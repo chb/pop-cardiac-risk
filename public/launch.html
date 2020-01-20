@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Launch App</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script src="https://combinatronics.com/smart-on-fhir/client-js/master/dist/build/fhir-client.js"></script>
+    <!-- <script src="%PUBLIC_URL%/highcharts.js"></script> -->
+    <script>
+      FHIR.oauth2.authorize({
+        iss: "http://localhost:3003/smart",
+        clientId: "whatever",
+        scope: "offline_access"
+      });
+    // TODO: Launch
+    // 1. Fetch /.well-known/smart-configuration
+    //    - Find "authorization_endpoint"
+    // 2. Request "authorization_endpoint"?
+    //    - "response_type"	required	Fixed value: code.
+    //    - "client_id"	required	The client's identifier.
+    //    - "redirect_uri"	required	Must match one of the client's pre-registered redirect URIs.
+    //    - "launch"	optional	When using the EHR launch flow, this must match the launch value received from the EHR.
+    //    - "scope"	required	Must describe the access that the app needs, including clinical data scopes like patient/*.read, openid and fhirUser (if app needs authenticated patient identity) and either:
+    //       a launch value indicating that the app wants to receive already-established launch context details from the EHR
+    //       a set of launch context requirements in the form launch/patient, which asks the EHR to establish context on your behalf.
+    //    - "state"	required	An opaque value used by the client to maintain state between the request and callback. The authorization server includes this value when redirecting the user-agent back to the client. The parameter SHALL be used for preventing cross-site request forgery or session fixation attacks.
+    //    - "aud"	required	URL of the EHR resource server from which the app wishes to retrieve FHIR data. This parameter prevents leaking a genuine bearer token to a counterfeit resource server. (Note: in the case of an EHR launch flow, this aud value is the same as the launch's iss value.)
+    </script>
+  </body>
+</html>
