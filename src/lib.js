@@ -1,66 +1,33 @@
+import React  from "react"
+import moment from "moment"
 
-/**
- * Used in fetch Promise chains to reject if the "ok" property is not true
- */
-export async function checkResponse(resp) {
-    if (!resp.ok) {
-        const text = await resp.text();
-        throw new Error(
-            "Request failed:\n" +
-            `${resp.status} ${resp.statusText}\nURL: ${resp.url}\n\n${text}`
-        );
+export function query(client, { sql, rowFormat = "object", onPage = (data) => {}}) {
+                
+    async function handle(obj) {
+        await onPage(obj.data);
+        if (obj.meta.continue) {
+            return getPage(obj.meta.continue)
+        }
     }
-    return resp;
-}
 
-/**
- * Used in fetch Promise chains to return the JSON version of the response.
- * Note that `resp.json()` will throw on empty body so we use resp.text()
- * instead.
- * @param {Response} resp
- * @returns {Promise<object|string>}
- */
-export function responseToJSON(resp) {
-    return resp.text().then(text => text.length ? JSON.parse(text) : "");
-}
+    function run(body) {
+        return client.request({
+            url   : "/",
+            method: "POST",
+            mode  : "cors",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body),
+        })
+        .then(handle);
+    }
 
-export function query(sql)
-{
-    return fetch("http://localhost:3003/sql", {
-        method : "POST",
-        mode   : "cors",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ query: sql })
-    })
-    .then(checkResponse)
-    .then(responseToJSON);
-}
+    function getPage(id) {
+        return client.request({ url: id, mode: "cors" }).then(handle)
+    }
 
-export function getAllPatients() {
-    // First get all patients with as much info as we can get for them in a
-    // convenient way
-    let sql = `SELECT
-        o1.resource_json ->> '$.valueQuantity.value' AS hsCRP,
-        o2.resource_json ->> '$.valueQuantity.value' AS totalCholesterol,
-        o3.resource_json ->> '$.valueQuantity.value' AS HDL
-    FROM Observation AS o1
-    RIGHT JOIN Observation AS o2 ON (o1.resource_json ->> '$.subject.reference'     = o2.resource_json ->> '$.subject.reference')
-    RIGHT JOIN Observation AS o3 ON (o1.resource_json ->> '$.subject.reference'     = o3.resource_json ->> '$.subject.reference')
-    WHERE 
-        o1.resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-        o1.resource_json ->> '$.code.coding[0].code'   = '30522-7' AND
-        o2.resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-        o2.resource_json ->> '$.code.coding[0].code'   = '2093-3' AND
-        o3.resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-        o3.resource_json ->> '$.code.coding[0].code'   = '2085-9'
-    ORDER BY o1.resource_json ->> '$.issued'
-    `;
-
-    return query(sql)
-        .then(console.log)
-        .catch(console.error);
+    return run({ query: sql, rowFormat });
 }
 
 export function getPatientDisplayName(name) {
@@ -108,7 +75,7 @@ export function roundToPrecision(n, precision, fixed) {
  * @param {number}  p.HDL HDL or "Good" Cholesterol
  * @param {number}  p.age Years (Maximum age must be 80)
  * @param {Boolean} p.smoker
- * @param {Boolean} p.fx_of_mi
+ * @param {Boolean} [p.fx_of_mi]
  */
 export function reynoldsRiskScore(p) {
 
@@ -120,7 +87,7 @@ export function reynoldsRiskScore(p) {
         !p.HDL)
         return "N/A";
 
-    let result = null, params;
+    let result, params;
   
     if (p.gender === "female") {
         params = {
@@ -160,7 +127,7 @@ export function reynoldsRiskScore(p) {
         result = (1 - Math.pow(0.8990,  (Math.exp(B-33.097)))) * 100
     }
 
-    return Math.round((result < 10 ? result.toPrecision(1) : result.toPrecision(2)))
+    return roundToPrecision(result, 2, 2);
 }
 
 export function avg(records) {
@@ -184,3 +151,63 @@ export function isSmoker(records) {
     );
 }
 
+/**
+ * Given a duration, formats it like "2 hours, 35 minutes and 10 seconds"
+ * @param {Number} ms The duration as number of milliseconds 
+ * @returns {String}
+ */
+export function formatDuration(ms)
+{
+    let out = [];
+    let meta = [
+        { label: "week",   n: 1000 * 60 * 60 * 24 * 7 },
+        { label: "day" ,   n: 1000 * 60 * 60 * 24     },
+        { label: "hour",   n: 1000 * 60 * 60          },
+        { label: "minute", n: 1000 * 60               },
+        { label: "second", n: 1000                    }
+    ];
+
+    meta.reduce((prev, cur) => {
+        let chunk = Math.floor(prev / cur.n);
+        if (chunk) {
+            out.push(`${chunk} ${cur.label}${chunk > 1 ? "s" : ""}`);
+            return prev - chunk * cur.n;
+        }
+        return prev;
+    }, ms);
+
+    if (!out.length) {
+        out.push(`0 ${meta.pop().label}s`);
+    }
+
+    if (out.length > 1) {
+        let last = out.pop();
+        out[out.length - 1] += " and " + last;
+    }
+
+    return out.join(", ");
+}
+
+export function getAge(patient) {
+    if (patient.deceasedBoolean || patient.deceasedDateTime) {
+        return <span className="label label-warning">deceased</span>;
+    }
+    return <b>{ moment.duration(moment().diff(patient.dob, "days"), "days").humanize() + " old" }</b>;
+}
+
+/**
+ * 
+ * @param {String} str 
+ * @param {String} stringToFind 
+ */
+export function highlight(str, stringToFind) {
+    let temp  = str;
+    let index = str.toLocaleLowerCase().indexOf(stringToFind.toLocaleLowerCase());
+    while (index > -1) {
+        const replacement = `<span class="search-match">${temp.substr(index, stringToFind.length)}</span>`;
+        const endIndex = index + stringToFind.length;
+        temp  = temp.substring(0, index) + replacement + temp.substring(endIndex);
+        index = temp.toLocaleLowerCase().indexOf(stringToFind.toLocaleLowerCase(), index + replacement.length);
+    }
+    return temp;
+}

@@ -1,9 +1,14 @@
 import React from 'react';
 import { Provider }  from "react-redux";
 import store from "./store"
-import Grid from "./components/Grid"
-import Detail from "./components/Detail"
 import { loadPatients } from "./store/patients"
+import PatientList from "./components/PatientList/"
+import Detail from "./components/DetailView/"
+import {
+  BrowserRouter as Router,
+  // Switch,
+  Route
+} from "react-router-dom";
 import './App.css';
 
 
@@ -46,17 +51,20 @@ class App extends React.Component {
     }
 
     return (
-      <Provider store={store}>
-        <div className="app">
-          <header className="app-header">
-            <h1>Population Cardiac Risk</h1>
-          </header>
-          <div className="grid-wrapper">
-            <Grid />
+      <Router>
+        <Provider store={store}>
+          <div className="app">
+          {/* <Switch> */}
+            <Route path="/:id?">
+              <PatientList />
+            </Route>
+            <Route path="/:id?">
+              <Detail />
+            </Route>
+          {/* </Switch> */}
           </div>
-          <Detail/>
-        </div>
-      </Provider>
+        </Provider>
+      </Router>
     );
   }
 }

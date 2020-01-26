@@ -1,25 +1,37 @@
-import moment from "moment"
+// import moment from "moment"
 import {
     reynoldsRiskScore,
     last,
     avg,
-    isSmoker
+    isSmoker,
+    query,
+    getPatientDisplayName
 } from "../lib"
 
 const initialState = {
     loading: false,
     error  : null,
-    observations_loading: false,
-    observations_error: null,
+    
     selectedPatientId: null,
-    data  : []
+
+    patientsLoadStartTime: Date.now(),
+    patientsLoadEndTime: Date.now(),
+    search: "",
+    sort: "",
+    data  : [],
+
+    observations_loading: false,
+    observations_error: null
 };
 
 const SET_LOADING  = "patients/setLoading";
 const SET_ERROR    = "patients/setError";
 const SET_PATIENTS = "patients/setPatients";
+const ADD_PATIENTS = "patients/addPatients";
 const MERGE        = "patients/merge";
 const SELECT       = "patients/selectedPatientId";
+const SEARCH       = "patients/search";
+const SORT         = "patients/sort";
 
 export function setLoading(bool) {
     return { type: SET_LOADING, payload: !!bool };
@@ -37,45 +49,61 @@ export function setPatients(payload) {
     return { type: SET_PATIENTS, payload };
 }
 
+export function addPatients(payload) {
+    return { type: ADD_PATIENTS, payload };
+}
+
 export function merge(payload) {
     return { type: MERGE, payload };
 }
 
+export function search(payload) {
+    return { type: SEARCH, payload };
+}
+
+export function sort(payload) {
+    return { type: SORT, payload };
+}
+
 export function loadPatients(client) {
     return function (dispatch, getState) {
-        console.time("Loading data");
+        // console.time("Loading data");
         dispatch(merge({ loading: true, error: null }));
-        return client.request({
-            url    : "sql",
-            method : "POST",
-            mode   : "cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                query: `SELECT 
-                p.resource_json ->> '$.id' AS id,
-                p.resource_json ->> '$.gender' AS gender,
-                p.resource_json ->> '$.birthDate' AS dob,
-                p.resource_json ->> '$.deceasedBoolean' AS deceasedBoolean,
-                p.resource_json ->> '$.deceasedDateTime' AS deceasedDateTime,
-                p.resource_json ->> '$.name' AS name
-                FROM Patient p`
-            })
+        // let gotFirstChunk = false;
+        return query(client, {
+            sql: `SELECT 
+                '{id}',
+                '{gender}',
+                '{birthDate}' AS dob,
+                '{deceasedBoolean}',
+                '{deceasedDateTime}',
+                '{{name}}'
+                FROM Patient
+                LIMIT 100000`,
+            onPage(data) {
+                dispatch(addPatients(data.map(o => {
+                    o.name = getPatientDisplayName(JSON.parse(o.name || "{}"));
+                    return o;
+                })));
+                // if (!gotFirstChunk) {
+                //     gotFirstChunk = true;
+                //     dispatch(setLoading(false));
+                // }
+            }
         })
-        .then(patients => {
+        .then(() => {
+            // dispatch(loadObservations(client));
             dispatch(merge({
-                data: patients.map(p => ({
-                    ...p,
-                    age: moment().diff(p.dob, "years")
-                })),
                 error: null,
                 loading: false
             }));
-            dispatch(loadObservations(client));
+            // console.timeEnd("Loading data");
         }).catch(error => {
             dispatch(merge({
                 error,
                 loading: false
             }));
+            // console.timeEnd("Loading data");
         });
     };
 }
@@ -289,6 +317,13 @@ export default function serversReducer(state = initialState, action)
                     ...action.payload
                 ]
             };
+
+        case ADD_PATIENTS:
+            return {
+                ...state,
+                patientsLoadEndTime: Date.now(),
+                data: [ ...state.data, ...action.payload ]
+            };
         
         case MERGE: {
             const data = [ ...state.data ];
@@ -309,6 +344,18 @@ export default function serversReducer(state = initialState, action)
                 data
             };
         }
+
+        case SEARCH:
+            return {
+                ...state,
+                search: action.payload
+            };
+        
+        case SORT:
+            return {
+                ...state,
+                sort: action.payload
+            };
 
         default:
             return state;

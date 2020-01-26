@@ -1,0 +1,36 @@
+.page.detail-view {
+    // background: orange;
+    flex: 2 1 0;
+
+    > .center {
+        background-color: #DDD;
+        color: #888;
+        text-shadow: 0 1px 0 #EEE;
+
+        h1 {
+            color: rgba(#999, 0.8);
+            text-shadow: 0 1px 0 #EEE, 0 0 1px rgba(#000000, 0.8);
+            text-transform: uppercase;
+            font-size: 2rem;
+        }
+    }
+
+    .back-link {
+        color: #FFF;
+        box-shadow: 0 0 0 1px rgba(#FFF, 0.3) inset;
+        height: 2rem;
+        margin: 1rem;
+        line-height: 2rem;
+        padding: 0 1rem 0 0.5rem;
+        // background: rgba(#FFF, 0.3);
+        border-radius: 3px;
+        text-decoration: none;
+        display: none;
+        white-space: nowrap;
+        min-width: 5em;
+
+        &:hover {
+            background: rgba(#FFF, 0.3);
+        }
+    }
+}
