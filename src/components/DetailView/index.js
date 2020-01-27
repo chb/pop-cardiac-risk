@@ -32,6 +32,11 @@ import { getAge } from "../../lib";
 
 class Detail extends React.Component
 {
+    shouldComponentUpdate(nextProps)
+    {
+        return !!nextProps.match.params.id || document.body.clientWidth >= 1024;
+    }
+
     renderHDLChart() {
         return (
             <>
@@ -104,7 +109,7 @@ class Detail extends React.Component
             if (this.props.match.params.id) {
                 return (
                     <header className="app-header">
-                        <Link to="/" className="back-link">
+                        <Link to="/" className="back-link col-1">
                             <b className="glyphicon glyphicon-chevron-left"/>&nbsp;Back
                         </Link>
                     </header>
@@ -115,10 +120,11 @@ class Detail extends React.Component
 
         return (
             <header className="app-header">
-                <Link to="/" className="back-link">
+                <Link to="/" className="back-link col-1">
                     <b className="glyphicon glyphicon-chevron-left"/>&nbsp;Back
                 </Link>
-                <b>{ patient.name }</b>
+                <b className="col-2">{ patient.name }</b>
+                <b className="col-3" />
             </header>
         )
     }
@@ -209,16 +215,31 @@ class Detail extends React.Component
         // if (!id) return null;
 
         return (
-            <div className={"page detail-view" + (id ? " active" : "")}>
+            <>
                 { this.renderHeader(patient) }
                 { this.renderBody(patient) }
-            </div>
+            </>
         );
     }
 }
 
+const wrapper = (props) => {
+    const { id } = props.match.params;
+    const patient = id ?
+        props.patients.data.find(p => p.id === id) :
+        null;
+    document.title = patient ?
+        patient.name :
+            id ? "No Patient" : "Patient List";
+    return (
+        <div className={"page detail-view" + (id ? " active" : "")}>
+            <Detail { ...props } />
+        </div>
+    );
+}
+
 const ConnectedDetail = connect(state => {
     return { patients: state.patients };
-})(Detail);
+})(wrapper);
 
 export default withRouter(ConnectedDetail);
