@@ -6,6 +6,7 @@
         background-color: #DDD;
         color: #888;
         text-shadow: 0 1px 0 #EEE;
+        box-shadow: 2px 0 0 #F3F3F3 inset;
 
         h1 {
             color: rgba(#999, 0.8);
@@ -16,21 +17,37 @@
     }
 
     .back-link {
-        color: #FFF;
-        box-shadow: 0 0 0 1px rgba(#FFF, 0.3) inset;
+        color: rgba(#FFF, 0.7);
+        box-shadow: 0 0 0 1px rgba(#FFF, 0.2) inset;
         height: 2rem;
-        margin: 1rem;
+        margin: 1rem 1rem 1rem 0;
         line-height: 2rem;
-        padding: 0 1rem 0 0.5rem;
+        padding: 0 0.5rem;
         // background: rgba(#FFF, 0.3);
         border-radius: 3px;
         text-decoration: none;
-        display: none;
+        visibility: hidden;
         white-space: nowrap;
         min-width: 5em;
 
         &:hover {
-            background: rgba(#FFF, 0.3);
+            background: rgba(#FFF, 0.1);
+        }
+    }
+
+    .app-header {
+        text-align: center;
+
+        .col-1 {
+            flex: 0 0 5rem;
+        }
+        .col-2 {
+            flex: 1 1 0;
+            justify-content: center;
+        }
+        .col-3 {
+            flex: 0 0 5rem;
+            margin: 1rem 0 1rem 1rem;
         }
     }
 }

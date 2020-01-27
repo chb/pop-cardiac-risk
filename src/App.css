@@ -31,12 +31,14 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  transition: all 0.4s ease-out;
+  transition: all 0.2s ease-out;
 }
 
 
 .page.patients {
   flex: 0 1 400px;
+  /* z-index: 2;
+  background: #FFF; */
 }
 
 @media (max-width: 1023px) {
@@ -48,7 +50,7 @@
   .page {
     width: 100%;
     min-width: 100%;
-    opacity: 1;
+    /* opacity: 1; */
     /* position: relative; */
     /* z-index: 1;
     background: #FFF; */
@@ -61,11 +63,11 @@
     position: relative; */
   }
   .page.detail-view.active .back-link {
-    display: block;
+    visibility: visible;
   }
   .page.patients:not(.active) {
     transform: translateX(-100vw);
-    opacity: 0;
+    /* opacity: 0; */
   }
 
   /* 

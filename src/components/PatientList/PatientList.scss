@@ -6,6 +6,7 @@
     height: 100%;
     margin: 0 0 1px 0;
     transform: translateZ(10px);
+    box-shadow: 1px 0 0 #CCC;
 
     &.has-message {
         display: flex;
@@ -41,7 +42,7 @@
             background   : linear-gradient(rgba(1, 1, 1, 0.2), rgba(1, 1, 1, 0.25));
             position     : absolute;
             border-radius: 50%;
-            box-shadow   : 0 0 0 3px rgba(255, 255, 255, 0.3);
+            box-shadow   : 0 0 0 3px #fff;
             text-align   : center;
             font-weight  : bold;
             text-shadow  : none;
@@ -87,6 +88,10 @@
             &:after {
                 color: #FFF;
             }
+
+            .avatar {
+                box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+            }
         }
     }
     
@@ -110,6 +115,8 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    box-shadow: 1px 0 0 #CCC;
+    z-index: 2;
     > div {
         margin: 5px;
         /* box-shadow: 0 0 0 1px #369 inset; */
@@ -129,5 +136,11 @@
             box-shadow: 0 0 2px 2px #DDD, 0 0 0 2px #369;
             outline: 0;
         }
+    }
+
+    select {
+        background: transparent;
+        border-color: rgba(0, 0, 0, 0.1);
+        box-shadow: none;
     }
 }
