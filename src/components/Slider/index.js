@@ -54,7 +54,7 @@ export default class Slider extends React.Component
         // No pan on touch devices
         e.preventDefault();
 
-        const clientX = e.clientX || e.touches[0].clientX;
+        const clientX = e.type === "mousemove" ? e.clientX : e.touches[0].clientX;
         const left = this.dragState.rect.left;
         const x = Math.min(
             Math.max(clientX + this.dragState.diffX - left, 0),
