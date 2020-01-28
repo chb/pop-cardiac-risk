@@ -1,6 +1,6 @@
 
 .selected .text-muted {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 
@@ -104,7 +104,7 @@
 
 /* ---------------------------- app-header ---------------------------------- */
 .app-header {
-  background: #369;
+  background: #008eb0;
   height: 4rem;
   line-height: 4rem;
   padding: 0 1rem;

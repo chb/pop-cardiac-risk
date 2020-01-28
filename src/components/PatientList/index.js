@@ -247,7 +247,7 @@ class PatientList extends React.Component
                             __html: search ? highlight(rec.name, search) : rec.name
                         }}/>
                     </div>
-                    <div className="text-muted">{ getAge(rec) } { rec.gender }</div>
+                    <div className="text-muted"><b>{ getAge(rec, " old") }</b> { rec.gender }</div>
                 </Link>
             );
         }

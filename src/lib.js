@@ -75,9 +75,9 @@ export function roundToPrecision(n, precision, fixed) {
  * @param {number}  p.HDL HDL or "Good" Cholesterol
  * @param {number}  p.age Years (Maximum age must be 80)
  * @param {Boolean} p.smoker
- * @param {Boolean} [p.fx_of_mi]
+ * @param {Boolean} [p.hha]
  */
-export function reynoldsRiskScore(p) {
+export function reynoldsRiskScore(p, precision = 1, fixed = 0) {
 
     if (!p.gender ||
         !p.age ||
@@ -85,7 +85,7 @@ export function reynoldsRiskScore(p) {
         !p.hsCRP ||
         !p.cholesterol ||
         !p.HDL)
-        return "N/A";
+        return null;
 
     let result, params;
   
@@ -97,7 +97,7 @@ export function reynoldsRiskScore(p) {
             cholesterol: 1.382,
             HDL        : -1.172,
             smoker     : 0.818,
-            fx_of_mi   : 0.438
+            hha        : 0.438
         }
     } else {
         params = {
@@ -107,7 +107,7 @@ export function reynoldsRiskScore(p) {
             cholesterol: 0.963,
             HDL        : -0.772,
             smoker     : 0.405,
-            fx_of_mi   : 0.541
+            hha        : 0.541
         }
     }
   
@@ -117,7 +117,7 @@ export function reynoldsRiskScore(p) {
       , b4 = params.cholesterol  * Math.log(p.cholesterol)
       , b5 = params.HDL          * Math.log(p.HDL)
       , b6 = params.smoker       * (p.smoker ? 1 : 0)
-      , b7 = params.fx_of_mi     * (p.fx_of_mi ? 1 : 0);
+      , b7 = params.hha          * (p.hha ? 1 : 0);
   
     var B = b1 + b2 + b3 + b4 + b5 + b6 + b7;
   
@@ -127,7 +127,7 @@ export function reynoldsRiskScore(p) {
         result = (1 - Math.pow(0.8990,  (Math.exp(B-33.097)))) * 100
     }
 
-    return roundToPrecision(result, 2, 2);
+    return roundToPrecision(result, precision, fixed);
 }
 
 export function avg(records) {
@@ -188,11 +188,11 @@ export function formatDuration(ms)
     return out.join(", ");
 }
 
-export function getAge(patient) {
+export function getAge(patient, suffix = "") {
     if (patient.deceasedBoolean || patient.deceasedDateTime) {
         return <span className="label label-warning">deceased</span>;
     }
-    return <b>{ moment.duration(moment().diff(patient.dob, "days"), "days").humanize() + " old" }</b>;
+    return moment.duration(moment().diff(patient.dob, "days"), "days").humanize() + suffix;
 }
 
 /**
@@ -210,4 +210,9 @@ export function highlight(str, stringToFind) {
         index = temp.toLocaleLowerCase().indexOf(stringToFind.toLocaleLowerCase(), index + replacement.length);
     }
     return temp;
+}
+
+export function buildClassName(classes)
+{
+    return Object.keys(classes).filter(c => classes[c]).join(" ");
 }

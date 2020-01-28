@@ -5,12 +5,12 @@ import {
 } from "redux";
 import thunk from "redux-thunk";
 import patientsReducer from "./patients"
-import observationsReducer from "./observations"
+import selectedPatient from "./selectedPatient"
 
 const store = createStore(
     combineReducers({
         patients    : patientsReducer,
-        observations: observationsReducer
+        selectedPatient
     }),
     applyMiddleware(thunk)
 );

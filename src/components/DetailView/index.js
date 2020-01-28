@@ -3,12 +3,16 @@ import React from "react"
 import { connect } from "react-redux";
 // import * as lib from "../../lib"
 import moment from "moment";
-import Chart from "../Chart";
+// import Chart from "../Chart";
 import { Link, withRouter } from "react-router-dom";
-import Loader from "../Loader"
+// import Loader from "../Loader"
 // import { selectPatientId } from "../store/patients"
 import "./DetailView.scss"
-import { getAge } from "../../lib";
+import { getAge, reynoldsRiskScore, buildClassName } from "../../lib";
+import Slider from "../Slider/"
+import { merge } from "../../store/selectedPatient"
+import ReactDOM from "react-dom";
+import Checkbox from "../Checkbox/"
 
 // const SMOKING_STATUS = { 
 //     "449868002"      : { smoker: true , text: "Current every day smoker"       },
@@ -28,7 +32,36 @@ import { getAge } from "../../lib";
 //     }
 //     return "Unknown if ever smoked";
 // }
+function HR() {
+    return <div style={{
+        borderTop: "1px dotted #999",
+        margin: "10px 0"
+    }} />
+}
 
+// class Checkbox extends React.Component
+// {
+//     componentDidMount() {
+//         ReactDOM.findDOMNode(this).indeterminate = this.props.indeterminate === true;
+//     }
+
+//     render()
+//     {
+//         return <input type="checkbox" { ...this.props } />
+//     }
+// }
+
+class Range extends React.Component
+{
+    componentDidMount() {
+        ReactDOM.findDOMNode(this).indeterminate = this.props.indeterminate === true;
+    }
+
+    render()
+    {
+        return <input type="range" { ...this.props } />
+    }
+}
 
 class Detail extends React.Component
 {
@@ -37,79 +70,12 @@ class Detail extends React.Component
         return !!nextProps.match.params.id || document.body.clientWidth >= 1024;
     }
 
-    renderHDLChart() {
-        return (
-            <>
-                <Chart id="chart-HDL" chartOptions={{
-                    title: {
-                        text: "HDL"
-                    },
-                    series: [
-                        {
-                            name: 'HDL',
-                            data: this.props.HDL.map(rec => ({
-                                y: rec.value,
-                                x: +moment(rec.date)
-                            }))
-                        }
-                    ]
-                }}
-                />
-                <Chart id="chart-sbp" chartOptions={{
-                    title: {
-                        text: "Systolic Blood Pressure"
-                    },
-                    series: [
-                        {
-                            name: 'Systolic Blood Pressure',
-                            data: this.props.sbp.map(rec => ({
-                                y: rec.value,
-                                x: +moment(rec.date)
-                            }))
-                        }
-                    ]
-                }}
-                />
-                <Chart id="chart-cholesterol" chartOptions={{
-                    title: {
-                        text: "Total Cholesterol"
-                    },
-                    series: [
-                        {
-                            name: 'Total Cholesterol',
-                            data: this.props.cholesterol.map(rec => ({
-                                y: rec.value,
-                                x: +moment(rec.date)
-                            }))
-                        }
-                    ]
-                }}
-                />
-                <Chart id="chart-hsCRP" chartOptions={{
-                    title: {
-                        text: "High Sensitivity C-Reactive Protein (hsCRP)"
-                    },
-                    series: [
-                        {
-                            name: 'hsCRP',
-                            data: this.props.hsCRP.map(rec => ({
-                                y: rec.value,
-                                x: +moment(rec.date)
-                            }))
-                        }
-                    ]
-                }}
-                />
-            </>
-        );
-    }
-
     renderHeader(patient) {
         if (!patient) {
             if (this.props.match.params.id) {
                 return (
                     <header className="app-header">
-                        <Link to="/" className="back-link col-1">
+                        <Link to="/" className="back-link col-1 btn-empty">
                             <b className="glyphicon glyphicon-chevron-left"/>&nbsp;Back
                         </Link>
                     </header>
@@ -120,16 +86,18 @@ class Detail extends React.Component
 
         return (
             <header className="app-header">
-                <Link to="/" className="back-link col-1">
+                <Link to="/" className="back-link col-1 btn-empty">
                     <b className="glyphicon glyphicon-chevron-left"/>&nbsp;Back
                 </Link>
-                <b className="col-2">{ patient.name }</b>
-                <b className="col-3" />
+                <b className="col-2">Bloodwork Cardiology Result</b>
+                <div className="col-3 btn-empty">Reset</div>
             </header>
         )
     }
 
     renderBody(patient) {
+        const { dispatch } = this.props;
+
         if (!this.props.match.params.id) {
             return (
                 <div className="center">
@@ -139,13 +107,13 @@ class Detail extends React.Component
             )
         }
 
-        if (this.props.patients.loading) {
-            return (
-                <div className="center">
-                    <h1><Loader/> Loading...</h1>
-                </div>
-            )
-        }
+        // if (this.props.patients.loading) {
+        //     return (
+        //         <div className="center">
+        //             <h1><Loader/> Loading...</h1>
+        //         </div>
+        //     )
+        // }
 
         if (!patient) {
             return (
@@ -156,49 +124,357 @@ class Detail extends React.Component
             )
         }
 
-        const { name, dob, gender } = patient;
+        const { name, dob, gender, sbp, hha, smoker } = patient;
+
+        const score = reynoldsRiskScore(patient, 1, 1);
+        const optimalScore = reynoldsRiskScore({
+            ...patient,
+            smoker: false,
+            hsCRP: 0.5,
+            cholesterol: 160,
+            HDL : 60,
+            sbp: 120
+        });
+        const lowerSbpScore = sbp && sbp > 10 ? reynoldsRiskScore({
+            ...patient,
+            sbp: sbp - 10
+        }) : null;
+        const nonSmokerScore = score && smoker ? reynoldsRiskScore({
+            ...patient,
+            smoker: false
+        }) : null;
+
         return (
-            <div className="container-fluid">
-                <br />
-                <div className="jumbotron">
-                    <table className="table">
+            <div className="container-fluid" style={{
+                overflow: "auto",
+                width: "100%",
+                flex: "1 1 0",
+                display: "flex",
+                flexDirection: "column",
+                paddingTop: "1rem"
+            }}>
+                <div className="horizontal-section">
+                    <header>
+                        <span className="item-number">1</span>
+                        About this test
+                    </header>
+                    <div className="text-muted">This report evaluates your potential risk of heart disease, heart attack, and stroke.</div>
+                    <div className="text-warning">Note: these results are valid for non-diabetics only!</div>
+                </div>
+                <HR />
+                <div className="horizontal-section">
+                    <header>
+                        <span className="item-number">2</span>
+                        Patient info
+                    </header>
+                    <div className="row">
+                        <div className="col-sm-6">
+                            <div>
+                                <span className="text-muted">NAME: </span>
+                                <span>{ name }</span>
+                            </div>
+                            <div>
+                                <span className="text-muted">GENDER: </span>
+                                <span>{ gender } </span>
+                            </div>
+                            <div>
+                                <span className="text-muted">AGE: </span>
+                                <span>{ getAge(patient) }</span>
+                            </div>
+                            <div>
+                                <span className="text-muted">DOB: </span>
+                                <span>{ moment(dob).format("YYYY-MM-DD") }</span>
+                            </div>
+                        </div>
+                        <div className="col-sm-6">
+                            <div style={{ marginTop: 5 }}>
+                                <Checkbox
+                                    checked={ smoker === true }
+                                    indeterminate={ smoker === undefined }
+                                    onChange={ checked => dispatch(merge({ data: { smoker: checked }})) }
+                                    label="Current smoker?"
+                                />
+                            </div>
+                            <div style={{ marginTop: 5 }}>
+                                <Checkbox
+                                    checked={ hha === true }
+                                    indeterminate={ hha === undefined }
+                                    onChange={ checked => dispatch(merge({ data: { hha: checked }})) }
+                                    label="Family history of heart attack?"
+                                />
+                            </div>
+                            <div style={{ marginTop: 5 }}>
+                                <Range
+                                    min={0}
+                                    max={200}
+                                    value={sbp || 0}
+                                    indeterminate={ sbp === undefined }
+                                    style={{ width: "100%" }}
+                                    onChange={ e => dispatch(merge({ data: { sbp: e.target.valueAsNumber }})) }
+                                />
+                                <label>Systolic blood pressure: <b>{ sbp ? sbp + " mm/Hg" : "Unknown" }</b></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <HR/>
+                <div className="horizontal-section">
+                    <header>
+                        <span className="item-number">3</span>
+                        Your risk over 10 years
+                    </header>
+                    <table>
                         <tbody>
                             <tr>
-                                <th className="text-right">Name</th>
-                                <td>{ name }</td>
-                            </tr>
-                            <tr>
-                                <th className="text-right">DOB</th>
-                                <td>{ moment(dob).format("YYYY-MM-DD") }</td>
-                            </tr>
-                            <tr>
-                                <th className="text-right">Gender</th>
-                                <td>{ gender }</td>
-                            </tr>
-                            <tr>
-                                <th className="text-right">Age</th>
-                                <td>{ getAge(patient) }</td>
-                            </tr>
-                            <tr>
-                                <th className="text-right">ID</th>
-                                <td>{ patient.id }</td>
+                                <td>
+                                    <h1 className={buildClassName({
+                                        score: true,
+                                        "text-muted": score === null,
+                                        "text-warning": score && score > 10,
+                                        "text-danger": score && score > 20
+                                    })}>
+                                        { score === null ? "N/A" : score + "%" }
+                                    </h1>
+                                </td>
+                                <td>
+                                    <ul>
+                                        {
+                                            optimalScore !== null && score && optimalScore < score ?
+                                            <li>if { smoker ? "you didn't smoke and " : "" }all
+                                            levels were optimal, your risk would be lowered
+                                            to <b>{optimalScore}%</b></li> :
+                                            null
+                                        }
+                                        {
+                                            lowerSbpScore ?
+                                            <li>if your blood pressure were {sbp - 10} mm/Hg,
+                                            your risk would be lowered to <b>{lowerSbpScore}%</b></li> :
+                                            null
+                                        }
+                                        {
+                                            nonSmokerScore ?
+                                            <li>if you didn't smoke, your risk would be lowered
+                                            to <b>{nonSmokerScore}%</b></li> :
+                                            null
+                                        }
+                                    </ul>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
-                    {/* <b>Smoker</b>: { getSmokingStatus(lib.last(smoker)) } &nbsp;&nbsp; */}
-                    {/* <b>Risk Score</b>: { score ? <b>{`${score.last}% (${score.avg}% average)`}</b> : "N/A" } */}
+                    {/* <p className="text-muted">Use your test results to calculate your risk of a cardiovascular event at <a rel="noopener noreferrer" target="_blank" href="http://reynoldsriskscore.org/">ReynoldsRisk.org</a></p> */}
                 </div>
+                <HR />
+                <div className="horizontal-section">
+                    <header>
+                        <span className="item-number">4</span>
+                        Your Results
+                    </header>
+                    <Slider
+                        label="CRP level test"
+                        precision={2}
+                        value={ patient.hsCRP }
+                        onChange={ hsCRP => dispatch(merge({ data: { hsCRP }}))}
+                        zones={[
+                            {
+                                label: <><div>Low risk</div><div className="text-muted">0 mg/dL</div></>,
+                                color: "rgb(97, 175, 201)",
+                                min: 0,
+                                max: 1
+                            },
+                            {
+                                label: <><div>Average</div><div className="text-muted">1 - 3</div></>,
+                                color: "rgb(11, 157, 188)",
+                                min: 1,
+                                max: 3
+                            },
+                            {
+                                label: <><div>High risk of cardiovascular disease</div><div className="text-muted">3 - 10</div></>,
+                                color: "rgb(0, 142, 176)",
+                                min: 3,
+                                max: 10 
+                            }
+                        ]}
+                    />
+                    <Slider
+                        label="Total cholesterol level"
+                        precision={1}
+                        value={ patient.cholesterol }
+                        onChange={ cholesterol => dispatch(merge({ data: { cholesterol }}))}
+                        zones={[
+                            {
+                                label: <><div>Desirable</div><div className="text-muted">0 mg/dL</div></>,
+                                color: "rgb(160, 190, 120)",
+                                min: 0,
+                                max: 200
+                            },
+                            {
+                                label: <><div>Borderline</div><div className="text-muted">200 - 239</div></>,
+                                color: "rgb(134, 173, 82)",
+                                min: 200,
+                                max: 239
+                            },
+                            {
+                                label: <><div>High</div><div className="text-muted">240+</div></>,
+                                color: "rgb(94, 137, 43)",
+                                min: 240,
+                                max: 360 
+                            }
+                        ]}
+                    />
+                    <div style={{ marginLeft: "4rem" }}>
+                        <Slider
+                            small
+                            label='LDL "bad" cholesterol'
+                            value={ patient.LDL }
+                            precision={0}
+                            onChange={ LDL => dispatch(merge({ data: { LDL }}))}
+                            zones={[
+                                {
+                                    label: <><div>Optimal</div><div className="text-muted">0 mg/dL</div></>,
+                                    color: "rgb(220, 230, 204)",
+                                    min: 0,
+                                    max: 100
+                                },
+                                {
+                                    label: <><div>Near optimal</div><div className="text-muted">100 - 129</div></>,
+                                    color: "rgb(189, 209, 160)",
+                                    min: 100,
+                                    max: 129
+                                },
+                                {
+                                    label: <><div>Borderline high</div><div className="text-muted">129 - 159</div></>,
+                                    color: "rgb(160, 190, 120)",
+                                    min: 129,
+                                    max: 159 
+                                },
+                                {
+                                    label: <><div>High</div><div className="text-muted">160 - 189</div></>,
+                                    color: "rgb(134, 173, 82)",
+                                    min: 160,
+                                    max: 189 
+                                },
+                                {
+                                    label: <><div>Very High</div><div className="text-muted">190+</div></>,
+                                    color: "rgb(94, 137, 43)",
+                                    min: 190,
+                                    max: 400 
+                                }
+                            ]}
+                        />
+                        <Slider
+                            small
+                            label='HDL "good" cholesterol'
+                            value={ patient.HDL }
+                            precision={1}
+                            onChange={ HDL => dispatch(merge({ data: { HDL }}))}
+                            zones={[
+                                {
+                                    label: <><div>High risk</div><div className="text-muted">0 mg/dL</div></>,
+                                    color: "rgb(160, 190, 120)",
+                                    min: 0,
+                                    max: 40
+                                },
+                                {
+                                    label: <><div>Intermediate</div><div className="text-muted">40 - 59</div></>,
+                                    color: "rgb(134, 173, 82)",
+                                    min: 40,
+                                    max: 59
+                                },
+                                {
+                                    label: <><div>Protective</div><div className="text-muted">60+</div></>,
+                                    color: "rgb(94, 137, 43)",
+                                    min: 60,
+                                    max: 100 
+                                }
+                            ]}
+                        />
+                    </div>
+                </div>
+                <HR />
+                <div className="horizontal-section">
+                    <header>
+                        <span className="item-number">5</span>
+                        What now?
+                    </header>
+                    <div className="small what-now">
+                        <div>
+                            <div className="img">
+                                <img src={ require("./runner.png")} alt="Runner" />
+                            </div>
+                            <div style={{ flex: 4 }}>
+                                <b>Diet and exercise</b>
+                                <div className="text-muted">
+                                    can improve your cholesterol levels
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div className="img">
+                                <img src={ require("./smoker.png")} alt="Smoker" />
+                            </div>
+                            <div style={{ flex: 4 }}>
+                                <b>Staying smoke-free</b>
+                                <div className="text-muted">
+                                    is one of the best ways to improve your
+                                    heart disease risk
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div className="img">
+                                <img src={ require("./doctor.png")} alt="Doctor" />
+                            </div>
+                            <div style={{ flex: 4 }}>
+                                <b>Ask your doctor</b>
+                                <div className="text-muted">
+                                    about statins or other medications that can
+                                    lower cholesterol
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div className="img">
+                                <img src={ require("./needle.png")} alt="Needle" />
+                            </div>
+                            <div style={{ flex: 4 }}>
+                                <b>Consider retesting</b>
+                                <div className="text-muted">
+                                    in 1 or 2 weeks to exclude a temporary spike
+                                    in blood levels
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <HR />
+                <div className="horizontal-section">
+                    <header>
+                        <span className="item-number">6</span>
+                        Further reading
+                    </header>
+                    <ul className="small" style={{ margin: "0 0 1em 0", padding: "0 0 0 0.7em" }}>
+                        <li><a rel="noopener noreferrer" target="_blank" href="https://informationisbeautiful.net/2010/visualizing-bloodtests/">Original Design: David McCandless & Stefanie Posavec for Wired Magazine // informationisbeautiful.net</a></li>
+                        <li><a rel="noopener noreferrer" target="_blank" href="http://reynoldsriskscore.org/">Reynolds Risk Score Calculator // ReynoldsRiskScore.org</a></li>
+                        <li><a rel="noopener noreferrer" target="_blank" href="https://jamanetwork.com/journals/jama/fullarticle/205528">Development and validation of improved algorithms for the assessment of global cardiovascular risk in women:The Reynolds Risk Score. Ridker el al. JAMA 2007;297:611-619</a></li>
+                        <li><a rel="noopener noreferrer" target="_blank" href="https://www.ahajournals.org/doi/full/10.1161/circulationaha.108.814251">C-reactive protein and parental history improve global cardiovascular risk prediction: The Reynolds Risk Score for Men. Ridker et al. Circulation. 2008;118:2243-2251</a></li>
+                    </ul>
+                </div>
+                <br />
             </div>
         );
     }
 
     render() {
         // console.log(this.props);
-
-        const { id } = this.props.match.params;
-        const patient = id ?
-            this.props.patients.data.find(p => p.id === id) :
-            null
+        const patient = this.props.selectedPatient;
+        // const { id } = this.props.match.params;
+        // const patient = id ?
+        //     this.props.patients.data.find(p => p.id === id) :
+        //     null
 
         // const {
         //     dob, gender, deceasedBoolean, deceasedDateTime,
@@ -239,7 +515,10 @@ const wrapper = (props) => {
 }
 
 const ConnectedDetail = connect(state => {
-    return { patients: state.patients };
+    return {
+        patients: state.patients,
+        selectedPatient: state.selectedPatient.data
+    };
 })(wrapper);
 
 export default withRouter(ConnectedDetail);
