@@ -478,12 +478,13 @@ class Detail extends React.Component
 
 const wrapper = (props) => {
     const { id } = props.match.params;
-    const patient = id ?
-        props.patients.data.find(p => p.id === id) :
-        null;
-    document.title = patient ?
-        patient.name :
-            id ? "No Patient" : "Patient List";
+    // const patient = id ?
+    //     props.patients.data.find(p => p.id === id) :
+    //     null;
+    // document.title = patient ?
+    //     patient.name :
+    //         id ? "No Patient" : "Patient List";
+    document.title = id ? props.selectedPatient.name : "Patient List";
     return (
         <div className={"page detail-view" + (id ? " active" : "")}>
             <Detail { ...props } />
@@ -493,8 +494,8 @@ const wrapper = (props) => {
 
 const ConnectedDetail = connect(state => {
     return {
-        patients: state.patients,
-        selectedPatient: state.selectedPatient.data
+        // patients: state.patients,
+        selectedPatient: state.selectedPatient.data,
     };
 })(wrapper);
 

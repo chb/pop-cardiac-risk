@@ -51,13 +51,19 @@ export default class Slider extends React.Component
 
     onMouseMove(e)
     {
+        // No pan on touch devices
         e.preventDefault();
-        const clientX = e.type === "mousedown" ? e.clientX : e.touches[0].clientX;
+
+        const clientX = e.clientX || e.touches[0].clientX;
         const left = this.dragState.rect.left;
         const x = Math.min(
             Math.max(clientX + this.dragState.diffX - left, 0),
             this.dragState.rect.width
         );
+
+        // Convert the coordinates to value respecting the internal rounding
+        // rules and if the result is different than the current one call the
+        // onChange handler
         const value = this.offsetToValue(x);
         if (value !== this.props.value) {
             this.props.onChange(value);
@@ -66,34 +72,48 @@ export default class Slider extends React.Component
 
     onMouseUp()
     {
+        // Stop dragging
         window.removeEventListener("touchmove", this.onMouseMove);
-        window.removeEventListener("touchend" , this.onMouseUp  );
         window.removeEventListener("mousemove", this.onMouseMove);
-        window.removeEventListener("mouseup"  , this.onMouseUp  );
+
+        // In case "once" is not supported
+        window.removeEventListener("touchend", this.onMouseUp);
+        window.removeEventListener("mouseup" , this.onMouseUp);
     }
 
     onMouseDown(e)
-    {   
+    {
+        // On desktop preventDefault to disable selection
         if (e.type === "mousedown") {
             e.preventDefault();
         }
 
-        // e.stopPropagation();
-
+        // Do nothing if onChange function is not passed in props
         if (this.props.onChange) {
-            let x = e.type === "mousedown" ? e.clientX : e.nativeEvent.touches[0].clientX;
+
+            // Compute the distance between the start event and the center of
+            // the button to prevent "jumping to the center" on first move.
+            // Also measure and store the parent rect so that we don't have to
+            // do that on every move event 
+            const x = e.type === "mousedown" ? e.clientX : e.nativeEvent.touches[0].clientX;
             const rect = this.btn.current.getBoundingClientRect();
             const diffX = (rect.left + rect.width/2) - x;
-
             this.dragState = {
                 diffX,
                 rect: this.wrapper.current.getBoundingClientRect()
             };
 
+            // Now that we are ready to handle drag, listen to move and end
+            // events.
             if (e.type === "mousedown") {
-                window.addEventListener("mousemove", this.onMouseMove, { passive: false });
+                window.addEventListener("mousemove", this.onMouseMove);
                 window.addEventListener("mouseup", this.onMouseUp, { once: true });
             } else {
+                // On touch devices user's finger will cover the number that is
+                // rendered inside the button. We want the user to be able to
+                // move his down and out of the button without scrolling the
+                // page. To do so, we need to call preventDefault, thus we have
+                // to use { passive: false } for the touchmove listener.
                 window.addEventListener("touchmove", this.onMouseMove, { passive: false });
                 window.addEventListener("touchend", this.onMouseUp, { once: true });
             }
