@@ -31,7 +31,7 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  transition: all 0.2s ease-out;
+  transition: all 0.3s ease-out;
 }
 
 
@@ -57,7 +57,7 @@
   }
 
   .page.detail-view.active {
-    transform: translateX(-100vw);
+    transform: translateX(-100%);
     /* opacity: 0; */
     /* z-index: 2;
     position: relative; */
@@ -66,7 +66,7 @@
     visibility: visible;
   }
   .page.patients:not(.active) {
-    transform: translateX(-100vw);
+    transform: translateX(-100%);
     /* opacity: 0; */
   }
 
