@@ -51,6 +51,7 @@ export default class Slider extends React.Component
 
     onMouseMove(e)
     {
+        e.preventDefault();
         const clientX = e.type === "mousedown" ? e.clientX : e.touches[0].clientX;
         const left = this.dragState.rect.left;
         const x = Math.min(
@@ -77,7 +78,8 @@ export default class Slider extends React.Component
             e.preventDefault();
         }
 
-        e.stopPropagation();
+        // e.stopPropagation();
+
         if (this.props.onChange) {
             let x = e.type === "mousedown" ? e.clientX : e.nativeEvent.touches[0].clientX;
             const rect = this.btn.current.getBoundingClientRect();
@@ -89,11 +91,11 @@ export default class Slider extends React.Component
             };
 
             if (e.type === "mousedown") {
-                window.addEventListener("mousemove", this.onMouseMove);
-                window.addEventListener("mouseup", this.onMouseUp);
+                window.addEventListener("mousemove", this.onMouseMove, { passive: false });
+                window.addEventListener("mouseup", this.onMouseUp, { once: true });
             } else {
-                window.addEventListener("touchmove", this.onMouseMove);
-                window.addEventListener("touchend", this.onMouseUp);
+                window.addEventListener("touchmove", this.onMouseMove, { passive: false });
+                window.addEventListener("touchend", this.onMouseUp, { once: true });
             }
         }
     }
