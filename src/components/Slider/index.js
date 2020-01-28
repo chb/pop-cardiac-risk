@@ -63,12 +63,17 @@ export default class Slider extends React.Component
     onMouseUp()
     {
         window.removeEventListener("mousemove", this.onMouseMove);
-        window.removeEventListener("mouseup", this.onMouseUp);
+        window.removeEventListener("mouseup"  , this.onMouseUp  );
+        window.removeEventListener("touchmove", this.onMouseMove);
+        window.removeEventListener("touchend" , this.onMouseUp  );
     }
 
     onMouseDown(e)
     {
-        e.preventDefault();
+        if (e.type === "mousedown") {
+            e.preventDefault();
+        }
+        // e.stopPropagation();
         if (this.props.onChange) {
             const rect = this.btn.current.getBoundingClientRect();
             const diffX = (rect.left + rect.width/2) - e.clientX;
@@ -78,8 +83,13 @@ export default class Slider extends React.Component
                 rect: this.wrapper.current.getBoundingClientRect()
             };
 
-            window.addEventListener("mousemove", this.onMouseMove);
-            window.addEventListener("mouseup", this.onMouseUp);
+            if (e.type === "touchstart") {
+                window.addEventListener("touchmove", this.onMouseMove);
+                window.addEventListener("touchend", this.onMouseUp);
+            } else {
+                window.addEventListener("mousemove", this.onMouseMove);
+                window.addEventListener("mouseup", this.onMouseUp);
+            }
         }
     }
 
@@ -121,6 +131,7 @@ export default class Slider extends React.Component
                         className="slider-value"
                         style={{ left: this.valueToPct(value || 0) + "%" }}
                         onMouseDown={ this.onMouseDown }
+                        onTouchStart={ this.onMouseDown }
                     >{ hasValue ? roundToPrecision(value, precision) : "N/A" }</div>
                     {
                         zones.map((z, i) => (
