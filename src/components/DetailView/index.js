@@ -11,7 +11,7 @@ import "./DetailView.scss"
 import { getAge, reynoldsRiskScore, buildClassName } from "../../lib";
 import Slider from "../Slider/"
 import { merge } from "../../store/selectedPatient"
-import ReactDOM from "react-dom";
+// import ReactDOM from "react-dom";
 import Checkbox from "../Checkbox/"
 
 // const SMOKING_STATUS = { 
@@ -39,29 +39,6 @@ function HR() {
     }} />
 }
 
-// class Checkbox extends React.Component
-// {
-//     componentDidMount() {
-//         ReactDOM.findDOMNode(this).indeterminate = this.props.indeterminate === true;
-//     }
-
-//     render()
-//     {
-//         return <input type="checkbox" { ...this.props } />
-//     }
-// }
-
-class Range extends React.Component
-{
-    componentDidMount() {
-        ReactDOM.findDOMNode(this).indeterminate = this.props.indeterminate === true;
-    }
-
-    render()
-    {
-        return <input type="range" { ...this.props } />
-    }
-}
 
 class Detail extends React.Component
 {
@@ -204,11 +181,11 @@ class Detail extends React.Component
                                 />
                             </div>
                             <div style={{ marginTop: 5 }}>
-                                <Range
+                                <input
+                                    type="range"
                                     min={0}
                                     max={200}
                                     value={sbp || 0}
-                                    indeterminate={ sbp === undefined }
                                     style={{ width: "100%" }}
                                     onChange={ e => dispatch(merge({ data: { sbp: e.target.valueAsNumber }})) }
                                 />

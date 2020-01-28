@@ -14,7 +14,10 @@ export default class Slider extends React.Component
         disabled : PropTypes.bool,
         precision: PropTypes.number,
         zones: PropTypes.arrayOf(PropTypes.shape({
-            label: PropTypes.string.isRequired,
+            label: PropTypes.oneOfType([
+                PropTypes.string,
+                PropTypes.element
+            ]).isRequired,
             min  : PropTypes.number.isRequired,
             max  : PropTypes.number.isRequired,
             color: PropTypes.string.isRequired
@@ -120,8 +123,8 @@ export default class Slider extends React.Component
                         onMouseDown={ this.onMouseDown }
                     >{ hasValue ? roundToPrecision(value, precision) : "N/A" }</div>
                     {
-                        zones.map(z => (
-                            <div className="slider-zone" style={{
+                        zones.map((z, i) => (
+                            <div key={`zone-${i}`} className="slider-zone" style={{
                                 width: this.valueToPct(z.max - z.min) + "%"
                             }}>
                                 <div className="slider-zone-color"  style={{
