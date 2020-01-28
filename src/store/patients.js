@@ -79,7 +79,7 @@ export function loadPatients(client) {
                 '{deceasedDateTime}',
                 '{{name}}'
                 FROM Patient
-                LIMIT 100`,
+                LIMIT 100000`,
             onPage(data) {
                 dispatch(addPatients(data.map(o => {
                     o.name = getPatientDisplayName(JSON.parse(o.name || "{}"));
