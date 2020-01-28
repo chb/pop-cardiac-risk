@@ -214,7 +214,7 @@ class Detail extends React.Component
                                     </h1>
                                 </td>
                                 <td>
-                                    <ul>
+                                    <ul className="small">
                                         {
                                             optimalScore !== null && score && optimalScore < score ?
                                             <li>if { smoker ? "you didn't smoke and " : "" }all
