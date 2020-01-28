@@ -1,0 +1,5 @@
+<svg height="100" width="100" 
+    xmlns="http://www.w3.org/2000/svg">
+    <path d="M 15 40 L 40 80 L 50 80 L 85 20 L 70 20 L 45 60 L 30 40 Z"
+    fill="white" stroke="rgba(0, 0, 0, 0.5)" stroke-width="1px"/>
+</svg>
