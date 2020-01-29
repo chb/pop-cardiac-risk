@@ -126,7 +126,7 @@ export default class Slider extends React.Component
         const min = zones[0].min;
         const max = zones[zones.length - 1].max;
         const range = max - min;
-        return val / range * 100
+        return (val - min) / range * 100
     }
 
     offsetToValue(offset)
@@ -136,7 +136,13 @@ export default class Slider extends React.Component
         const max   = zones[zones.length - 1].max;
         const range = max - min;
         const width = this.wrapper.current.clientWidth;
-        return roundToPrecision(range * offset / width, this.props.precision);
+        return Math.max(
+            Math.min(
+                min + roundToPrecision(range * offset / width, this.props.precision),
+                max
+            ),
+            min
+        );
     }
 
     render()
@@ -151,19 +157,19 @@ export default class Slider extends React.Component
                 "small": small,
                 "disabled": disabled || !hasValue
             }) } ref={ this.wrapper }>
-                <div>{ label }</div>
+                <b>{ label }</b>
                 <div className="slider-zones">
                     <div
                         ref={ this.btn }
                         className="slider-value"
-                        style={{ left: this.valueToPct(value || 0) + "%" }}
+                        style={{ left: this.valueToPct(value || zones[0].min) + "%" }}
                         onMouseDown={ hasTouch ? null : this.onMouseDown }
                         onTouchStart={ hasTouch ? this.onMouseDown : null }
                     >{ hasValue ? roundToPrecision(value, precision) : "N/A" }</div>
                     {
                         zones.map((z, i) => (
                             <div key={`zone-${i}`} className="slider-zone" style={{
-                                width: this.valueToPct(z.max - z.min) + "%"
+                                width: this.valueToPct(z.max) - this.valueToPct(z.min) + "%"
                             }}>
                                 <div className="slider-zone-color"  style={{
                                     background: z.color,

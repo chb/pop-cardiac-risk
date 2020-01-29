@@ -164,7 +164,7 @@ class Detail extends React.Component
                             </div>
                         </div>
                         <div className="col-sm-6">
-                            <div style={{ marginTop: 5 }}>
+                            <div style={{ marginTop: 15 }}>
                                 <Checkbox
                                     checked={ smoker === true }
                                     indeterminate={ smoker === undefined }
@@ -172,7 +172,7 @@ class Detail extends React.Component
                                     label="Current smoker?"
                                 />
                             </div>
-                            <div style={{ marginTop: 5 }}>
+                            <div style={{ marginTop: 15 }}>
                                 <Checkbox
                                     checked={ hha === true }
                                     indeterminate={ hha === undefined }
@@ -180,17 +180,17 @@ class Detail extends React.Component
                                     label="Family history of heart attack?"
                                 />
                             </div>
-                            <div style={{ marginTop: 5 }}>
+                            {/* <div style={{ marginTop: 5 }}>
                                 <input
                                     type="range"
-                                    min={0}
-                                    max={200}
+                                    min={80}
+                                    max={160}
                                     value={sbp || 0}
                                     style={{ width: "100%" }}
                                     onChange={ e => dispatch(merge({ data: { sbp: e.target.valueAsNumber }})) }
                                 />
                                 <label>Systolic blood pressure: <b>{ sbp ? sbp + " mm/Hg" : "Unknown" }</b></label>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
@@ -247,6 +247,32 @@ class Detail extends React.Component
                         <span className="item-number">4</span>
                         Your Results
                     </header>
+                    <Slider
+                        label="Systolic blood pressure"
+                        precision={0}
+                        value={ sbp }
+                        onChange={ sbp => dispatch(merge({ data: { sbp }}))}
+                        zones={[
+                            {
+                                label: <><div>Low</div><div className="text-muted">80 - 100 mm/Hg</div></>,
+                                color: "rgb(208, 202, 120)",
+                                min: 80,
+                                max: 100
+                            },
+                            {
+                                label: <><div>Normal</div><div className="text-muted">100 - 140 mm/Hg</div></>,
+                                color: "rgb(191, 174, 84)",
+                                min: 100,
+                                max: 140
+                            },
+                            {
+                                label: <><div>High</div><div className="text-muted">140+ mm/Hg</div></>,
+                                color: "rgb(191, 139, 84)",
+                                min  : 140,
+                                max  : 160 
+                            }
+                        ]}
+                    />
                     <Slider
                         label="CRP level test"
                         precision={2}
