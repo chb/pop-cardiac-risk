@@ -101,25 +101,25 @@ class Detail extends React.Component
             )
         }
 
-        const { name, dob, gender, sbp, hha, smoker } = patient;
+        const { name, /*dob,*/ gender, sbp, hha, smoker } = patient;
 
         const score = reynoldsRiskScore(patient, 1, 1);
-        const optimalScore = reynoldsRiskScore({
-            ...patient,
-            smoker: false,
-            hsCRP: 0.5,
-            cholesterol: 160,
-            HDL : 60,
-            sbp: 120
-        });
-        const lowerSbpScore = sbp && sbp > 10 ? reynoldsRiskScore({
-            ...patient,
-            sbp: sbp - 10
-        }) : null;
-        const nonSmokerScore = score && smoker ? reynoldsRiskScore({
-            ...patient,
-            smoker: false
-        }) : null;
+        // const optimalScore = reynoldsRiskScore({
+        //     ...patient,
+        //     smoker: false,
+        //     hsCRP: 0.5,
+        //     cholesterol: 160,
+        //     HDL : 60,
+        //     sbp: 120
+        // });
+        // const lowerSbpScore = sbp && sbp > 10 ? reynoldsRiskScore({
+        //     ...patient,
+        //     sbp: sbp - 10
+        // }) : null;
+        // const nonSmokerScore = score && smoker ? reynoldsRiskScore({
+        //     ...patient,
+        //     smoker: false
+        // }) : null;
 
         return (
             <div className="container-fluid" style={{
@@ -142,55 +142,37 @@ class Detail extends React.Component
                 <div className="horizontal-section">
                     <header>
                         <span className="item-number">2</span>
-                        Patient info
+                        Patient info &nbsp;&nbsp;&nbsp;
+                        <span className="text-info" style={{ fontWeight: 400 }}>
+                            <b>{ name }</b> - { getAge(patient, " old") } { gender }
+                        </span>
                     </header>
-                    <div className="row">
-                        <div className="col-sm-6">
-                            <div>
-                                <span className="text-muted">NAME: </span>
-                                <span>{ name }</span>
-                            </div>
-                            <div>
-                                <span className="text-muted">GENDER: </span>
-                                <span>{ gender } </span>
-                            </div>
-                            <div>
-                                <span className="text-muted">AGE: </span>
-                                <span>{ getAge(patient) }</span>
-                            </div>
-                            <div>
-                                <span className="text-muted">DOB: </span>
-                                <span>{ moment(dob).format("YYYY-MM-DD") }</span>
-                            </div>
+                    <div className="text-center">
+                        <div style={{
+                            margin   : "10px auto 5px",
+                            display  : "inline-block",
+                            width    : "17em",
+                            textAlign: "left"
+                        }}>
+                            <Checkbox
+                                checked={ smoker === true }
+                                indeterminate={ smoker === undefined }
+                                onChange={ checked => dispatch(merge({ data: { smoker: checked }})) }
+                                label="Current smoker?"
+                            />
                         </div>
-                        <div className="col-sm-6">
-                            <div style={{ marginTop: 15 }}>
-                                <Checkbox
-                                    checked={ smoker === true }
-                                    indeterminate={ smoker === undefined }
-                                    onChange={ checked => dispatch(merge({ data: { smoker: checked }})) }
-                                    label="Current smoker?"
-                                />
-                            </div>
-                            <div style={{ marginTop: 15 }}>
-                                <Checkbox
-                                    checked={ hha === true }
-                                    indeterminate={ hha === undefined }
-                                    onChange={ checked => dispatch(merge({ data: { hha: checked }})) }
-                                    label="Family history of heart attack?"
-                                />
-                            </div>
-                            {/* <div style={{ marginTop: 5 }}>
-                                <input
-                                    type="range"
-                                    min={80}
-                                    max={160}
-                                    value={sbp || 0}
-                                    style={{ width: "100%" }}
-                                    onChange={ e => dispatch(merge({ data: { sbp: e.target.valueAsNumber }})) }
-                                />
-                                <label>Systolic blood pressure: <b>{ sbp ? sbp + " mm/Hg" : "Unknown" }</b></label>
-                            </div> */}
+                        <div style={{
+                            margin   : "10px auto",
+                            display  : "inline-block",
+                            width    : "17em",
+                            textAlign: "left"
+                        }}>
+                            <Checkbox
+                                checked={ hha === true }
+                                indeterminate={ hha === undefined }
+                                onChange={ checked => dispatch(merge({ data: { hha: checked }})) }
+                                label="Family history of heart attack?"
+                            />
                         </div>
                     </div>
                 </div>
@@ -199,8 +181,17 @@ class Detail extends React.Component
                     <header>
                         <span className="item-number">3</span>
                         Your risk over 10 years
+                        <h1 className={buildClassName({
+                            score: true,
+                            "text-muted": score === null,
+                            "text-warning": score && score > 10,
+                            "text-danger": score && score > 20
+                        })}>
+                            { score === null ? "N/A" : score + "%" }
+                        </h1>
                     </header>
-                    <table>
+                    
+                    {/* <table>
                         <tbody>
                             <tr>
                                 <td>
@@ -238,7 +229,7 @@ class Detail extends React.Component
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table> */}
                     {/* <p className="text-muted">Use your test results to calculate your risk of a cardiovascular event at <a rel="noopener noreferrer" target="_blank" href="http://reynoldsriskscore.org/">ReynoldsRisk.org</a></p> */}
                 </div>
                 <HR />
@@ -326,7 +317,7 @@ class Detail extends React.Component
                         ]}
                     />
                     <div style={{ marginLeft: "4rem" }}>
-                        <Slider
+                        {/* <Slider
                             small
                             label='LDL "bad" cholesterol'
                             value={ patient.LDL }
@@ -364,7 +355,7 @@ class Detail extends React.Component
                                     max: 400 
                                 }
                             ]}
-                        />
+                        /> */}
                         <Slider
                             small
                             label='HDL "good" cholesterol'

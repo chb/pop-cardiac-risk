@@ -14,10 +14,11 @@ export default class Checkbox extends React.Component
 
     render()
     {
-        const { checked, indeterminate, label } = this.props;
+        const { checked, indeterminate, label, ...rest } = this.props;
 
         return (
             <div
+                { ...rest }
                 className={ buildClassName({
                     "checkbox-wrap": true,
                     indeterminate,

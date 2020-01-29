@@ -2,23 +2,20 @@
 
 
 .checkbox-wrap {
-    display: inline-block;
-    vertical-align: text-top;
-    line-height: 0em;
-    margin: 0;
-    cursor: default;
+    display    : inline-block;
+    line-height: inherit;
+    cursor     : default;
     user-select: none;
 
     .checkbox {
         display       : inline-block;
         width         : 2ex;
         height        : 2ex;
-        vertical-align: middle;
+        vertical-align: baseline;
         margin        : 0;
         border-radius : 3px;
         position      : relative;
-        // box-shadow    : 0 0 0 1px rgba(0, 0, 0, 0.4) inset;
-        // background    : rgba(255, 255, 255, 0.5);
+        top           : 0.15em;
         background    : #f4f2ef;
         border        : 1px solid rgba(82, 79, 75, 0.5);
     }
@@ -70,10 +67,9 @@
     }
 
     .checkbox-label {
-        display: inline-block;
-        vertical-align: middle;
-        line-height: inherit;
+        display: inline;
         margin: 0;
-        text-indent: 0.5ch;
+        padding-left: 0.5ch;
+        white-space: normal;
     }
 }
