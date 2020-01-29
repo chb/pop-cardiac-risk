@@ -4,7 +4,7 @@
     // background: orange;
     flex: 2 1 0;
     font-size: 1rem;
-    font-size: calc(12px + 0.3vw);
+    font-size: calc(14px + 0.2vw);
 
     > .center {
         background-color: #DDD;
@@ -22,7 +22,7 @@
 
     .back-link {
         
-        margin: 1rem 1rem 1rem 0;
+        // margin: 1rem 1rem 1rem 0;
         visibility: hidden;
         // background: rgba(#FFF, 0.3);
         
@@ -30,15 +30,15 @@
 
     .btn-empty {
         color: rgba(#FFF, 0.7);
-        box-shadow: 0 0 0 1px rgba(#FFF, 0.2) inset;
-        height: 2rem;
-        line-height: 2rem;
-        padding: 0 0.5rem;
-        border-radius: 3px;
+        // box-shadow: 0 0 0 1px rgba(#FFF, 0.2) inset;
+        // height: 2rem;
+        // line-height: 2rem;
+        // padding: 0 0.5rem;
+        // border-radius: 3px;
         text-decoration: none;
         cursor: pointer;
         white-space: nowrap;
-        min-width: 5em;
+        // min-width: 5em;
 
         &:hover {
             background: rgba(#FFF, 0.1);
@@ -46,10 +46,15 @@
     }
 
     .app-header {
-        text-align: center;
-
         .col-1 {
-            flex: 0 0 5rem;
+            flex: 0 0 6rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            .glyphicon {
+                top: 0;
+            }
         }
         .col-2 {
             flex: 1 1 0;
@@ -60,8 +65,11 @@
             display: flex;
         }
         .col-3 {
-            flex: 0 0 5rem;
-            margin: 1rem 0 1rem 1rem;
+            flex: 0 0 6rem;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     }
 
@@ -139,7 +147,7 @@
 
 .score {
     color: $color-green;
-    font-size: 3em;
+    // font-size: 3em;
     margin: 0 0 0 1ex;
     font-weight: 700;
     // text-align: center;

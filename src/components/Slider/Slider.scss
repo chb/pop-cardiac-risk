@@ -1,8 +1,9 @@
 .slider-wrap {
-    margin: 20px;
+    margin: 20px 20px 20px 0;
     position: relative;
     font-size: inherit;
     font-size: calc(12px + 0.3vw);
+    transform: translateZ(1px);
 }
 
 .slider-zones {
@@ -74,7 +75,7 @@
     text-align: center;
     font-weight: bold;
     position: absolute;
-    z-index: 2;
+    z-index: 3;
     top: 5px;
     margin-left: -25px;
     cursor: default;

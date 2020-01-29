@@ -2,7 +2,7 @@ import React from "react"
 // import PropTypes from "prop-types";
 import { connect } from "react-redux";
 // import * as lib from "../../lib"
-import moment from "moment";
+// import moment from "moment";
 // import Chart from "../Chart";
 import { Link, withRouter } from "react-router-dom";
 // import Loader from "../Loader"
@@ -66,7 +66,7 @@ class Detail extends React.Component
                 <Link to="/" className="back-link col-1 btn-empty">
                     <b className="glyphicon glyphicon-chevron-left"/>&nbsp;Back
                 </Link>
-                <b className="col-2">Bloodwork Cardiology Result</b>
+                <b className="col-2">Risk Score</b>
                 <div className="col-3 btn-empty">Reset</div>
             </header>
         )
@@ -180,7 +180,7 @@ class Detail extends React.Component
                 <div className="horizontal-section">
                     <header>
                         <span className="item-number">3</span>
-                        Your risk over 10 years
+                        Your risk over 10 years:
                         <h1 className={buildClassName({
                             score: true,
                             "text-muted": score === null,

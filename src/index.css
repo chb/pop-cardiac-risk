@@ -5,9 +5,9 @@
 html {
   font-size: 16px;
   height: 100%;
-  /* display: flex;
-  flex: 1 0 100vh;
-  flex-direction: column; */
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -20,16 +20,16 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* padding: 0; */
-  height: 100%;
-  /* display: flex;
-  flex: 1 0 100vh;
-  flex-direction: column; */
+  /* height: 100%; */
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 #root {
   height: 100%;
   display: flex;
-  flex: 1 0 100vh;
+  flex: 1 1 100%;
   flex-direction: column;
 }
 

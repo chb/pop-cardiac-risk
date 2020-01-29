@@ -1,13 +1,23 @@
 @import "../../style/config.scss";
 
 .patient-list {
-    overflow: auto;
-    overflow: overlay;
-    flex: 1 0 0vh;
-    height: 100%;
-    margin: 0 0 1px 0;
-    transform: translateZ(10px);
-    box-shadow: 1px 0 0 #CCC;
+    overflow  : auto;
+    overflow  : overlay;
+    // overflow-X: hidden;
+    flex      : 1 1 0%;
+    margin    : 0 0 -1px;
+    // display: block;
+    // z-index: 2;
+    // transform: translateZ(1px);
+    // box-shadow: 1px 0 0 #CCC;
+    // -webkit-overflow-scrolling: auto;
+    // scroll-behavior: auto;
+
+    // > div {
+    //     display: flex;
+    //     flex-direction: column;
+    //     flex: 1 0 0px;
+    // }
 
     &.has-message {
         display: flex;
@@ -31,6 +41,7 @@
         position: relative;
         font-size: 1rem;
         text-decoration: none;
+        height: 70px;
         
         .avatar {
             display      : block;
@@ -72,14 +83,17 @@
         &:first-child {
             border-top: 0;
         }
+
         &:last-child {
             border-bottom: 0;
         }
-        &:hover {
-            background: #EEE;
-            border-color: #EEE;
-            text-shadow: 0 1px 0 #FFF;
-        }
+
+        // &:hover {
+        //     background: #EEE;
+        //     border-color: #EEE;
+        //     text-shadow: 0 1px 0 #FFF;
+        // }
+
         &.selected {
             background: $color-green;
             color: #FFF;
@@ -118,14 +132,16 @@
 }
 
 .patient-header {
-    background: #DDD;
+    background: #EEE;
     border-bottom: 1px solid #BBB;
     text-align: center;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    box-shadow: 1px 0 0 #CCC;
+    flex: 0 0 3em;
+    // box-shadow: 1px 0 0 #CCC;
     z-index: 2;
+
     > div {
         margin: 5px;
         /* box-shadow: 0 0 0 1px #369 inset; */
@@ -137,7 +153,7 @@
     input[type="search"] {
         border-radius: 3rem;
         width: 100%;
-        min-width: 180px;
+        min-width: 150px;
         max-width: 600px;
     
         &:focus {
@@ -147,9 +163,13 @@
         }
     }
 
-    select {
+    select, select:focus {
         background: transparent;
-        border-color: rgba(0, 0, 0, 0.1);
+        border-color: rgba(0, 0, 0, 0);
         box-shadow: none;
+        appearance: none;
+        padding: 0;
+        vertical-align: middle;
+        line-height: inherit;
     }
 }

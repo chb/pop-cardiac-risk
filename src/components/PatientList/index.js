@@ -25,7 +25,8 @@ class PatientList extends React.Component
     };
 
     static defaultProps = {
-        offscreenRows: 20
+        offscreenRows: 20,
+        data: []
     };
 
     constructor(props)
@@ -49,41 +50,79 @@ class PatientList extends React.Component
 
     computeScrollState()
     {
-        const { scrollTop, scrollHeight, clientHeight } = this.wrapper.current;
+        const { scrollHeight, clientHeight } = this.wrapper.current;
         const { offscreenRows } = this.props;
         let { rowHeight } = this.state;
 
-        const nextState = { skipTop: 0, skipBottom: 0, scrollHeight };
+        // scrollTop can be negative on touch devices
+        const scrollTop = Math.max(this.wrapper.current.scrollTop, 0);
+        
+        const scrollBottom = Math.max(scrollHeight - (clientHeight + scrollTop), 0)
+        // console.log(scrollBottom);
+
+        const nextState = {
+            // skipTop: 0,
+            // skipBottom: 0,
+            scrollHeight
+        };
 
         // When called for the first time, measure the height of the first
         // (and only) child element and use that to set `rowHeight`
         if (this.state.windowLength === 1) {
             rowHeight = nextState.rowHeight = this.wrapper.current.querySelector(".patient").offsetHeight;
+            rowHeight = 70;
         }
+        
+
+        // const windowInnerLength = Math.ceil(clientHeight / rowHeight);
+
+        nextState.windowLength = Math.ceil(clientHeight / rowHeight) + offscreenRows * 2;
 
         // find how many rows are off-screen above the top edge
         const topOffscreenRows = Math.floor(scrollTop / rowHeight);
 
-        // If more than `offscreenRows` have become invisible, keep 
-        // `offscreenRows` number of rows and replace the rest with an empty
-        // div to free those DOM elements
-        if (topOffscreenRows > offscreenRows) {
-            nextState.skipTop = topOffscreenRows - offscreenRows;
-        }
-
         // find how many rows are off-screen below the bottom edge
-        const bottomOffscreenRows = Math.floor(
-            (scrollHeight - (clientHeight + scrollTop)) / rowHeight
-        );
+        const bottomOffscreenRows = Math.floor(scrollBottom / rowHeight);
 
-        // If more than `offscreenRows` have become invisible, keep 
-        // `offscreenRows` number of rows and replace the rest with an empty
-        // div to free those DOM elements
-        if (bottomOffscreenRows > offscreenRows) {
-            nextState.skipBottom = bottomOffscreenRows - offscreenRows;
+        if (scrollBottom) {
+        
+
+            // If more than `offscreenRows` have become invisible, keep 
+            // `offscreenRows` number of rows and replace the rest with an empty
+            // div to free those DOM elements
+            // if (topOffscreenRows >= offscreenRows) {
+                // nextState.skipTop = topOffscreenRows - offscreenRows;
+            // }
+            // else if (topOffscreenRows > offscreenRows) {
+            //     nextState.skipTop = 0;
+            nextState.skipTop = Math.max(topOffscreenRows - offscreenRows, 0);
+            // }
         }
+        // else {
+        //     nextState.skipTop = 0;
+        // }
 
-        nextState.windowLength = Math.ceil(clientHeight / rowHeight) + offscreenRows * 2;
+        
+
+        if (scrollBottom > rowHeight) {
+
+            
+
+            // If more than `offscreenRows` have become invisible, keep 
+            // `offscreenRows` number of rows and replace the rest with an empty
+            // div to free those DOM elements
+            // if (bottomOffscreenRows >= offscreenRows) {
+            //     nextState.skipBottom = bottomOffscreenRows - offscreenRows;
+            // }
+            // else if (bottomOffscreenRows === offscreenRows) {
+            //     nextState.skipBottom = 0;
+            // }
+            nextState.skipBottom = Math.max(bottomOffscreenRows - offscreenRows, 0);
+        }
+        // else {
+        //     nextState.skipBottom = 0;
+        // }
+        
 
         return nextState;
     }
@@ -99,6 +138,31 @@ class PatientList extends React.Component
             this.setState(this.computeScrollState());
         }
     }
+
+    // shouldComponentUpdate(nextProps, nextState)
+    // {
+    //     if (nextProps.data.length !== this.props.data.length) {
+    //         return true;
+    //     }
+    // //     if (nextState.windowLength !== this.state.windowLength) {
+    // //         return true;
+    // //     }
+    // //     if (nextState.skipBottom !== this.state.skipBottom) {
+    // //         return true;
+    // //     }
+    // //     if (nextState.scrollHeight === this.state.scrollHeight) {
+    // //         return false;
+    // //     }
+    //     if (
+    //         // nextState.windowLength === this.state.windowLength &&
+    //         nextState.skipTop === this.state.skipTop &&
+    //         nextState.skipBottom === this.state.skipBottom //&&
+    //         // nextState.scrollHeight === this.state.scrollHeight
+    //     ) {
+    //         return false;
+    //     }
+    //     return true;
+    // }
 
     render()
     {
@@ -120,7 +184,7 @@ class PatientList extends React.Component
         const { rowHeight, skipTop, skipBottom } = this.state;
         const { loading, error, data } = this.props;
 
-        if (!data || !data.length) {
+        if (!data.length) {
             return loading ?
                 <div className="patient-list has-message"><Loader/> Loading...</div> :
                 <div className="patient-list has-message">No data available</div>;
@@ -142,23 +206,23 @@ class PatientList extends React.Component
     renderHeader() {
         return (
             <header className="patient-header">
-                <div style={{ flex: "2 0 0" }}>
+                <div style={{ flex: "3 1 0" }}>
                     <input type="search" className="form-control" placeholder="Search patients" onInput={
                         e => this.props.dispatch(search(e.target.value.trim()))
                     } />
                 </div>
-                <div style={{ flex: "0 0 12.5em" }}>
-                    Sort:&nbsp;
+                <div style={{ flex: "0 0 8em" }}>
+                    <label className="text-muted" style={{ margin: 0 }}>&nbsp;Sort:&nbsp;</label>
                     <select className="form-control" onChange={
                         e => this.props.dispatch(sort(e.target.value))
                     }>
                         <option value="">None</option>
-                        <option value="name:desc">Name: A-Z</option>
-                        <option value="name:asc">Name: Z-A</option>
-                        <option value="age:desc">Age: old first</option>
-                        <option value="age:asc">Age: young first</option>
-                        <option value="gender:desc">Gender: M-F</option>
-                        <option value="gender:asc">Gender: F-M</option>
+                        <option value="name:desc">Name ▼</option>
+                        <option value="name:asc">Name ▲</option>
+                        <option value="age:desc">Age ▼</option>
+                        <option value="age:asc">Age ▲</option>
+                        <option value="gender:desc">Gender ▲</option>
+                        <option value="gender:asc">Gender ▼</option>
                     </select>
                 </div>
             </header>
@@ -234,7 +298,6 @@ class PatientList extends React.Component
         for (let i = start; i <= end; i++) {
             const rec = data[i];
             if (!rec) break;
-
             win.push(
                 <Link
                     to={"/" + rec.id}

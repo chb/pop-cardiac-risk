@@ -9,7 +9,7 @@ import {
   // Switch,
   Route
 } from "react-router-dom";
-import './App.css';
+import './App.scss';
 
 
 class App extends React.Component {
@@ -24,7 +24,11 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    window.FHIR.oauth2.ready()
+    window.FHIR.oauth2.init({
+      iss     : "https://smart-proxy-server.herokuapp.com/pop/presto1",
+      clientId: "whatever",
+      scope   : "offline_access"
+    })
       .then(client => {
         this.setState({
           authorized: true,
