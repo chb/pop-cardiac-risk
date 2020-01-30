@@ -8,14 +8,14 @@
     position: relative;
 
     > .center {
-        background-color: #DDD;
+        background-color: #EEE;
         color: #888;
-        text-shadow: 0 1px 0 #EEE;
+        text-shadow: 0 1px 0 #FFF;
         box-shadow: 1px 0 0 #bbb inset;
 
         h1 {
             color: rgba(#999, 0.8);
-            text-shadow: 0 1px 0 #EEE, 0 0 1px rgba(#000000, 0.8);
+            text-shadow: 0 1px 0 #FFF, 0 0 1px rgba(#000000, 0.8);
             text-transform: uppercase;
             font-size: 2rem;
         }
