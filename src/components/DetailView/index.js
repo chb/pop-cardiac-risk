@@ -103,7 +103,7 @@ class Detail extends React.Component
 
         const { name, /*dob,*/ gender, sbp, hha, smoker } = patient;
 
-        const score = reynoldsRiskScore(patient, 1, 1);
+        const score = reynoldsRiskScore(patient, 0, 0);
         // const optimalScore = reynoldsRiskScore({
         //     ...patient,
         //     smoker: false,
@@ -266,7 +266,7 @@ class Detail extends React.Component
                     />
                     <Slider
                         label="CRP level test"
-                        precision={2}
+                        precision={1}
                         value={ patient.hsCRP }
                         onChange={ hsCRP => dispatch(merge({ data: { hsCRP }}))}
                         zones={[
@@ -451,8 +451,8 @@ class Detail extends React.Component
                         Further reading
                     </header>
                     <ul className="small" style={{ margin: "0 0 1em 0", padding: "0 0 0 0.7em" }}>
-                        <li><a rel="noopener noreferrer" target="_blank" href="https://informationisbeautiful.net/2010/visualizing-bloodtests/">Original Design: David McCandless & Stefanie Posavec for Wired Magazine // informationisbeautiful.net</a></li>
-                        <li><a rel="noopener noreferrer" target="_blank" href="http://reynoldsriskscore.org/">Reynolds Risk Score Calculator // ReynoldsRiskScore.org</a></li>
+                        <li><a rel="noopener noreferrer" target="_blank" href="https://informationisbeautiful.net/2010/visualizing-bloodtests/">Original Design: David McCandless & Stefanie Posavec for Wired Magazine</a></li>
+                        <li><a rel="noopener noreferrer" target="_blank" href="http://reynoldsriskscore.org/">Reynolds Risk Score Calculator</a></li>
                         <li><a rel="noopener noreferrer" target="_blank" href="https://jamanetwork.com/journals/jama/fullarticle/205528">Development and validation of improved algorithms for the assessment of global cardiovascular risk in women:The Reynolds Risk Score. Ridker el al. JAMA 2007;297:611-619</a></li>
                         <li><a rel="noopener noreferrer" target="_blank" href="https://www.ahajournals.org/doi/full/10.1161/circulationaha.108.814251">C-reactive protein and parental history improve global cardiovascular risk prediction: The Reynolds Risk Score for Men. Ridker et al. Circulation. 2008;118:2243-2251</a></li>
                     </ul>
