@@ -61,8 +61,8 @@ class PatientList extends React.Component
         // console.log(scrollBottom);
 
         const nextState = {
-            // skipTop: 0,
-            // skipBottom: 0,
+            skipTop: 0,
+            skipBottom: 0,
             scrollHeight
         };
 
