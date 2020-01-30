@@ -98,26 +98,30 @@ class DetailView extends React.Component
         //     )
         // }
 
-        if (this.props.loading) {
-            return (
-                <div className="center">
-                    <h1><Loader/> Loading...</h1>
-                </div>
-            )
-        }
+        // if (this.props.loading) {
+        //     return (
+        //         <div className="center loading-screen active">
+        //             <h1><Loader/> Loading...</h1>
+        //         </div>
+        //     )
+        // }
 
         return (
-            <CardiacRisk
-                { ...this.props.selectedPatient }
-                dispatch={ this.props.dispatch }
-                setHDL={ this.props.setHDL }
-                setCholesterol={ this.props.setCholesterol }
-                setCRP={ this.props.setCRP }
-                setSBP={ this.props.setSBP }
-                setHHA={ this.props.setHHA }
-                setSmoker={ this.props.setSmoker }
-
-            />
+            <>
+                <div className={"center loading-screen" + (this.props.loading ? " active" : "")}>
+                    <h1><Loader/> Loading...</h1>
+                </div>
+                <CardiacRisk
+                    { ...this.props.selectedPatient }
+                    dispatch={ this.props.dispatch }
+                    setHDL={ this.props.setHDL }
+                    setCholesterol={ this.props.setCholesterol }
+                    setCRP={ this.props.setCRP }
+                    setSBP={ this.props.setSBP }
+                    setHHA={ this.props.setHHA }
+                    setSmoker={ this.props.setSmoker }
+                />
+            </>
         );
     }
 
