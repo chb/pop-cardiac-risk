@@ -1,3 +1,4 @@
+@import "./style/config.scss";
 
 .selected .text-muted {
   color: rgba(255, 255, 255, 0.7);
@@ -12,6 +13,8 @@
 .form-control {
   font: inherit;
 }
+
+.color-green { color: $color-green; }
 
 /* ========================================================================== */
 

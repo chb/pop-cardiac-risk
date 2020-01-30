@@ -103,7 +103,7 @@ class Detail extends React.Component
 
         const { name, /*dob,*/ gender, sbp, hha, smoker } = patient;
 
-        const score = reynoldsRiskScore(patient, 1, 1);
+        const score = reynoldsRiskScore(patient, 0, 0);
         // const optimalScore = reynoldsRiskScore({
         //     ...patient,
         //     smoker: false,
@@ -266,7 +266,7 @@ class Detail extends React.Component
                     />
                     <Slider
                         label="CRP level test"
-                        precision={2}
+                        precision={1}
                         value={ patient.hsCRP }
                         onChange={ hsCRP => dispatch(merge({ data: { hsCRP }}))}
                         zones={[
@@ -393,11 +393,11 @@ class Detail extends React.Component
                     </header>
                     <div className="small what-now">
                         <div>
-                            <div className="img">
+                            <div className="img hidden-xs">
                                 <img src={ require("./runner.png")} alt="Runner" />
                             </div>
                             <div style={{ flex: 4 }}>
-                                <b>Diet and exercise</b>
+                                <b className="color-green">Diet and exercise</b>
                                 <div className="text-muted">
                                     can improve your cholesterol levels
                                 </div>
@@ -405,11 +405,11 @@ class Detail extends React.Component
                         </div>
                         
                         <div>
-                            <div className="img">
+                            <div className="img hidden-xs">
                                 <img src={ require("./smoker.png")} alt="Smoker" />
                             </div>
                             <div style={{ flex: 4 }}>
-                                <b>Staying smoke-free</b>
+                                <b className="color-green">Staying smoke-free</b>
                                 <div className="text-muted">
                                     is one of the best ways to improve your
                                     heart disease risk
@@ -418,11 +418,11 @@ class Detail extends React.Component
                         </div>
                         
                         <div>
-                            <div className="img">
+                            <div className="img hidden-xs">
                                 <img src={ require("./doctor.png")} alt="Doctor" />
                             </div>
                             <div style={{ flex: 4 }}>
-                                <b>Ask your doctor</b>
+                                <b className="color-green">Ask your doctor</b>
                                 <div className="text-muted">
                                     about statins or other medications that can
                                     lower cholesterol
@@ -431,11 +431,11 @@ class Detail extends React.Component
                         </div>
                         
                         <div>
-                            <div className="img">
+                            <div className="img hidden-xs">
                                 <img src={ require("./needle.png")} alt="Needle" />
                             </div>
                             <div style={{ flex: 4 }}>
-                                <b>Consider retesting</b>
+                                <b className="color-green">Consider retesting</b>
                                 <div className="text-muted">
                                     in 1 or 2 weeks to exclude a temporary spike
                                     in blood levels
@@ -451,8 +451,8 @@ class Detail extends React.Component
                         Further reading
                     </header>
                     <ul className="small" style={{ margin: "0 0 1em 0", padding: "0 0 0 0.7em" }}>
-                        <li><a rel="noopener noreferrer" target="_blank" href="https://informationisbeautiful.net/2010/visualizing-bloodtests/">Original Design: David McCandless & Stefanie Posavec for Wired Magazine // informationisbeautiful.net</a></li>
-                        <li><a rel="noopener noreferrer" target="_blank" href="http://reynoldsriskscore.org/">Reynolds Risk Score Calculator // ReynoldsRiskScore.org</a></li>
+                        <li><a rel="noopener noreferrer" target="_blank" href="https://informationisbeautiful.net/2010/visualizing-bloodtests/">Original Design: David McCandless & Stefanie Posavec for Wired Magazine</a></li>
+                        <li><a rel="noopener noreferrer" target="_blank" href="http://reynoldsriskscore.org/">Reynolds Risk Score Calculator</a></li>
                         <li><a rel="noopener noreferrer" target="_blank" href="https://jamanetwork.com/journals/jama/fullarticle/205528">Development and validation of improved algorithms for the assessment of global cardiovascular risk in women:The Reynolds Risk Score. Ridker el al. JAMA 2007;297:611-619</a></li>
                         <li><a rel="noopener noreferrer" target="_blank" href="https://www.ahajournals.org/doi/full/10.1161/circulationaha.108.814251">C-reactive protein and parental history improve global cardiovascular risk prediction: The Reynolds Risk Score for Men. Ridker et al. Circulation. 2008;118:2243-2251</a></li>
                     </ul>
