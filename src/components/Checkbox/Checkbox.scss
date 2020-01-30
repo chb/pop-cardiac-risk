@@ -16,7 +16,7 @@
         border-radius : 3px;
         position      : relative;
         top           : 0.15em;
-        background    : #f4f2ef;
+        // background    : #f4f2ef;
         border        : 1px solid rgba(82, 79, 75, 0.5);
     }
 
@@ -45,7 +45,7 @@
     }
 
     &.indeterminate .checkbox {
-        background: #EEE;
+        // background: #EEE;
         &:after {
             content   : "";
             // background: #CCC;
@@ -64,6 +64,11 @@
             background: url("indeterminate.svg") center center no-repeat;
             background-size: 100%;
         }
+    }
+
+    &.readOnly .checkbox {
+        background: #EEE;
+        // cursor: not-allowed;
     }
 
     .checkbox-label {

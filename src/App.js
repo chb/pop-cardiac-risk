@@ -4,12 +4,14 @@ import store from "./store"
 import { loadPatients } from "./store/patients"
 import PatientList from "./components/PatientList/"
 import Detail from "./components/DetailView/"
+import ClientContext from "./ClientContext"
 import {
   BrowserRouter as Router,
   // Switch,
   Route
 } from "react-router-dom";
 import './App.scss';
+
 
 
 class App extends React.Component {
@@ -30,6 +32,7 @@ class App extends React.Component {
       scope   : "offline_access"
     })
       .then(client => {
+        this.client = client;
         this.setState({
           authorized: true,
           authError: null
@@ -58,14 +61,14 @@ class App extends React.Component {
       <Router>
         <Provider store={store}>
           <div className="app">
-          {/* <Switch> */}
-            <Route path="/:id?">
-              <PatientList />
-            </Route>
-            <Route path="/:id?">
-              <Detail />
-            </Route>
-          {/* </Switch> */}
+            <ClientContext.Provider value={this.client}>
+              <Route path="/:id?">
+                <PatientList />
+              </Route>
+              <Route path="/:id?">
+                <Detail />
+              </Route>
+            </ClientContext.Provider>
           </div>
         </Provider>
       </Router>

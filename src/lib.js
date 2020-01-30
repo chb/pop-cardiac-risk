@@ -189,8 +189,16 @@ export function formatDuration(ms)
 }
 
 export function getAge(patient, suffix = "") {
-    if (patient.deceasedBoolean || patient.deceasedDateTime) {
+    if (patient.deceasedBoolean) {
         return <span className="label label-warning">deceased</span>;
+    }
+    if (patient.deceasedDateTime) {
+        return <span className="label label-warning">deceased at {
+            moment.duration(
+                moment(patient.deceasedDateTime).diff(patient.dob, "days"),
+                "days"
+            ).humanize()
+        }</span>;
     }
     return moment.duration(moment().diff(patient.dob, "days"), "days").humanize() + suffix;
 }

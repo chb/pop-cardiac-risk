@@ -7,14 +7,20 @@ export default class Checkbox extends React.Component
 {
     onClick()
     {
-        if (this.props.onChange) {
+        if (this.props.onChange && !this.props.readOnly) {
             this.props.onChange(!this.props.checked);
         }
     }
 
     render()
     {
-        const { checked, indeterminate, label, ...rest } = this.props;
+        const {
+            checked,
+            indeterminate,
+            readOnly,
+            label,
+            ...rest
+        } = this.props;
 
         return (
             <div
@@ -22,7 +28,8 @@ export default class Checkbox extends React.Component
                 className={ buildClassName({
                     "checkbox-wrap": true,
                     indeterminate,
-                    checked: !indeterminate && checked
+                    checked: !indeterminate && checked,
+                    readOnly
                 })}
                 onClick={() => this.onClick()}
             >

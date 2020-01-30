@@ -61,8 +61,8 @@ class PatientList extends React.Component
         // console.log(scrollBottom);
 
         const nextState = {
-            skipTop: 0,
-            skipBottom: 0,
+            // skipTop: 0,
+            // skipBottom: 0,
             scrollHeight
         };
 
@@ -217,12 +217,12 @@ class PatientList extends React.Component
                         e => this.props.dispatch(sort(e.target.value))
                     }>
                         <option value="">None</option>
-                        <option value="name:desc">Name ▼</option>
-                        <option value="name:asc">Name ▲</option>
-                        <option value="age:desc">Age ▼</option>
-                        <option value="age:asc">Age ▲</option>
-                        <option value="gender:desc">Gender ▲</option>
-                        <option value="gender:asc">Gender ▼</option>
+                        <option value="name:asc">▲ Name</option>
+                        <option value="name:desc">▼ Name</option>
+                        <option value="age:asc">▲ Age</option>
+                        <option value="age:desc">▼ Age</option>
+                        <option value="gender:desc">▲Gender</option>
+                        <option value="gender:asc">▼ Gender</option>
                     </select>
                 </div>
             </header>
