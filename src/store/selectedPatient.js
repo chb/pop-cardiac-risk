@@ -93,10 +93,10 @@ export function load(client, id) {
                 // setTimeout(() => {
                     dispatch(merge({ data: {
                         ...patient,
-                        cholesterol: 10 + Math.random() * 340,
-                        sbp        : 90 + Math.random() * 60,
-                        hsCRP      : 1 + Math.random() * 8,
-                        HDL        : 10 + Math.random() * 80,
+                        cholesterol: Math.random() > 0.33 ? 10 + Math.random() * 340 : null,
+                        sbp        : Math.random() > 0.33 ? 90 + Math.random() * 60 : null,
+                        hsCRP      : Math.random() > 0.33 ? 1 + Math.random() * 8 : null,
+                        HDL        : Math.random() > 0.33 ? 10 + Math.random() * 80 : null,
                         smoker     : Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined,
                         hha        : Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined
                     }}));
