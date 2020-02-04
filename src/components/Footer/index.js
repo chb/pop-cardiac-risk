@@ -8,18 +8,23 @@ import "./Footer.scss"
 class Footer extends React.Component
 {
     static propTypes = {
-        patients: PropTypes.number
+        patients: PropTypes.number,
+        start   : PropTypes.number,
+        end     : PropTypes.number
     };
     
     render()
     {
+        const { patients, patientsLoadEndTime, patientsLoadStartTime, start, end } = this.props;
         return (
             <div className="app-footer">
-                Loaded { this.props.patients.toLocaleString() } patients in {
-                    formatDuration(
-                        this.props.patientsLoadEndTime -
-                        this.props.patientsLoadStartTime
-                    )
+                Loaded { patients.toLocaleString() } patients in {
+                    formatDuration(patientsLoadEndTime - patientsLoadStartTime)
+                }
+                {
+                    (start || start === 0) && (end || end === 0) ?
+                        ` [${start} - ${end}]` :
+                        null
                 }
             </div>
         )

@@ -57,7 +57,8 @@ class PatientList extends React.Component
         // scrollTop can be negative on touch devices
         const scrollTop = Math.max(this.wrapper.current.scrollTop, 0);
         
-        const scrollBottom = Math.max(scrollHeight - (clientHeight + scrollTop), 0)
+        const scrollBottom = scrollHeight - (clientHeight + scrollTop);
+        const scrollBottomAbs = Math.max(scrollBottom, 0)
         // console.log(scrollBottom);
 
         const nextState = {
@@ -79,10 +80,10 @@ class PatientList extends React.Component
         nextState.windowLength = Math.ceil(clientHeight / rowHeight) + offscreenRows * 2;
 
         // find how many rows are off-screen above the top edge
-        const topOffscreenRows = Math.floor(scrollTop / rowHeight);
+        const topOffscreenRows = nextState.topOffscreenRows = Math.floor(scrollTop / rowHeight);
 
         // find how many rows are off-screen below the bottom edge
-        const bottomOffscreenRows = Math.floor(scrollBottom / rowHeight);
+        const bottomOffscreenRows = Math.floor(scrollBottomAbs / rowHeight);
 
         if (scrollBottom) {
         
@@ -167,6 +168,10 @@ class PatientList extends React.Component
     render()
     {
         const id = this.props.match.params.id;
+        const { windowLength, topOffscreenRows } = this.state;
+        const start = topOffscreenRows;
+        const end   = start + windowLength - this.props.offscreenRows * 2
+
         return (
             <div className={"page patients" + (id ? "" : " active")}>
                 <header className="app-header">
@@ -174,7 +179,7 @@ class PatientList extends React.Component
                 </header>
                 { this.renderHeader() }
                 { this.renderList() }
-                <Footer />
+                <Footer start={ start } end={ end } />
             </div>
         )
     }
