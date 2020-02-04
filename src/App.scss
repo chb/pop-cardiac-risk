@@ -1,5 +1,21 @@
 @import "./style/config.scss";
 
+body {
+
+  #root {
+    transition: opacity 2s;
+  }
+
+  &.loaded {
+    > .glyphicon-refresh {
+      display: none;
+    }
+    #root {
+      opacity: 1 !important;
+    }
+  }
+}
+
 .selected .text-muted {
   color: rgba(255, 255, 255, 0.7);
 }

@@ -46,6 +46,9 @@ class App extends React.Component {
           authError: error
         })
       })
+      .finally(() => {
+        setTimeout(() => document.body.classList.add("loaded"), 1000);
+      })
   }
 
   render() {
