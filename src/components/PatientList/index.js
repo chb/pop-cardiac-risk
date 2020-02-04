@@ -85,7 +85,7 @@ class PatientList extends React.Component
         // find how many rows are off-screen below the bottom edge
         const bottomOffscreenRows = Math.floor(scrollBottomAbs / rowHeight);
 
-        if (scrollBottom) {
+        if (scrollBottomAbs) {
         
 
             // If more than `offscreenRows` have become invisible, keep 
