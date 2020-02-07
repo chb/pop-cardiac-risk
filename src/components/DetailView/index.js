@@ -55,8 +55,8 @@ class DetailView extends React.Component
 
     componentDidUpdate()
     {
-        const { selectedPatient, id, loading, load, client } = this.props;
-        if (id && !loading && (!selectedPatient.id || selectedPatient.id !== id)) {
+        const { selectedPatient, id, loading, error, load, client } = this.props;
+        if (id && !loading && !error && (!selectedPatient.id || selectedPatient.id !== id)) {
             load(client, id);
         }
     }
@@ -78,13 +78,23 @@ class DetailView extends React.Component
 
     renderBody()
     {
-        const { id } = this.props;
+        const { id, error } = this.props;
 
         if (!id) {
             return (
                 <div className="center">
                     To view a cardiac risk score report
                     <h1>please select a patient</h1>
+                </div>
+            )
+        }
+
+        if (error) {
+            return (
+                <div className="center">
+                    <pre>
+                        { String(error) }
+                    </pre>
                 </div>
             )
         }

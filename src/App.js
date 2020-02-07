@@ -28,8 +28,9 @@ class App extends React.Component {
   componentDidMount() {
     window.FHIR.oauth2.init({
       iss     : "https://smart-proxy-server.herokuapp.com/pop/presto1",
+      // iss     : "http://localhost:4000/pop/presto1",
       clientId: "whatever",
-      scope   : "offline_access"
+      scope   : "system/Patient.read system/Observation.read offline_access"
     })
       .then(client => {
         this.client = client;

@@ -67,16 +67,19 @@ export function load(client, id) {
         // let gotFirstChunk = false;
         return query(client, {
             sql: `SELECT 
-                json_extract_scalar(json, '$.id') AS "id",
-                json_extract_scalar(json, '$.gender') AS "gender",
-                json_extract_scalar(json, '$.birthDate') AS "dob",
-                json_extract_scalar(json, '$.deceasedBoolean') AS "deceasedBoolean",
-                json_extract_scalar(json, '$.deceasedDateTime') AS "deceasedDateTime",
-                json_extract(json, '$.name') AS "name"
+                '{id}'               AS "id",
+                '{gender}'           AS "gender",
+                '{birthDate}'        AS "dob",
+                '{deceasedBoolean}'  AS "deceasedBoolean",
+                '{deceasedDateTime}' AS "deceasedDateTime",
+                '{{name}}'           AS "name"
                 FROM Patient
-                WHERE json_extract_scalar(json, '$.id') = '${id}'`,
+                WHERE '{id}' = '${id}'`,
             onPage(data) {
                 const patient = data[0];
+                if (!patient) {
+                    throw new Error("Patient not found")
+                }
                 patient.name = getPatientDisplayName(JSON.parse(patient.name || "{}"));
                 // dispatch(merge({
                 //     data: {
