@@ -4,7 +4,6 @@ import { connect } from "react-redux"
 // import * as lib from "../../lib"
 // import Chart from "../Chart";
 import { Link, withRouter } from "react-router-dom";
-import Loader from "../Loader"
 // import { selectPatientId } from "../store/patients"
 import "./DetailView.scss"
 import { merge, load } from "../../store/selectedPatient"
@@ -111,7 +110,7 @@ class DetailView extends React.Component
         // if (this.props.loading) {
         //     return (
         //         <div className="center loading-screen active">
-        //             <h1><Loader/> Loading...</h1>
+        //             <h1><i className="loader"/> Loading...</h1>
         //         </div>
         //     )
         // }
@@ -119,7 +118,7 @@ class DetailView extends React.Component
         return (
             <>
                 <div className={"center loading-screen" + (this.props.loading ? " active" : "")}>
-                    <h1><Loader/> Loading...</h1>
+                    <h1><i className="loader"/> Loading...</h1>
                 </div>
                 <CardiacRisk
                     { ...this.props.selectedPatient }

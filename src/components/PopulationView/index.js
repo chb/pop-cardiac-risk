@@ -773,7 +773,13 @@ export class PopulationView extends React.Component
         }
 
         if (this.state.observationsLoading) {
-            return <div className="center">Loading observations...</div>
+            return (
+                <div className="center">
+                    <div>
+                        <i className="loader"/> Loading observations...
+                    </div>
+                </div>
+            );
         }
 
         if (!this.state.observations.length) {
@@ -795,7 +801,13 @@ export class PopulationView extends React.Component
         const { patientsLoading, patientsError, patientsData } = this.props;
 
         if (patientsLoading) {
-            return <div className="center">Loading patients...</div>
+            return (
+                <div className="center" style={{ color: "#FFF" }}>
+                    <div>
+                        <i className="loader"/> Loading patients...
+                    </div>
+                </div>
+            )
         }
 
         if (patientsError) {

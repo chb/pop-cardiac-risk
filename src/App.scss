@@ -7,7 +7,7 @@ body {
   }
 
   &.loaded {
-    > .glyphicon-refresh {
+    > .loader {
       display: none;
     }
     #root {
@@ -32,6 +32,33 @@ body {
 }
 
 .color-green { color: $color-green; }
+
+.spin {
+  animation: spin 2s linear infinite;
+}
+
+.loader {
+  display         : inline-block;
+  line-height     : 1em;
+  vertical-align  : text-bottom;
+  width           : 1em;
+  height          : 1em;
+  border-radius   : 100%;
+  margin          : -1px 0 1px 0;
+  border-width    : 0.075em;
+  border-style    : dashed;
+  border-top-color: transparent !important;
+  animation       : spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(359deg);
+  }
+}
 
 /* ========================================================================== */
 

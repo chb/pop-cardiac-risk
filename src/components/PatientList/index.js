@@ -5,7 +5,6 @@ import Footer from "../Footer/"
 import { search, sort } from "../../store/patients"
 import { getAge, highlight } from '../../lib';
 import { Link, withRouter } from "react-router-dom";
-import Loader from "../Loader/"
 import "./PatientList.scss"
 
 
@@ -191,7 +190,7 @@ class PatientList extends React.Component
 
         if (!data.length) {
             return loading ?
-                <div className="patient-list has-message"><Loader/> Loading...</div> :
+                <div className="patient-list has-message"><i className="loader"/> Loading...</div> :
                 <div className="patient-list has-message">No data available</div>;
         }
       
