@@ -79,7 +79,8 @@ export function loadPatients(client) {
                 '{deceasedDateTime}',
                 '{{name}}'
                 FROM Patient
-                LIMIT 1000`,
+                LIMIT 2000`,
+            maxRows: 10000,
             onPage(data) {
                 dispatch(addPatients(data.map(o => {
                     o.name = getPatientDisplayName(JSON.parse(o.name || "{}"));

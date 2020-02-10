@@ -5,9 +5,10 @@ import { loadPatients } from "./store/patients"
 import PatientList from "./components/PatientList/"
 import Detail from "./components/DetailView/"
 import ClientContext from "./ClientContext"
+import PopulationView from "./components/PopulationView/"
 import {
   BrowserRouter as Router,
-  // Switch,
+  Switch,
   Route
 } from "react-router-dom";
 import './App.scss';
@@ -66,12 +67,15 @@ class App extends React.Component {
         <Provider store={store}>
           <div className="app">
             <ClientContext.Provider value={this.client}>
-              <Route path="/:id?">
-                <PatientList />
-              </Route>
-              <Route path="/:id?">
-                <Detail />
-              </Route>
+              <Switch>
+                <Route path="/groups">
+                  <PopulationView />
+                </Route>
+                <Route path="/:id?">
+                  <PatientList />
+                  <Detail />
+                </Route>
+              </Switch>
             </ClientContext.Provider>
           </div>
         </Provider>

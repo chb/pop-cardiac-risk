@@ -1,7 +1,11 @@
 import React  from "react"
 import moment from "moment"
 
-export function query(client, { sql, rowFormat = "object", onPage = (data) => {}}) {
+export function query(client, {
+    sql,
+    rowFormat = "object",
+    maxRows = 10000,
+    onPage = (data) => {}}) {
                 
     async function handle(obj) {
         await onPage(obj.data);
@@ -24,14 +28,26 @@ export function query(client, { sql, rowFormat = "object", onPage = (data) => {}
     }
 
     function getPage(id) {
-        return client.request({ url: id, mode: "cors" }).then(handle)
+        return client.request({
+            url: id,
+            mode: "cors"
+        }).then(handle)
     }
 
-    return run({ query: sql, rowFormat });
+    return run({ query: sql, rowFormat, maxRows });
+}
+
+export function makeArray(x) {
+    return Array.isArray(x) ? x : [x];
 }
 
 export function getPatientDisplayName(name) {
-    return `${name[0].given[0]} ${name[0].family[0]}`;
+
+    try {
+        return `${makeArray(name[0].given)[0]} ${makeArray(name[0].family)[0]}`;
+    } catch {
+        return `NO NAME`
+    }
 }
 
 /**
@@ -193,12 +209,18 @@ export function getAge(patient, suffix = "") {
         return <span className="label label-warning">deceased</span>;
     }
     if (patient.deceasedDateTime) {
-        return <span className="label label-warning">deceased at {
-            moment.duration(
-                moment(patient.deceasedDateTime).diff(patient.dob, "days"),
-                "days"
-            ).humanize()
-        }</span>;
+        return (
+            <>
+                <span className="label label-warning">deceased</span> at {
+                moment.duration(
+                    moment(patient.deceasedDateTime).diff(patient.dob, "days"),
+                    "days"
+                ).humanize()}
+            </>
+        );
+    }
+    if (!patient.dob || !moment(patient.dob).isValid()) {
+        return <span className="label label-danger">Unknown age</span>;
     }
     return moment.duration(moment().diff(patient.dob, "days"), "days").humanize() + suffix;
 }
