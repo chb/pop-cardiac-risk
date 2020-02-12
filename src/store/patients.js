@@ -16,10 +16,10 @@ const initialState = {
 
     patientsLoadStartTime: Date.now(),
     patientsLoadEndTime: Date.now(),
-    search: "",
-    sort: "",
-    data  : [],
-
+    search : "",
+    sort   : "",
+    data   : [],
+    idIndex: {},
     observations_loading: false,
     observations_error: null
 };
@@ -310,21 +310,36 @@ export default function serversReducer(state = initialState, action)
         case SELECT:
             return { ...state, selectedPatientId: action.payload };
         
-        case SET_PATIENTS:
+        case SET_PATIENTS: {
+            const idIndex = {};
+            action.payload.forEach((o, i) => {
+                idIndex[o.id] = i;
+            });
             return {
                 ...state,
                 loading: false,
+                idIndex,
                 data: [
                     ...action.payload
                 ]
             };
+        }
 
-        case ADD_PATIENTS:
+        case ADD_PATIENTS: {
+            const idIndex = {};
+            action.payload.forEach((o, i) => {
+                idIndex[o.id] = i;
+            });
             return {
                 ...state,
                 patientsLoadEndTime: Date.now(),
-                data: [ ...state.data, ...action.payload ]
+                data: [ ...state.data, ...action.payload ],
+                idIndex: {
+                    ...state.idIndex,
+                    ...idIndex
+                }
             };
+        }
         
         case MERGE: {
             const data = [ ...state.data ];

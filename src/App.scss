@@ -24,7 +24,7 @@ body {
 .chart {
   // display: inline-block;
   margin: 1rem;
-  // min-height: 400px;
+  min-height: 400px;
 }
 
 .form-control {
@@ -118,6 +118,7 @@ body {
   flex-direction: column;
   // transition: all 3s ease-out;
   background: #FFF;
+  max-width: 100%;
 }
 
 
