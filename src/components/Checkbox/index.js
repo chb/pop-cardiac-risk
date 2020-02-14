@@ -27,7 +27,7 @@ export default class Checkbox extends React.Component
                 { ...rest }
                 className={ buildClassName({
                     "checkbox-wrap": true,
-                    indeterminate,
+                    indeterminate: indeterminate || checked === undefined,
                     checked: !indeterminate && checked,
                     readOnly
                 })}
