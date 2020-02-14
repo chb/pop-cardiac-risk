@@ -146,6 +146,131 @@ export function reynoldsRiskScore(p, precision = 1, fixed = 0) {
     return roundToPrecision(result, precision, fixed);
 }
 
+/**
+ * 
+ * @param {Object}   options
+ * @param {string}   options.gender male|female|m|M|f|F
+ * @param {number}   options.sbp Systolic Blood Pressure
+ * @param {boolean}  options.africanAmerican
+ * @param {number}   options.totalCholesterol Total Cholesterol
+ * @param {number}   options.hdl HDL or "Good" Cholesterol
+ * @param {number}   options.age Years (Maximum age must be 79)
+ * @param {boolean}  [options.smoker]
+ * @param {boolean}  [options.diabetes]
+ * @param {boolean}  [options.hypertensionTreatment]
+ */
+export function calcASCVD(options, precision = 1, fixed = 0)
+{    
+    // const required = ["age", "totalCholesterol", "hdl", "sbp", "africanAmerican", "gender"];
+    // for( const param of required) {
+    //     if (options[param] === undefined) {
+    //         throw new Error(`"${param}" option is required`);
+    //         // return NaN;
+    //     }
+    // }
+
+    const {
+        age,
+        totalCholesterol,
+        hdl,
+        sbp,
+        hypertensionTreatment,
+        africanAmerican,
+        gender,
+        diabetes,
+        smoker
+    } = options;
+
+    const logAge = Math.log(age);
+    const logTCH = Math.log(totalCholesterol);
+    const logHDL = Math.log(hdl);
+    const logSBP = Math.log(sbp);
+
+    let s0_10, mnxb, prediction = 0;
+
+    if (String(gender).charAt(0).toUpperCase() === "M") {
+      
+      // Black male ------------------------------------------------------------
+      if (africanAmerican) {
+        s0_10 = 0.89536;
+        mnxb  = 19.5425;
+        
+        prediction = (
+          2.469 * logAge +
+          0.302 * logTCH +
+          (-0.307 * logHDL) +
+          logSBP * (hypertensionTreatment ? 1.916 : 1.809) +
+          (smoker ? 0.549 : 0) +
+          (diabetes ? 0.645 : 0)
+        );
+      }
+      
+      // White male ------------------------------------------------------------
+      else {
+        s0_10 = 0.91436;
+        mnxb  = 61.1816;
+
+        prediction = (
+          12.344 * logAge +
+          11.853 * logTCH +
+          (-2.664 * logAge * logTCH) +
+          (-7.99  * logHDL) +
+          1.769 * logAge * logHDL +
+          logSBP * (hypertensionTreatment ? 1.797 : 1.764) +
+          (smoker ? 7.837 : 0) +
+          (smoker ? -1.795 * logAge : 0) +
+          (diabetes ? 0.658 : 0)
+        );
+      }
+    }
+    else if (String(gender).charAt(0).toUpperCase() === "F") {
+      
+      // Black female ----------------------------------------------------------
+      if (africanAmerican) {
+        s0_10 = 0.95334
+        mnxb = 86.6081
+        
+        prediction = (
+            17.1141 * logAge +
+            0.9396 * logTCH +
+            (-18.9196 * logHDL) +
+            4.4748 * logAge * logHDL +
+            logSBP * (hypertensionTreatment ? 29.2907 : 27.8197) +
+            logSBP * logAge * (hypertensionTreatment ? -6.4321 : -6.0873) +
+            (smoker ? 0.6908 : 0) +
+            (diabetes ? 0.8738 : 0)
+        );
+      }
+      
+      // White female ----------------------------------------------------------
+      else {
+        s0_10 = 0.96652
+        mnxb = -29.1817
+        
+        prediction = (
+            (-29.799 * logAge) +
+            4.884 * logAge * logAge +
+            13.54  * logTCH +
+            (-3.114 * logAge * logTCH) +
+            (-13.578 * logHDL) +
+            3.149 * logAge * logHDL +
+            logSBP * (hypertensionTreatment ? 2.019 : 1.957) +
+            (smoker ? 7.574 : 0) +
+            (smoker ? -1.665 * logAge : 0) +
+            (diabetes ? 0.661 : 0)
+        );
+      }
+    }
+    else {
+        // throw new Error(`Unknown gender "${gender}"`);
+        return NaN;
+    }
+  
+    const risk = 1 - Math.pow(s0_10, Math.exp(prediction - mnxb))
+
+    return roundToPrecision(risk * 100, precision, fixed);
+}
+
 export function avg(records) {
     return records.reduce((prev, cur) => prev + cur.value, 0) / records.length;
 }

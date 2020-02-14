@@ -51,20 +51,21 @@ export function load(client, id) {
             loading: true,
             error: null,
             data: {
-                gender      : null,
-                dob         : null,
+                gender          : null,
+                dob             : null,
                 deceasedBoolean : null,
                 deceasedDateTime: null,
-                name        : null,
-                cholesterol: null,
-                sbp        : null,
-                hsCRP      : null,
-                HDL        : null,
-                smoker     : null,
-                hha        : null
+                name            : null,
+                cholesterol     : null,
+                sbp             : null,
+                HDL             : null,
+                smoker          : null,
+                afroAmerican    : null,
+                diabetic        : null,
+                hypertensionTmt : null
             }
         }));
-        // let gotFirstChunk = false;
+        
         return query(client, {
             sql: `SELECT 
                 '{id}'               AS "id",
@@ -72,7 +73,8 @@ export function load(client, id) {
                 '{birthDate}'        AS "dob",
                 '{deceasedBoolean}'  AS "deceasedBoolean",
                 '{deceasedDateTime}' AS "deceasedDateTime",
-                '{{name}}'           AS "name"
+                '{{name}}'           AS "name",
+                '{{extension}}'      AS "extensions"
                 FROM Patient
                 WHERE '{id}' = '${id}'`,
             onPage(data) {
@@ -80,29 +82,42 @@ export function load(client, id) {
                 if (!patient) {
                     throw new Error("Patient not found")
                 }
-                patient.name = getPatientDisplayName(JSON.parse(patient.name || "{}"));
-                // dispatch(merge({
-                //     data: {
-                //         ...patient,
-                //         cholesterol: null,
-                //         sbp        : null,
-                //         hsCRP      : null,
-                //         HDL        : null,
-                //         smoker     : null,
-                //         hha        : null
-                //     }
-                // }));
 
-                // setTimeout(() => {
-                    dispatch(merge({ data: {
-                        ...patient,
-                        cholesterol: Math.random() > 0.33 ? 10 + Math.random() * 340 : null,
-                        sbp        : Math.random() > 0.33 ? 90 + Math.random() * 60 : null,
-                        hsCRP      : Math.random() > 0.33 ? 1 + Math.random() * 8 : null,
-                        HDL        : Math.random() > 0.33 ? 10 + Math.random() * 80 : null,
-                        smoker     : Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined,
-                        hha        : Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined
-                    }}));
+                const pt = {
+                    id              : patient.id,
+                    gender          : patient.gender,
+                    dob             : patient.dob,
+                    deceasedBoolean : patient.deceasedBoolean,
+                    deceasedDateTime: patient.deceasedDateTime
+                }
+
+                pt.name = getPatientDisplayName(JSON.parse(patient.name || "{}"));
+
+                if (patient.extensions) {
+                    const ext = JSON.parse(patient.extensions).find(
+                        e => e.url === "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+                    );
+
+                    // R4
+                    // if (ext && ext.extension && ext.extension[0]) {
+                    //     pt.afroAmerican = ext.extension[0].valueCoding.code === "2054-5";
+                    // }
+
+                    // R3
+                    if (ext && ext.valueCodeableConcept) {
+                        pt.afroAmerican = ext.valueCodeableConcept.coding[0].code === "2054-5";
+                    }
+                }
+
+                pt.cholesterol     = Math.random() > 0.33 ? 130 + Math.random() * 190 : null;
+                pt.sbp             = Math.random() > 0.33 ? 90  + Math.random() * 60  : null;
+                pt.hsCRP           = Math.random() > 0.33 ? 1   + Math.random() * 8   : null;
+                pt.HDL             = Math.random() > 0.33 ? 30  + Math.random() * 60  : null;
+                pt.smoker          = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
+                pt.hypertensionTmt = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
+                pt.diabetic        = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
+                
+                dispatch(merge({ data: pt }));
                 // }, 2000);
 
                 // loadObservations(client, id).then(o => {

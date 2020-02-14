@@ -35,6 +35,7 @@ class App extends React.Component {
     })
       .then(client => {
         this.client = client;
+        window.SMARTClient = client;
         this.setState({
           authorized: true,
           authError: null

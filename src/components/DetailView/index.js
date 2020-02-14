@@ -35,12 +35,14 @@ class DetailView extends React.Component
 {
     static propTypes = {
         client: PropTypes.object,
-        id: PropTypes.string,
-        load: PropTypes.func
+        id    : PropTypes.string,
+        load  : PropTypes.func
     };
 
     shouldComponentUpdate(nextProps)
     {
+        // if (nextProps.loading)
+        //     return false;
         return nextProps.id || !(!!this.props.id && !nextProps.id)
     }
 
@@ -98,22 +100,13 @@ class DetailView extends React.Component
             )
         }
 
-        // if (!patient) {
-        //     return (
-        //         <div className="center">
-        //             <h3 className="text-danger">Patient not found!</h3>
-        //             <h3 className="text-muted">Please select another patient</h3>
-        //         </div>
-        //     )
-        // }
-
-        // if (this.props.loading) {
-        //     return (
-        //         <div className="center loading-screen active">
-        //             <h1><i className="loader"/> Loading...</h1>
-        //         </div>
-        //     )
-        // }
+        if (this.props.loading) {
+            return (
+                <div className="center loading-screen active">
+                    <h2><i className="loader"/> Loading...</h2>
+                </div>
+            )
+        }
 
         return (
             <>
@@ -125,10 +118,11 @@ class DetailView extends React.Component
                     dispatch={ this.props.dispatch }
                     setHDL={ this.props.setHDL }
                     setCholesterol={ this.props.setCholesterol }
-                    setCRP={ this.props.setCRP }
                     setSBP={ this.props.setSBP }
-                    setHHA={ this.props.setHHA }
+                    setDiabetic={ this.props.setDiabetic }
                     setSmoker={ this.props.setSmoker }
+                    setAfroAmerican={ this.props.setAfroAmerican }
+                    setHypertensionTmt={ this.props.setHypertensionTmt }
                 />
             </>
         );
@@ -184,13 +178,14 @@ const DetailPage = connect(
         error          : state.selectedPatient.error
     }),
     dispatch => ({
-        setHDL        : HDL          => dispatch(merge({ data: { HDL         }})),
-        setCholesterol: cholesterol  => dispatch(merge({ data: { cholesterol }})),
-        setCRP        : hsCRP        => dispatch(merge({ data: { hsCRP       }})),
-        setSBP        : sbp          => dispatch(merge({ data: { sbp         }})),
-        setHHA        : hha          => dispatch(merge({ data: { hha         }})),
-        setSmoker     : smoker       => dispatch(merge({ data: { smoker      }})),
-        load          : (client, id) => dispatch(load(client, id))
+        setHDL            : HDL             => dispatch(merge({ data: { HDL             }})),
+        setCholesterol    : cholesterol     => dispatch(merge({ data: { cholesterol     }})),
+        setSBP            : sbp             => dispatch(merge({ data: { sbp             }})),
+        setDiabetic       : diabetic        => dispatch(merge({ data: { diabetic        }})),
+        setAfroAmerican   : afroAmerican    => dispatch(merge({ data: { afroAmerican    }})),
+        setSmoker         : smoker          => dispatch(merge({ data: { smoker          }})),
+        setHypertensionTmt: hypertensionTmt => dispatch(merge({ data: { hypertensionTmt }})),
+        load              : (client, id)    => dispatch(load(client, id))
     })
 )(Wrapper);
 

@@ -107,10 +107,22 @@
     }
     
     .checkbox-wrapper {
-        margin    : 10px auto 5px;
+        margin    : 0 auto;
         display   : inline-block;
         width     : 17em;
         text-align: left;
+        
+
+        .checkbox-wrap {
+            display: block;
+            margin : 0;
+            padding: 1ex;
+
+            &:hover {
+                border-radius: 4px;
+                background: #EEE;
+            }
+        }
     }
 
 }

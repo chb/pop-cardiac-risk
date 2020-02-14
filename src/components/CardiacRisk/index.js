@@ -1,7 +1,7 @@
 import React       from "react"
 import PropTypes   from "prop-types"
 import moment      from "moment"
-import { getAge, reynoldsRiskScore, buildClassName } from "../../lib";
+import { getAge, calcASCVD, buildClassName } from "../../lib";
 import Slider from "../Slider/"
 import Checkbox from "../Checkbox/"
 import "./CardiacRisk.scss"
@@ -127,7 +127,7 @@ export default class CardiacRisk extends React.Component
     static defaultProps = {
         lowScoreBoundary : 10,
         highScoreBoundary: 20,
-        precision: 0
+        precision: 1
     };
 
     render()
@@ -140,24 +140,26 @@ export default class CardiacRisk extends React.Component
             dob,
             deceasedBoolean,
             deceasedDateTime,
+            hypertensionTmt,
 
             // observations
             sbp,
-            hha,
             smoker,
-            hsCRP,
+            diabetic,
             cholesterol,
             HDL,
 
             // event handlers
             setHDL,
             setCholesterol,
-            setCRP,
             setSBP,
-            setHHA,
+            setAfroAmerican,
+            setDiabetic,
             setSmoker,
+            setHypertensionTmt,
 
             // other
+            afroAmerican,
             lowScoreBoundary,
             highScoreBoundary,
             precision
@@ -174,16 +176,17 @@ export default class CardiacRisk extends React.Component
             deceasedDateTime
         }, " old");
 
-        const score = reynoldsRiskScore({
-            gender,
+        const score = calcASCVD({
+            gender: gender,
             age: ageInYears,
             sbp,
-            hsCRP,
-            cholesterol,
-            HDL,
+            africanAmerican: afroAmerican,
+            totalCholesterol: cholesterol,
+            hdl: HDL,
             smoker,
-            hha
-        }, precision);
+            hypertensionTreatment: hypertensionTmt,
+            diabetes: diabetic
+        }, precision, precision);
         
         return (
             <div className="cardiac-risk">
@@ -193,14 +196,13 @@ export default class CardiacRisk extends React.Component
                         About this test
                     </header>
                     <div className="text-muted">This report evaluates your potential risk of heart disease, heart attack, and stroke.</div>
-                    <div className="text-warning">Note: these results are valid for non-diabetics only!</div>
                 </div>
                 <div className="horizontal-section">
                     <header>
                         <span className="item-number">2</span>
                         Patient info &nbsp;&nbsp;&nbsp;
                         <span className="text-info" style={{ fontWeight: 400 }}>
-                            <b>{ name }</b> - { ageAsString } { gender }
+                            <b>{ name }</b> - { ageAsString }, { gender || "Unknown gender" }
                         </span>
                     </header>
                     <div className="text-center">
@@ -215,11 +217,29 @@ export default class CardiacRisk extends React.Component
                         </div>
                         <div className="checkbox-wrapper">
                             <Checkbox
-                                checked={ hha === true }
-                                indeterminate={ hha === undefined }
-                                readOnly={ !setHHA }
-                                onChange={ setHHA }
-                                label="Family history of heart attack?"
+                                checked={ hypertensionTmt === true }
+                                indeterminate={ hypertensionTmt === undefined }
+                                readOnly={ !setHypertensionTmt }
+                                onChange={ setHypertensionTmt }
+                                label="Treatment for Hypertension?"
+                            />
+                        </div>
+                        <div className="checkbox-wrapper">
+                            <Checkbox
+                                checked={ afroAmerican === true }
+                                indeterminate={ afroAmerican === undefined }
+                                readOnly={ !setAfroAmerican }
+                                onChange={ setAfroAmerican }
+                                label="African-American?"
+                            />
+                        </div>
+                        <div className="checkbox-wrapper">
+                            <Checkbox
+                                checked={ diabetic === true }
+                                indeterminate={ diabetic === undefined }
+                                readOnly={ !setDiabetic }
+                                onChange={ setDiabetic }
+                                label="Diabetic?"
                             />
                         </div>
                     </div>
@@ -230,11 +250,11 @@ export default class CardiacRisk extends React.Component
                         Your risk over 10 years:
                         <h1 className={buildClassName({
                             score: true,
-                            "text-muted": score === null,
+                            "text-muted": isNaN(+score),
                             "text-warning": score && score > lowScoreBoundary,
                             "text-danger": score && score > highScoreBoundary
                         })}>
-                            { score === null ? "N/A" : score + "%" }
+                            { isNaN(+score) ? "N/A" : score + "%" }
                         </h1>
                     </header>
                 </div>
@@ -251,47 +271,21 @@ export default class CardiacRisk extends React.Component
                         zones={[
                             {
                                 label: <><div>Low</div><div className="text-muted">80 - 100 mm/Hg</div></>,
-                                color: "rgb(208, 202, 120)",
+                                color: "rgb(97, 175, 201)",
                                 min: 80,
                                 max: 100
                             },
                             {
                                 label: <><div>Normal</div><div className="text-muted">100 - 140 mm/Hg</div></>,
-                                color: "rgb(191, 174, 84)",
+                                color: "rgb(11, 157, 188)",
                                 min: 100,
                                 max: 140
                             },
                             {
                                 label: <><div>High</div><div className="text-muted">140+ mm/Hg</div></>,
-                                color: "rgb(191, 139, 84)",
+                                color: "rgb(0, 142, 176)",
                                 min  : 140,
                                 max  : 160 
-                            }
-                        ]}
-                    />
-                    <Slider
-                        label="CRP level test"
-                        precision={1}
-                        value={ hsCRP }
-                        onChange={ setCRP }
-                        zones={[
-                            {
-                                label: <><div>Low risk</div><div className="text-muted">0 mg/dL</div></>,
-                                color: "rgb(97, 175, 201)",
-                                min: 0,
-                                max: 1
-                            },
-                            {
-                                label: <><div>Average</div><div className="text-muted">1 - 3</div></>,
-                                color: "rgb(11, 157, 188)",
-                                min: 1,
-                                max: 3
-                            },
-                            {
-                                label: <><div>High risk of cardiovascular disease</div><div className="text-muted">3 - 10</div></>,
-                                color: "rgb(0, 142, 176)",
-                                min: 3,
-                                max: 10 
                             }
                         ]}
                     />
@@ -302,22 +296,22 @@ export default class CardiacRisk extends React.Component
                         onChange={ setCholesterol }
                         zones={[
                             {
-                                label: <><div>Desirable</div><div className="text-muted">0 mg/dL</div></>,
+                                label: <><div>Desirable</div><div className="text-muted">130 - 200 mg/dL</div></>,
                                 color: "rgb(160, 190, 120)",
-                                min: 0,
+                                min: 130,
                                 max: 200
                             },
                             {
-                                label: <><div>Borderline</div><div className="text-muted">200 - 239</div></>,
+                                label: <><div>Borderline</div><div className="text-muted">200 - 240</div></>,
                                 color: "rgb(134, 173, 82)",
                                 min: 200,
-                                max: 239
+                                max: 240
                             },
                             {
-                                label: <><div>High</div><div className="text-muted">240+</div></>,
+                                label: <><div>High</div><div className="text-muted">240 - 320</div></>,
                                 color: "rgb(94, 137, 43)",
                                 min: 240,
-                                max: 360 
+                                max: 320 
                             }
                         ]}
                     />
@@ -330,19 +324,19 @@ export default class CardiacRisk extends React.Component
                             onChange={ setHDL }
                             zones={[
                                 {
-                                    label: <><div>High risk</div><div className="text-muted">0 mg/dL</div></>,
+                                    label: <><div>High risk</div><div className="text-muted">20 mg/dL</div></>,
                                     color: "rgb(160, 190, 120)",
-                                    min: 0,
+                                    min: 20,
                                     max: 40
                                 },
                                 {
-                                    label: <><div>Intermediate</div><div className="text-muted">40 - 59</div></>,
+                                    label: <><div>Intermediate</div><div className="text-muted">40 - 60</div></>,
                                     color: "rgb(134, 173, 82)",
                                     min: 40,
-                                    max: 59
+                                    max: 60
                                 },
                                 {
-                                    label: <><div>Protective</div><div className="text-muted">60+</div></>,
+                                    label: <><div>Protective</div><div className="text-muted">60 - 100</div></>,
                                     color: "rgb(94, 137, 43)",
                                     min: 60,
                                     max: 100 
@@ -416,9 +410,7 @@ export default class CardiacRisk extends React.Component
                     </header>
                     <ul className="small" style={{ margin: "0 0 1em 0", padding: "0 0 0 0.7em" }}>
                         <li><a rel="noopener noreferrer" target="_blank" href="https://informationisbeautiful.net/2010/visualizing-bloodtests/">Original Design: David McCandless & Stefanie Posavec for Wired Magazine</a></li>
-                        <li><a rel="noopener noreferrer" target="_blank" href="http://reynoldsriskscore.org/">Reynolds Risk Score Calculator</a></li>
-                        <li><a rel="noopener noreferrer" target="_blank" href="https://jamanetwork.com/journals/jama/fullarticle/205528">Development and validation of improved algorithms for the assessment of global cardiovascular risk in women:The Reynolds Risk Score. Ridker el al. JAMA 2007;297:611-619</a></li>
-                        <li><a rel="noopener noreferrer" target="_blank" href="https://www.ahajournals.org/doi/full/10.1161/circulationaha.108.814251">C-reactive protein and parental history improve global cardiovascular risk prediction: The Reynolds Risk Score for Men. Ridker et al. Circulation. 2008;118:2243-2251</a></li>
+                        <li><a rel="noopener noreferrer" target="_blank" href="https://professional.heart.org/professional/GuidelinesStatements/PreventionGuidelines/UCM_457698_ASCVD-Risk-Calculator.jsp">Based on the 2013 ACC/AHA Guideline on the Assessment of Cardiovascular Risk</a></li>
                     </ul>
                 </div>
             </div>
