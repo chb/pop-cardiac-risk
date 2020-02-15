@@ -65,6 +65,8 @@ export function load(client, id) {
                 hypertensionTmt : null
             }
         }));
+
+        let patient;
         
         return query(client, {
             sql: `SELECT 
@@ -78,65 +80,54 @@ export function load(client, id) {
                 FROM Patient
                 WHERE '{id}' = '${id}'`,
             onPage(data) {
-                const patient = data[0];
-                if (!patient) {
-                    throw new Error("Patient not found")
+                if (data[0]) {
+                    patient = data[0];
                 }
-
-                const pt = {
-                    id              : patient.id,
-                    gender          : patient.gender,
-                    dob             : patient.dob,
-                    deceasedBoolean : patient.deceasedBoolean,
-                    deceasedDateTime: patient.deceasedDateTime
-                }
-
-                pt.name = getPatientDisplayName(JSON.parse(patient.name || "{}"));
-
-                if (patient.extensions) {
-                    const ext = JSON.parse(patient.extensions).find(
-                        e => e.url === "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-                    );
-
-                    // R4
-                    // if (ext && ext.extension && ext.extension[0]) {
-                    //     pt.afroAmerican = ext.extension[0].valueCoding.code === "2054-5";
-                    // }
-
-                    // R3
-                    if (ext && ext.valueCodeableConcept) {
-                        pt.afroAmerican = ext.valueCodeableConcept.coding[0].code === "2054-5";
-                    }
-                }
-
-                pt.cholesterol     = Math.random() > 0.33 ? 130 + Math.random() * 190 : null;
-                pt.sbp             = Math.random() > 0.33 ? 90  + Math.random() * 60  : null;
-                pt.hsCRP           = Math.random() > 0.33 ? 1   + Math.random() * 8   : null;
-                pt.HDL             = Math.random() > 0.33 ? 30  + Math.random() * 60  : null;
-                pt.smoker          = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
-                pt.hypertensionTmt = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
-                pt.diabetic        = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
-                
-                dispatch(merge({ data: pt }));
-                // }, 2000);
-
-                // loadObservations(client, id).then(o => {
-
-                //     dispatch(merge({ data: {
-                //         ...patient,
-                //         cholesterol: o.cholesterol[0],
-                //         sbp        : o.sbp[0],
-                //         hsCRP      : o.hsCRP[0],
-                //         HDL        : o.HDL[0],
-                //         smoker     : o.smoker[0]
-                //     }}));
-                // })
             }
         })  
         .then(() => {
-            // dispatch(loadObservations(client));
+            
+            if (!patient) {
+                throw new Error("Patient not found")
+            }
+
+            const pt = {
+                id              : patient.id,
+                gender          : patient.gender,
+                dob             : patient.dob,
+                deceasedBoolean : patient.deceasedBoolean,
+                deceasedDateTime: patient.deceasedDateTime
+            }
+
+            pt.name = getPatientDisplayName(JSON.parse(patient.name || "{}"));
+
+            if (patient.extensions) {
+                const ext = JSON.parse(patient.extensions).find(
+                    e => e.url === "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+                );
+
+                // R4
+                // if (ext && ext.extension && ext.extension[0]) {
+                //     pt.afroAmerican = ext.extension[0].valueCoding.code === "2054-5";
+                // }
+
+                // R3
+                if (ext && ext.valueCodeableConcept) {
+                    pt.afroAmerican = ext.valueCodeableConcept.coding[0].code === "2054-5";
+                }
+            }
+
+            pt.cholesterol     = Math.random() > 0.33 ? 130 + Math.random() * 190 : null;
+            pt.sbp             = Math.random() > 0.33 ? 90  + Math.random() * 60  : null;
+            pt.hsCRP           = Math.random() > 0.33 ? 1   + Math.random() * 8   : null;
+            pt.HDL             = Math.random() > 0.33 ? 30  + Math.random() * 60  : null;
+            pt.smoker          = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
+            pt.hypertensionTmt = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
+            pt.diabetic        = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
+            
             dispatch(merge({
-                error: null,
+                data   : pt,
+                error  : null,
                 loading: false
             }));
             // console.timeEnd("Loading data");
