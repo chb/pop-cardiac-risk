@@ -75,8 +75,7 @@ export function load(client, id) {
                 '{birthDate}'        AS "dob",
                 '{deceasedBoolean}'  AS "deceasedBoolean",
                 '{deceasedDateTime}' AS "deceasedDateTime",
-                '{{name}}'           AS "name",
-                '{{extension}}'      AS "extensions"
+                '{{name}}'           AS "name"
                 FROM Patient
                 WHERE '{id}' = '${id}'`,
             onPage(data) {
