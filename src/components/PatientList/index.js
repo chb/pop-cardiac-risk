@@ -139,6 +139,14 @@ class PatientList extends React.Component
         }
     }
 
+    componentDidMount()
+    {
+        if (this.wrapper.current && !this.state.scrollHeight) {
+            this.setState(this.computeScrollState());
+        }
+    }
+
+
     // shouldComponentUpdate(nextProps, nextState)
     // {
     //     if (nextProps.data.length !== this.props.data.length) {
