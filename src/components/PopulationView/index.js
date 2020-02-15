@@ -1,14 +1,45 @@
 import React            from "react"
 import PropTypes        from "prop-types"
 import { connect }      from "react-redux"
-import { withRouter }   from "react-router-dom"
+import { withRouter, Link }   from "react-router-dom"
 import moment           from "moment"
 import ClientContext    from "../../ClientContext"
 import HDL              from "./HDL"
 import TotalCholesterol from "./TotalCholesterol"
-import HSCRP            from "./hsCRP"
 import SBP              from "./SBP"
 import "./PopulationView.scss"
+import { getAge } from "../../lib"
+
+export class PatientInfo extends React.Component
+{
+    render()
+    {
+        const {
+            name,
+            dob,
+            deceasedBoolean,
+            deceasedDateTime,
+            gender
+        } = this.props.patient;
+
+        const { separator = <span style={{ opacity: 0.3 }}>|</span> } = this.props;
+
+        const ageAsString = getAge({
+            dob,
+            deceasedBoolean,
+            deceasedDateTime
+        }, " old");
+
+        return (
+            <div className="patient-info">
+                <i className="glyphicon glyphicon-user" />
+                <b> {name}</b>{ separator }
+                <span>{ ageAsString }</span>{ separator }
+                <span>{ gender || "Unknown gender" }</span>
+            </div>
+        );
+    }
+}
 
 
 export class PopulationViewHeader extends React.Component
@@ -48,6 +79,51 @@ export class PopulationViewHeader extends React.Component
 
     render()
     {
+        const { patientId, patients } = this.props;
+
+        if (patientId) {
+
+            let pt = patients.find(p => p.id === patientId);
+
+            if (!pt) {
+                return "Patient not found";
+            }
+
+            return (
+                <div className="navbar navbar-default">
+                    <div className="container-fluid">
+                        <div className="navbar-header">
+                            <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                                <span className="sr-only">Toggle navigation</span>
+                                <span className="icon-bar"></span>
+                                <span className="icon-bar"></span>
+                                <span className="icon-bar"></span>
+                            </button>
+                            <div className="navbar-brand">
+                                <PatientInfo patient={pt} />
+                            </div>
+                        </div>
+                        <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <ul className="nav navbar-nav navbar-right">
+                                <li>
+                                    <Link to={ "/" + patientId }>
+                                        <i className="glyphicon glyphicon-heart"/>
+                                        <span className="hidden-xs"> Cardiac Risk</span>
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/groups">
+                                        <i className="glyphicon glyphicon-list"/>
+                                        <span className="hidden-xs"> All Patients</span>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         const dateFormat = "YYYY-MM-DD";
         const { startDate, endDate, groupBy } = this.state;
 
@@ -148,6 +224,8 @@ export class PopulationView extends React.Component
                 <div>
                     {/* <h1>Population Dashboard</h1> */}
                     <PopulationViewHeader
+                        patientId={ this.props.match.params.id }
+                        patients={ patientsData }
                         startDate={ this.state.startDate }
                         endDate={ this.state.endDate }
                         groupBy={ this.state.groupBy }
@@ -157,21 +235,19 @@ export class PopulationView extends React.Component
                         startDate={ this.state.startDate }
                         endDate={ this.state.endDate }
                         groupBy={ this.state.groupBy }
+                        patientId={ this.props.match.params.id }
                     />
                     <HDL
                         startDate={ this.state.startDate }
                         endDate={ this.state.endDate }
                         groupBy={ this.state.groupBy }
+                        patientId={ this.props.match.params.id }
                     />
                     <TotalCholesterol
                         startDate={ this.state.startDate }
                         endDate={ this.state.endDate }
                         groupBy={ this.state.groupBy }
-                    />
-                    <HSCRP
-                        startDate={ this.state.startDate }
-                        endDate={ this.state.endDate }
-                        groupBy={ this.state.groupBy }
+                        patientId={ this.props.match.params.id }
                     />
                 </div>
             </div>

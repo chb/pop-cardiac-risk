@@ -10,6 +10,7 @@ export function getObservationSeries(data, { groupBy, patients, idIndex })
         case "gender":
             series.push({
                 name: 'Female',
+                type: 'scatter',
                 color: 'rgba(127, 0, 64, .3)',
                 showInLegend: true,
                 marker: {
@@ -18,6 +19,7 @@ export function getObservationSeries(data, { groupBy, patients, idIndex })
                 data: []
             }, {
                 name: 'Male',
+                type: 'scatter',
                 color: 'rgba(0, 0, 127, .3)',
                 showInLegend: true,
                 marker: {
@@ -28,18 +30,19 @@ export function getObservationSeries(data, { groupBy, patients, idIndex })
         break;
         case "age":
             series.push(
-                { name: '0 - 10' , showInLegend: true, data: [], marker: { symbol: "circle" } },
-                { name: '10 - 20', showInLegend: true, data: [], marker: { symbol: "circle" } },
-                { name: '20 - 40', showInLegend: true, data: [], marker: { symbol: "circle" } },
-                { name: '40 - 60', showInLegend: true, data: [], marker: { symbol: "circle" } },
-                { name: '60 - 80', showInLegend: true, data: [], marker: { symbol: "circle" } },
-                { name: '80+'    , showInLegend: true, data: [], marker: { symbol: "circle" } }
+                { name: '0 - 10' , type: 'scatter', showInLegend: true, data: [], color: "rgba(0  , 0  , 127, 0.5)", marker: { symbol: "circle" } },
+                { name: '10 - 20', type: 'scatter', showInLegend: true, data: [], color: "rgba(0  , 127, 0  , 0.5)", marker: { symbol: "circle" } },
+                { name: '20 - 40', type: 'scatter', showInLegend: true, data: [], color: "rgba(127, 0  , 0  , 0.5)", marker: { symbol: "circle" } },
+                { name: '40 - 60', type: 'scatter', showInLegend: true, data: [], color: "rgba(0  , 127, 127, 0.5)", marker: { symbol: "circle" } },
+                { name: '60 - 80', type: 'scatter', showInLegend: true, data: [], color: "rgba(127, 127, 0  , 0.5)", marker: { symbol: "circle" } },
+                { name: '80+'    , type: 'scatter', showInLegend: true, data: [], color: "rgba(127, 0  , 127, 0.5)", marker: { symbol: "circle" } }
             );
         break;
         default:
             series.push({
                 name: "",
-                color: 'rgba(0, 0, 0, .5)',
+                type: 'scatter',
+                color: 'rgba(0, 0, 0, .3)',
                 data: [],
                 showInLegend: false,
                 marker: { symbol: "circle" }
@@ -52,6 +55,8 @@ export function getObservationSeries(data, { groupBy, patients, idIndex })
         color: 'rgb(0, 220, 0)',
         data: [],
         type: "spline",
+        lineWidth: 2,
+        marker: false,
         shadow: {
             color: "#000",
             offsetX: 0,

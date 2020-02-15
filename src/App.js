@@ -69,7 +69,7 @@ class App extends React.Component {
           <div className="app">
             <ClientContext.Provider value={this.client}>
               <Switch>
-                <Route path="/groups">
+                <Route path="/groups/:id?">
                   <PopulationView />
                 </Route>
                 <Route path="/:id?">

@@ -29,4 +29,15 @@
         display: block;
         margin: 1rem 0 0.25ex;
     }
+
+    .patient-info {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        > * {
+            white-space: nowrap;
+            margin: 0 0.5ch;
+        }
+    }
 }
