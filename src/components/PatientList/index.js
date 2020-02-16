@@ -69,8 +69,9 @@ class PatientList extends React.Component
         // When called for the first time, measure the height of the first
         // (and only) child element and use that to set `rowHeight`
         if (this.state.windowLength === 1) {
-            rowHeight = nextState.rowHeight = this.wrapper.current.querySelector(".patient").offsetHeight;
-            rowHeight = 70;
+            let firstResult = this.wrapper.current.querySelector(".patient");
+            rowHeight = nextState.rowHeight = firstResult ? firstResult.offsetHeight : 70;
+            // rowHeight = 70;
         }
         
 
@@ -132,12 +133,17 @@ class PatientList extends React.Component
         setTimeout(() => this.setState(this.computeScrollState()), 100);
     }
 
-    componentDidUpdate(newProps)
+    componentDidUpdate(prevProps)
     {
-        if (newProps.search !== this.props.search) {
+        if (prevProps.search !== this.props.search) {
             this.wrapper.current.scrollTop = 0;
+            this.setState({
+                skipTop     : 0,
+                skipBottom  : 0,
+                scrollHeight: 0
+            });
         }
-        if (this.wrapper.current && !this.state.scrollHeight) {
+        else if (this.wrapper.current && !this.state.scrollHeight) {
             this.setState(this.computeScrollState());
         }
     }
@@ -267,11 +273,13 @@ class PatientList extends React.Component
 
     renderPatients()
     {    
-        const { search, sort } = this.props;
+        const { sort } = this.props;
         const { startIndex, skipTop, windowLength, skipBottom } = this.state;
         const selectedPatientId = this.props.match.params.id || "";
         const start = startIndex + skipTop;
         const end   = start + windowLength - skipBottom;
+
+        let search = String(this.props.search || "").trim();
 
         let found = 0;
 
@@ -301,7 +309,7 @@ class PatientList extends React.Component
 
         // Now sort the records if needed
         if (sort) {
-            data = data.sort((a, b) => {
+            data = [...data.sort((a, b) => {
                 switch(sort) {
                     case "name:desc":
                         return a.name.localeCompare(b.name);
@@ -318,7 +326,7 @@ class PatientList extends React.Component
                     default:
                         return 0;
                 }
-            });
+            })];
         }
 
         let win = [];
