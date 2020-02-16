@@ -2,8 +2,8 @@ import React               from 'react'
 import PropTypes           from "prop-types"
 import { connect }         from "react-redux"
 import Footer from "../Footer/"
-import { search, sort } from "../../store/patients"
-import { getAge, highlight } from '../../lib';
+import { search as doSearch, sort } from "../../store/patients"
+import { getAge, highlight, buildClassName } from '../../lib';
 import { Link, withRouter } from "react-router-dom";
 import "./PatientList.scss"
 
@@ -216,12 +216,25 @@ class PatientList extends React.Component
     }
 
     renderHeader() {
+        const { search } = this.props;
         return (
             <header className="patient-header">
-                <div style={{ flex: "3 1 0" }}>
-                    <input type="search" className="form-control" placeholder="Search patients" onInput={
-                        e => this.props.dispatch(search(e.target.value.trim()))
-                    } />
+                <div style={{ flex: "3 1 0" }} className={ buildClassName({
+                    "search-input-wrap": true,
+                    "has-search": search
+                })}>
+                    <input
+                        type="search"
+                        className="form-control"
+                        placeholder="Search patients"
+                        value={search}
+                        onInput={
+                            e => this.props.dispatch(doSearch(e.target.value.trim()))
+                        }
+                    />
+                    <span className="clear-search" title="Clear Search" onClick={
+                        () => this.props.dispatch(doSearch(""))
+                    }/>
                 </div>
                 <div style={{ flex: "0 0 8em" }}>
                     <label className="text-muted" style={{ margin: 0 }}>&nbsp;Sort:&nbsp;</label>
