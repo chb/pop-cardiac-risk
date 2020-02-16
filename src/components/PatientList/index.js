@@ -238,7 +238,7 @@ class PatientList extends React.Component
                         placeholder="Search patients"
                         value={search}
                         onChange={
-                            e => this.props.dispatch(doSearch(e.target.value.trim()))
+                            e => this.props.dispatch(doSearch(e.target.value))
                         }
                     />
                     <span className="clear-search" title="Clear Search" onClick={
