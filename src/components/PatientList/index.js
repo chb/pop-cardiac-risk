@@ -132,8 +132,11 @@ class PatientList extends React.Component
         setTimeout(() => this.setState(this.computeScrollState()), 100);
     }
 
-    componentDidUpdate()
+    componentDidUpdate(newProps)
     {
+        if (newProps.search !== this.props.search) {
+            this.wrapper.current.scrollTop = 0;
+        }
         if (this.wrapper.current && !this.state.scrollHeight) {
             this.setState(this.computeScrollState());
         }
@@ -228,7 +231,7 @@ class PatientList extends React.Component
                         className="form-control"
                         placeholder="Search patients"
                         value={search}
-                        onInput={
+                        onChange={
                             e => this.props.dispatch(doSearch(e.target.value.trim()))
                         }
                     />

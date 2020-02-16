@@ -158,4 +158,18 @@ describe("ascvd", () => {
       sbp: 200
     })).toEqual(85.5);
   });
+
+  it('custom test 1', () => {
+    expect(calcASCVD({
+      africanAmerican : false,
+      gender          : "M",
+      age             : 79,
+      diabetes        : false,
+      smoker          : true,
+      hypertensionTreatment: false,
+      hdl             : 88.3,
+      totalCholesterol: 254.9,
+      sbp             : 107
+    })).toEqual(21.7);
+  });
 });

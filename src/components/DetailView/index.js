@@ -56,7 +56,7 @@ class DetailView extends React.Component
 
     componentDidUpdate()
     {
-        const { selectedPatient, id, loading, error, load, client } = this.props;
+        const { selectedPatient, id, loading/*, error*/, load, client } = this.props;
         if (id && !loading && /*!error &&*/ (!selectedPatient.id || selectedPatient.id !== id)) {
             load(client, id);
         }

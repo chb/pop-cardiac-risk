@@ -166,15 +166,26 @@ export default class CardiacRisk extends React.Component
 
         } = this.props;
 
-        const ageInYears = deceasedDateTime ?
-            moment(deceasedDateTime).diff(dob, "years") :
-            moment().diff(dob, "years");
+        const eol = deceasedDateTime ? moment(deceasedDateTime) : moment();
+        const ageInYears = moment.duration(eol.diff(dob, "days"), "days").asYears();
 
         const ageAsString = getAge({
             dob,
             deceasedBoolean,
             deceasedDateTime
         }, " old");
+
+        // console.log({
+        //     gender: gender,
+        //     age: ageInYears,
+        //     sbp,
+        //     africanAmerican: afroAmerican,
+        //     totalCholesterol: cholesterol,
+        //     hdl: HDL,
+        //     smoker,
+        //     hypertensionTreatment: hypertensionTmt,
+        //     diabetes: diabetic
+        // })
 
         const score = calcASCVD({
             gender: gender,
