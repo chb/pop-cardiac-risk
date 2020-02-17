@@ -2,10 +2,12 @@ import React               from 'react'
 import PropTypes           from "prop-types"
 import { connect }         from "react-redux"
 import Footer from "../Footer/"
-import { search as doSearch, sort } from "../../store/patients"
+import Checkbox from "../Checkbox/"
+import { search as doSearch, sort as doSort } from "../../store/patients"
 import { getAge, highlight, buildClassName } from '../../lib';
 import { Link, withRouter } from "react-router-dom";
 import "./PatientList.scss"
+import moment from 'moment'
 
 
 class PatientList extends React.Component
@@ -39,7 +41,10 @@ class PatientList extends React.Component
             skipBottom  : 0,
             scrollHeight: 0,
             windowLength: 1,
-            rowHeight   : 10
+            rowHeight   : 10,
+            hideIncompatible: true,
+            groupBy: "none",
+            showFilters: false
         };
 
         this.wrapper = React.createRef();
@@ -225,10 +230,15 @@ class PatientList extends React.Component
     }
 
     renderHeader() {
-        const { search } = this.props;
+        const { search, sort } = this.props;
+        const [ sortBy, sortDir = "asc" ] = sort.split(":");
+        const { groupBy, showFilters } = this.state;
         return (
-            <header className="patient-header">
-                <div style={{ flex: "3 1 0" }} className={ buildClassName({
+            <header className={ buildClassName({
+                "patient-header": 1,
+                "show-filters": showFilters
+            }) }>
+                <div style={{ flex: "3 1 0", height: "2.3em" }} className={ buildClassName({
                     "search-input-wrap": true,
                     "has-search": search
                 })}>
@@ -245,10 +255,10 @@ class PatientList extends React.Component
                         () => this.props.dispatch(doSearch(""))
                     }/>
                 </div>
-                <div style={{ flex: "0 0 8em" }}>
+                {/* <div style={{ flex: "0 0 8em" }}>
                     <label className="text-muted" style={{ margin: 0 }}>&nbsp;Sort:&nbsp;</label>
                     <select className="form-control" onChange={
-                        e => this.props.dispatch(sort(e.target.value))
+                        e => this.props.dispatch(doSort(e.target.value))
                     }>
                         <option value="">None</option>
                         <option value="name:asc">▲ Name</option>
@@ -258,6 +268,92 @@ class PatientList extends React.Component
                         <option value="gender:desc">▲Gender</option>
                         <option value="gender:asc">▼ Gender</option>
                     </select>
+                </div> */}
+                <div style={{ flex: "0 0 1em" }} onClick={() => this.setState({ showFilters: !showFilters })}>
+                    <div className={ buildClassName({
+                        btn: 1,
+                        "btn-default active": showFilters
+                    }) }>
+                        <i className="glyphicon glyphicon-cog"/>
+                    </div>
+                </div>
+                <div className="filters">
+                    <div>
+                        <Checkbox
+                            checked={this.state.hideIncompatible}
+                            onChange={on => this.setState({ hideIncompatible: on })}
+                            label={
+                                <>
+                                    <b>Hide incompatible patients</b>
+                                    <div className="small text-muted">
+                                        Only show patients with known age and gender, who are
+                                        not deceased and are between 20 and 79 years old.
+                                    </div>
+                                </>
+                            }
+                        />
+                    </div>
+                    <div>
+                        <label>Group By</label>
+                        <div className={ buildClassName({ "btn-group btn-group-justified": 1, "passive": groupBy === "none" }) }>
+                            <label
+                                className={ buildClassName({ "btn btn-default": 1, "active": groupBy === "none" }) }
+                                onClick={ () => this.setState({ groupBy: "none" }) }
+                            >
+                                None
+                            </label>
+                            <label
+                                className={ buildClassName({ "btn btn-default": 1, "active": groupBy === "gender"}) }
+                                onClick={ () => this.setState({ groupBy: "gender" }) }>
+                                Gender
+                            </label>
+                            <label
+                                className={ buildClassName({ "btn btn-default": 1, "active": groupBy === "age" }) }
+                                onClick={ () => this.setState({ groupBy: "age" }) }>
+                                Age
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Sort By</label>
+                        <div className={ buildClassName({ "btn-group btn-group-justified": 1, "passive": !sortBy }) }>
+                            <label
+                                className={ buildClassName({ "btn btn-default": 1, "active": !sortBy }) }
+                                onClick={ () => this.props.dispatch(doSort(`:${sortDir}`)) }>
+                                None
+                            </label>
+                            <label
+                                className={ buildClassName({ "btn btn-default": 1, "active": sortBy === "name" }) }
+                                onClick={ () => this.props.dispatch(doSort(`name:${sortDir}`)) }>
+                                Name
+                            </label>
+                            <label
+                                className={ buildClassName({ "btn btn-default": 1, "active": sortBy === "gender" }) }
+                                onClick={ () => this.props.dispatch(doSort(`gender:${sortDir}`)) }>
+                                Gender
+                            </label>
+                            <label
+                                className={ buildClassName({ "btn btn-default": 1, "active" : sortBy === "age" }) }
+                                onClick={ () => this.props.dispatch(doSort(`age:${sortDir}`)) }>
+                                Age
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Sort Direction</label>
+                        <div className={ buildClassName({ "btn-group btn-group-justified": 1, "passive": !sortBy }) }>
+                            <label
+                                className={ buildClassName({ "btn btn-default": 1, "active" : sortDir === "asc"}) }
+                                onClick={ () => this.props.dispatch(doSort(`${sortBy}:asc`)) }>
+                                <i className="glyphicon glyphicon-sort-by-attributes"/> Ascending
+                            </label>
+                            <label
+                                className={ buildClassName({ "btn btn-default": 1, "active" : sortDir === "desc" }) }
+                                onClick={ () => this.props.dispatch(doSort(`${sortBy}:desc`)) }>
+                                <i className="glyphicon glyphicon-sort-by-attributes-alt"/> Descending
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </header>
         )
@@ -274,10 +370,11 @@ class PatientList extends React.Component
     renderPatients()
     {    
         const { sort } = this.props;
-        const { startIndex, skipTop, windowLength, skipBottom } = this.state;
+        const { startIndex, skipTop, windowLength, skipBottom, hideIncompatible } = this.state;
         const selectedPatientId = this.props.match.params.id || "";
         const start = startIndex + skipTop;
         const end   = start + windowLength - skipBottom;
+        const now = moment();
 
         let search = String(this.props.search || "").trim();
 
@@ -327,6 +424,40 @@ class PatientList extends React.Component
                         return 0;
                 }
             })];
+        }
+
+        if (hideIncompatible) {
+            data = data.filter(rec => {
+
+                // Hide patients with no gender
+                if (!rec.gender) {
+                    return false;
+                }
+
+                // Hide deceased patients
+                if (rec.deceasedDateTime || rec.deceasedBoolean) {
+                    return false;
+                }
+
+                // Hide patients with no birthDate
+                if (!rec.dob) {
+                    return false;
+                }
+
+                const ageInYears = moment.duration(now.diff(rec.dob, "days"), "days").asYears();
+
+                // Hide patients younger than 20 years
+                if (ageInYears < 20) {
+                    return false;
+                }
+
+                // Hide patients older than 79 years
+                if (ageInYears > 79) {
+                    return false;
+                }
+                
+                return true;
+            });
         }
 
         let win = [];
