@@ -255,21 +255,7 @@ class PatientList extends React.Component
                         () => this.props.dispatch(doSearch(""))
                     }/>
                 </div>
-                {/* <div style={{ flex: "0 0 8em" }}>
-                    <label className="text-muted" style={{ margin: 0 }}>&nbsp;Sort:&nbsp;</label>
-                    <select className="form-control" onChange={
-                        e => this.props.dispatch(doSort(e.target.value))
-                    }>
-                        <option value="">None</option>
-                        <option value="name:asc">▲ Name</option>
-                        <option value="name:desc">▼ Name</option>
-                        <option value="age:asc">▲ Age</option>
-                        <option value="age:desc">▼ Age</option>
-                        <option value="gender:desc">▲Gender</option>
-                        <option value="gender:asc">▼ Gender</option>
-                    </select>
-                </div> */}
-                <div style={{ flex: "0 0 1em" }} onClick={() => this.setState({ showFilters: !showFilters })}>
+                <div style={{ flex: "0 0 1em" }} onMouseDown={() => this.setState({ showFilters: !showFilters })}>
                     <div className={ buildClassName({
                         btn: 1,
                         "btn-default active": showFilters
@@ -298,18 +284,18 @@ class PatientList extends React.Component
                         <div className={ buildClassName({ "btn-group btn-group-justified": 1, "passive": groupBy === "none" }) }>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active": groupBy === "none" }) }
-                                onClick={ () => this.setState({ groupBy: "none" }) }
+                                onMouseDown={ () => this.setState({ groupBy: "none" }) }
                             >
                                 None
                             </label>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active": groupBy === "gender"}) }
-                                onClick={ () => this.setState({ groupBy: "gender" }) }>
+                                onMouseDown={ () => this.setState({ groupBy: "gender" }) }>
                                 Gender
                             </label>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active": groupBy === "age" }) }
-                                onClick={ () => this.setState({ groupBy: "age" }) }>
+                                onMouseDown={ () => this.setState({ groupBy: "age" }) }>
                                 Age
                             </label>
                         </div>
@@ -319,22 +305,22 @@ class PatientList extends React.Component
                         <div className={ buildClassName({ "btn-group btn-group-justified": 1, "passive": !sortBy }) }>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active": !sortBy }) }
-                                onClick={ () => this.props.dispatch(doSort(`:${sortDir}`)) }>
+                                onMouseDown={ () => this.props.dispatch(doSort(`:${sortDir}`)) }>
                                 None
                             </label>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active": sortBy === "name" }) }
-                                onClick={ () => this.props.dispatch(doSort(`name:${sortDir}`)) }>
+                                onMouseDown={ () => this.props.dispatch(doSort(`name:${sortDir}`)) }>
                                 Name
                             </label>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active": sortBy === "gender" }) }
-                                onClick={ () => this.props.dispatch(doSort(`gender:${sortDir}`)) }>
+                                onMouseDown={ () => this.props.dispatch(doSort(`gender:${sortDir}`)) }>
                                 Gender
                             </label>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active" : sortBy === "age" }) }
-                                onClick={ () => this.props.dispatch(doSort(`age:${sortDir}`)) }>
+                                onMouseDown={ () => this.props.dispatch(doSort(`age:${sortDir}`)) }>
                                 Age
                             </label>
                         </div>
@@ -344,12 +330,12 @@ class PatientList extends React.Component
                         <div className={ buildClassName({ "btn-group btn-group-justified": 1, "passive": !sortBy }) }>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active" : sortDir === "asc"}) }
-                                onClick={ () => this.props.dispatch(doSort(`${sortBy}:asc`)) }>
+                                onMouseDown={ () => this.props.dispatch(doSort(`${sortBy}:asc`)) }>
                                 <i className="glyphicon glyphicon-sort-by-attributes"/> Ascending
                             </label>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active" : sortDir === "desc" }) }
-                                onClick={ () => this.props.dispatch(doSort(`${sortBy}:desc`)) }>
+                                onMouseDown={ () => this.props.dispatch(doSort(`${sortBy}:desc`)) }>
                                 <i className="glyphicon glyphicon-sort-by-attributes-alt"/> Descending
                             </label>
                         </div>

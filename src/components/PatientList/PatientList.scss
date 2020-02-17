@@ -156,9 +156,9 @@
     }
 
     .btn .glyphicon {
-        line-height: 1;
+        line-height: 1.2em;
         margin: 0 1ch;
-        vertical-align: middle;
+        vertical-align: top;
         font-size: 110%;
     }
 
@@ -219,16 +219,6 @@
         }
     }
 
-    select, select:focus {
-        background: transparent;
-        border-color: rgba(0, 0, 0, 0);
-        box-shadow: none;
-        appearance: none;
-        padding: 0;
-        vertical-align: middle;
-        line-height: inherit;
-    }
-
     .filters {
         flex: 1 1 100%;
         white-space: normal;
@@ -254,6 +244,7 @@
         > div {
             border-top: 1px solid #DDD;
             padding: 1.5ex 1ex;
+            width: 100%;
         }
     }
 
@@ -265,30 +256,40 @@
 
     .btn.active {
         background: $color-orange;
-        border-color: darken($color: $color-orange, $amount: 25%);
+        border-color: rgba(0, 0, 0, 0.25);
         color: #FFF;
-        text-shadow: 0 0px 1px rgba(0, 0, 0, 0.5);
+        text-shadow: 0 0px 1px rgba(0, 0, 0, 0.75);
         font-weight: bold;
+        box-shadow: none;
     }
 
     .btn-group {
-        // border-collapse: collapse;
+        display: flex;
+        flex: 1;
+        width: 100%;
+        border-radius: 5px;
         .btn {
-            border: 0;
-            box-shadow: 0px 0px 0 0.5px rgba(0, 0, 0, 0.2) inset;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            margin: -1;
+            border: 1px solid rgba(0, 0, 0, 0.2);
         }
 
         .btn.active {
             background: $color-orange;
-            border-color: darken($color: $color-orange, $amount: 50%);
             color: #FFF;
-            text-shadow: 0 0px 1px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 0px 1px rgba(0, 0, 0, 0.75);
             font-weight: bold;
+            border-color: rgba(0, 0, 0, 0.25);
+            z-index: 2;
         }
 
         &.passive .btn.active {
-            background: #DDD;
-            border-color: #666;
+            background: #EEE;
             color: #666;
             text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
         }
