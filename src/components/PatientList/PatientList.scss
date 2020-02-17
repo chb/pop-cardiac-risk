@@ -133,6 +133,20 @@
         /* flex-direction: column; */
         height: 100%;
     }
+
+    .group-header {
+        font-weight: bold;
+        border-bottom: 2px solid $color-orange;
+        padding: 1ex 2em 1ex 1em;
+        color: #666;
+        text-transform: capitalize;
+        line-height: 1;
+        position: sticky;
+        top: 0;
+        bottom: 0;
+        background: rgba(249, 249, 249, 0.9);
+        z-index: 3;
+    }
 }
 
 .patient-header {

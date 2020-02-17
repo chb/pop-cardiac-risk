@@ -35,16 +35,16 @@ class PatientList extends React.Component
         super(props);
 
         this.state = {
-            startIndex  : 0,
-            endIndex    : 15,
-            skipTop     : 0,
-            skipBottom  : 0,
-            scrollHeight: 0,
-            windowLength: 1,
-            rowHeight   : 10,
+            startIndex      : 0,
+            endIndex        : 15,
+            skipTop         : 0,
+            skipBottom      : 0,
+            scrollHeight    : 0,
+            windowLength    : 1,
+            rowHeight       : 10,
             hideIncompatible: true,
-            groupBy: "none",
-            showFilters: false
+            groupBy         : "none",
+            showFilters     : false
         };
 
         this.wrapper = React.createRef();
@@ -356,7 +356,7 @@ class PatientList extends React.Component
     renderPatients()
     {    
         const { sort } = this.props;
-        const { startIndex, skipTop, windowLength, skipBottom, hideIncompatible } = this.state;
+        const { startIndex, skipTop, windowLength, skipBottom, hideIncompatible, groupBy } = this.state;
         const selectedPatientId = this.props.match.params.id || "";
         const start = startIndex + skipTop;
         const end   = start + windowLength - skipBottom;
@@ -412,6 +412,7 @@ class PatientList extends React.Component
             })];
         }
 
+        // hide incompatible patients
         if (hideIncompatible) {
             data = data.filter(rec => {
 
@@ -445,6 +446,52 @@ class PatientList extends React.Component
                 return true;
             });
         }
+
+        // Group by gender
+        if (groupBy === "gender") {
+            const groups = {};
+            for (let i = start; i <= end; i++) {
+                const rec = data[i];
+                if (!rec) break;
+                if (!groups[rec.gender]) {
+                    groups[rec.gender] = [];
+                }
+                groups[rec.gender].push(
+                    <Link
+                        to={"/" + rec.id}
+                        key={ rec.id }
+                        className={ "patient" + (selectedPatientId === rec.id ? " selected" : "") }
+                    >
+                        { this.renderAvatar(rec) }
+                        <div>
+                            <b dangerouslySetInnerHTML={{
+                                __html: search ? highlight(rec.name, search) : rec.name
+                            }}/>
+                        </div>
+                        <div className="text-muted"><b>{ getAge(rec, " old") }</b>, { rec.gender || "unknown gender" }</div>
+                    </Link>
+                );
+            }
+
+            return Object.keys(groups).sort().map(groupName => {
+                const group = groups[groupName];
+                return (
+                    <>
+                        <div className="group-header">
+                            <b className="badge pull-right">{ group.length }</b>
+                            { groupName }
+                        </div>
+                        { group }
+                    </>
+                )
+            })
+            
+        }
+
+        // Group by gender
+        else if (groupBy === "age") {
+            
+        } 
 
         let win = [];
 
