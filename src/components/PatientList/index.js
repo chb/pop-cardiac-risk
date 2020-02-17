@@ -238,7 +238,7 @@ class PatientList extends React.Component
                 "patient-header": 1,
                 "show-filters": showFilters
             }) }>
-                <div style={{ flex: "3 1 0", height: "2.3em" }} className={ buildClassName({
+                <div style={{ flex: "3 1 0" }} className={ buildClassName({
                     "search-input-wrap": true,
                     "has-search": search
                 })}>

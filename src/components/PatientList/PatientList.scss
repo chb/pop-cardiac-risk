@@ -164,6 +164,7 @@
 
     .search-input-wrap {
         position: relative;
+        padding: 2px 0;
         .clear-search {
             font-family: 'Glyphicons Halflings';
             font-size: 1em;
@@ -212,8 +213,8 @@
         padding-right: 1.8em;
     
         &:focus {
-            border-color: #369;
-            box-shadow: 0 0 2px 2px #DDD, 0 0 0 2px #369;
+            border-color: $color-orange;
+            box-shadow: 0 0 0px 3px fade-out($color-orange, 0.7);
             outline: 0;
         }
     }
@@ -251,19 +252,23 @@
         }
 
         > div {
-            border-top: 1px solid #CCC;
+            border-top: 1px solid #DDD;
             padding: 1.5ex 1ex;
         }
-
-        // > label {
-        //     padding: 0 1ex;
-        // }
     }
 
     &.show-filters .filters {
         height: 22em;
         // height: max-content;
         opacity: 1;
+    }
+
+    .btn.active {
+        background: $color-orange;
+        border-color: darken($color: $color-orange, $amount: 25%);
+        color: #FFF;
+        text-shadow: 0 0px 1px rgba(0, 0, 0, 0.5);
+        font-weight: bold;
     }
 
     .btn-group {
