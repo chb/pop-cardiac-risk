@@ -233,9 +233,9 @@ class PatientList extends React.Component
     
         return (
             <div className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
-                <div style={{ height: skipTop * rowHeight }} />
+                {/* <div className="spacer" style={{ height: skipTop * rowHeight }} /> */}
                 { this.renderPatients() }
-                <div style={{ height: skipBottom * rowHeight }} />
+                {/* <div className="spacer" style={{ height: skipBottom * rowHeight }} /> */}
             </div>
         )
     }
@@ -367,7 +367,7 @@ class PatientList extends React.Component
     renderPatients()
     {    
         const { sort } = this.props;
-        const { startIndex, skipTop, windowLength, skipBottom, hideIncompatible, groupBy, openGroup } = this.state;
+        const { startIndex, skipTop, windowLength, skipBottom, hideIncompatible, groupBy, openGroup, rowHeight } = this.state;
         const selectedPatientId = this.props.match.params.id || "";
         const start = startIndex + skipTop;
         let end   = start + windowLength - skipBottom;
@@ -550,7 +550,9 @@ class PatientList extends React.Component
                         <i className="glyphicon glyphicon-signal pull-right"/>
                         { groupName } <b className="badge">{ groups[groupName].length }</b>
                     </div>,
-                    group
+                    group.length ? <div className="spacer" style={{ height: skipTop * rowHeight }} /> : null,
+                    group,
+                    group.length ? <div className="spacer" style={{ height: skipBottom * rowHeight }} /> : null
                 ];
             });
         }
@@ -560,7 +562,9 @@ class PatientList extends React.Component
             
         } 
 
-        let win = [];
+        let win = [
+            <div className="spacer" style={{ height: skipTop * rowHeight }} />
+        ];
 
         for (let i = start; i <= end; i++) {
             const rec = data[i];
@@ -581,6 +585,8 @@ class PatientList extends React.Component
                 </Link>
             );
         }
+
+        win.push(<div className="spacer" style={{ height: skipBottom * rowHeight }} />);
 
         return win;
     }

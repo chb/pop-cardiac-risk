@@ -7,6 +7,8 @@
     flex      : 1 1 0%;
     margin    : 0 0 -1px;
     position: relative;
+    // max-height: 80%;
+    // box-sizing: border-box;
     // display: block;
     // z-index: 2;
     // transform: translateZ(1px);
@@ -19,6 +21,10 @@
     //     flex-direction: column;
     //     flex: 1 0 0px;
     // }
+
+    .spacer {
+        position: relative;
+    }
 
     &.has-message {
         display: flex;
