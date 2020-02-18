@@ -176,7 +176,7 @@
         }
 
         &.open {
-            bottom: auto;
+            bottom: auto !important;
             &:before {
                 content: "▾";
                 // padding: 0 0.75ch 0 0.25ch;
