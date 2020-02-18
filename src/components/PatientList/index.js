@@ -379,6 +379,10 @@ class PatientList extends React.Component
 
         let data = [ ...this.props.data ];
 
+        if (groupBy !== "none") {
+            data = data.filter(o => o[groupBy] === openGroup);
+        }
+
         // Start by applying the search (if any) because that would reduce the
         // size of the dataset
         if (search) {
