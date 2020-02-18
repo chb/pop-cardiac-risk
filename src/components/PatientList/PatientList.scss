@@ -141,55 +141,56 @@
         height: 100%;
     }
 
-    > div, a {
-        order: 2;
+    // > div, a {
+    //     order: 2;
+    // }
+
+}
+
+.group-header {
+    font-weight: bold;
+    border-top: 1px solid #FFF;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1ex 2em 1ex 1em;
+    color: #666;
+    text-transform: capitalize;
+    line-height: 1;
+    // position: sticky;
+    height: 35px;
+    // top: 0;
+    // bottom: 0;
+    background: rgba(238, 238, 238, 0.9);
+    z-index: 3;
+    cursor: pointer;
+    text-shadow: 0 1px 0 #FFF;
+    // order: 1;
+    box-shadow: 0 0 1px 0 #000;
+
+    .badge {
+        text-shadow: 0 0 1px #000;
     }
 
-    .group-header {
-        font-weight: bold;
-        border-top: 1px solid #FFF;
-        border-bottom: 1px solid #CCC;
-        padding: 1ex 2em 1ex 1em;
-        color: #666;
-        text-transform: capitalize;
-        line-height: 1;
-        position: sticky;
-        height: 35px;
-        top: 0;
-        bottom: 0;
-        background: rgba(238, 238, 238, 0.9);
-        z-index: 3;
-        cursor: pointer;
-        text-shadow: 0 1px 0 #FFF;
-        order: 1;
+    &:before {
+        content: "▸";
+        display: inline-block;
+        width: 2ch;
+        text-align: center;
+        padding: 0 0.5ch 0 0;
+    }
 
-        .badge {
-            text-shadow: 0 0 1px #000;
-        }
-
+    &.open {
+        // bottom: auto !important;
         &:before {
-            content: "▸";
-            display: inline-block;
-            width: 2ch;
-            text-align: center;
-            padding: 0 0.5ch 0 0;
+            content: "▾";
+            // padding: 0 0.75ch 0 0.25ch;
         }
-
-        &.open {
-            bottom: auto !important;
-            &:before {
-                content: "▾";
-                // padding: 0 0.75ch 0 0.25ch;
-            }
-        }
-        // &:nth-of-type(1) {
-        //     top: 0;
-        // }
-        // &:nth-of-type(2) {
-        //     top: 2.2em;
-        // }
     }
-
+    // &:nth-of-type(1) {
+    //     top: 0;
+    // }
+    // &:nth-of-type(2) {
+    //     top: 2.2em;
+    // }
 }
 
 .patient-header {

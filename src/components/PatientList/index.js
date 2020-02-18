@@ -149,7 +149,7 @@ class PatientList extends React.Component
 
     componentDidUpdate(prevProps, prevState)
     {
-        if (prevProps.search !== this.props.search || prevState.openGroup !== this.state.openGroup) {
+        if (this.wrapper.current && (prevProps.search !== this.props.search || prevState.openGroup !== this.state.openGroup)) {
             this.wrapper.current.scrollTop = 0;
             this.setState({
                 startIndex  : 0,
@@ -230,14 +230,16 @@ class PatientList extends React.Component
         if (error) {
             return <div className="patient-list has-message">{ String(this.props.error) }</div>
         }
+
+        return this.renderPatients();
     
-        return (
-            <div className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
-                {/* <div className="spacer" style={{ height: skipTop * rowHeight }} /> */}
-                { this.renderPatients() }
-                {/* <div className="spacer" style={{ height: skipBottom * rowHeight }} /> */}
-            </div>
-        )
+        // return (
+        //     <div className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
+        //         {/* <div className="spacer" style={{ height: skipTop * rowHeight }} /> */}
+        //         { this.renderPatients() }
+        //         {/* <div className="spacer" style={{ height: skipBottom * rowHeight }} /> */}
+        //     </div>
+        // )
     }
 
     renderHeader() {
@@ -542,17 +544,20 @@ class PatientList extends React.Component
                         "open": openGroup === groupName
                     })}
                     key={ "header-" + groupName }
-                    style={{
-                        top: 35 * i,
-                        bottom: 35 * (all.length - i - 1)
-                    }}
+                    // style={{
+                    //     top: 35 * i,
+                    //     bottom: 35 * (all.length - i - 1)
+                    // }}
                     onClick={() => this.setState({ openGroup: groupName }) }>
                         <i className="glyphicon glyphicon-signal pull-right"/>
                         { groupName } <b className="badge">{ groups[groupName].length }</b>
                     </div>,
-                    group.length ? <div className="spacer" style={{ height: skipTop * rowHeight }} /> : null,
-                    group,
-                    group.length ? <div className="spacer" style={{ height: skipBottom * rowHeight }} /> : null
+                    group.length ? 
+                        <div className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
+                            <div className="spacer" style={{ height: skipTop * rowHeight }} />
+                            { group }
+                            <div className="spacer" style={{ height: skipBottom * rowHeight }} />
+                        </div> : null
                 ];
             });
         }
@@ -588,7 +593,11 @@ class PatientList extends React.Component
 
         win.push(<div className="spacer" style={{ height: skipBottom * rowHeight }} />);
 
-        return win;
+        return (
+            <div className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
+                { win }
+            </div>
+        );
     }
 }
 
