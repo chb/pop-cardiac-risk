@@ -3,28 +3,10 @@
 .patient-list {
     overflow  : auto;
     overflow  : overlay;
-    // overflow-X: hidden;
     flex      : 1 1 0%;
-    margin    : 0 0 -1px;
-    position: relative;
-    // max-height: 80%;
-    // box-sizing: border-box;
-    // display: block;
-    // z-index: 2;
-    // transform: translateZ(1px);
-    // box-shadow: 1px 0 0 #CCC;
-    // -webkit-overflow-scrolling: auto;
-    // scroll-behavior: auto;
-
-    // > div {
-    //     display: flex;
-    //     flex-direction: column;
-    //     flex: 1 0 0px;
-    // }
-
-    .spacer {
-        position: relative;
-    }
+    margin    : 0 0 1px;
+    position  : relative;
+    box-shadow: 0 1px 0 #BBB;
 
     &.has-message {
         display: flex;
@@ -148,26 +130,22 @@
 }
 
 .group-header {
-    font-weight: bold;
-    border-top: 1px solid #FFF;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    padding: 1ex 2em 1ex 1em;
-    color: #666;
+    font-weight   : bold;
+    border-top    : 1px solid #FFF;
+    border-bottom : 1px solid #BBB;
+    padding       : 1.5ex 1ex 1.5ex 1em;
+    color         : #666;
     text-transform: capitalize;
-    line-height: 1;
-    // position: sticky;
-    height: 35px;
-    // top: 0;
-    // bottom: 0;
-    background: rgba(238, 238, 238, 0.9);
-    z-index: 3;
-    cursor: pointer;
-    text-shadow: 0 1px 0 #FFF;
-    // order: 1;
-    box-shadow: 0 0 1px 0 #000;
+    line-height   : 1;
+    background    : #EEE;
+    cursor        : pointer;
+    text-shadow   : 0 1px 0 #FFF;
+    transition: color 0.2s;
 
     .badge {
-        text-shadow: 0 0 1px #000;
+        text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) inset, 0 3px 4px -1px rgba(0, 0, 0, 0.1) inset;
+        background: $color-orange;
     }
 
     &:before {
@@ -191,6 +169,28 @@
     // &:nth-of-type(2) {
     //     top: 2.2em;
     // }
+    &:hover {
+        color: #000;
+    }
+
+    .stat-btn {
+        padding: 10px;
+        margin: -10px 0 -10px -10px;
+        border-radius: 4px;
+        
+        &:hover {
+            background: $color-orange;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) inset;
+            color: #FFF;
+            text-shadow: 0 0 1px #000;
+
+            &:after {
+                content: "Stats";
+                padding-left: 1ch;
+                font-weight: bold;
+            }
+        }
+    }
 }
 
 .patient-header {
@@ -218,6 +218,7 @@
         margin: 0 1ch;
         vertical-align: top;
         font-size: 110%;
+        color: #666;
     }
 
     .search-input-wrap {
@@ -319,6 +320,9 @@
         text-shadow: 0 0px 1px rgba(0, 0, 0, 0.75);
         font-weight: bold;
         box-shadow: none;
+        .glyphicon {
+            color: #FFF;
+        }
     }
 
     .btn-group {

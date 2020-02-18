@@ -549,7 +549,7 @@ class PatientList extends React.Component
                     //     bottom: 35 * (all.length - i - 1)
                     // }}
                     onClick={() => this.setState({ openGroup: groupName }) }>
-                        <i className="glyphicon glyphicon-signal pull-right"/>
+                        <i className="glyphicon glyphicon-signal pull-right stat-btn"/>
                         { groupName } <b className="badge">{ groups[groupName].length }</b>
                     </div>,
                     group.length ? 
