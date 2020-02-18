@@ -38,7 +38,7 @@
             left         : 0.75rem;
             width        : 3rem;
             height       : 3rem;
-            line-height  : 3rem;
+            line-height  : 3.1rem;
             margin       : -1.5rem 0 0 0;
             background   : linear-gradient(rgba(1, 1, 1, 0.2), rgba(1, 1, 1, 0.25));
             position     : absolute;
@@ -174,8 +174,8 @@
     }
 
     .stat-btn {
-        padding: 10px;
-        margin: -10px 0 -10px -10px;
+        padding: 6px 10px;
+        margin: -6px 0 -6px -10px;
         border-radius: 4px;
         
         &:hover {
@@ -185,8 +185,10 @@
             text-shadow: 0 0 1px #000;
 
             &:after {
-                content: "Stats";
-                padding-left: 1ch;
+                content: "View";
+                margin: -2px 0 2px 1ch;
+                vertical-align: top;
+                line-height: 13px;
                 font-weight: bold;
             }
         }

@@ -1,5 +1,5 @@
 import React               from 'react'
-import PropTypes           from "prop-types"
+import PropTypes, { func }           from "prop-types"
 import { connect }         from "react-redux"
 import Footer from "../Footer/"
 import Checkbox from "../Checkbox/"
@@ -7,7 +7,43 @@ import { search as doSearch, sort as doSort } from "../../store/patients"
 import { getAge, highlight, buildClassName } from '../../lib';
 import { Link, withRouter } from "react-router-dom";
 import "./PatientList.scss"
-import moment from 'moment'
+import moment from 'moment';
+
+function createSorter(sort)
+{
+    const sortArgs = sort.trim().split(/\s*,\s*/).map(token => {
+        const [prop, dir = "asc"] = token.split(/\s+/);
+        return {
+            prop, dir
+        }
+    });
+
+    return function(a, b)
+    {
+        let i = 0;
+        let out = 0;
+
+        while (i < sortArgs.length) {
+            let { prop, dir } = sortArgs[i++];
+            let _a = a[prop];
+            let _b = b[prop];
+
+            if (typeof _a === "string" && typeof _b === "string") {
+                out = _a.localeCompare(_b);    
+            } else {
+                out = _a > _b ? -1 : _a < _b ? 1 : 0;
+            }
+
+            if (dir === "desc") {
+                out *= -1;
+            }
+
+            if (out !== 0) break
+        }
+
+        return out;
+    }
+}
 
 
 class PatientList extends React.Component
@@ -49,10 +85,7 @@ class PatientList extends React.Component
         };
 
         this.wrapper = React.createRef();
-
         this.onScroll = this.onScroll.bind(this);
-
-        this.timer = null;
     }
 
     computeScrollState()
@@ -136,31 +169,26 @@ class PatientList extends React.Component
         return nextState;
     }
 
-    onScroll(e)
+    onScroll()
     {
-        // if (this.state.groupBy === "none") {
-            // if (this.timer) {
-            //     clearTimeout(this.timer);
-            // }
-            // this.timer = setTimeout(() => this.setState(this.computeScrollState()), 0);
-            this.setState(this.computeScrollState())
-        // }
+        this.setState(this.computeScrollState());
     }
 
     componentDidUpdate(prevProps, prevState)
     {
-        if (this.wrapper.current && (prevProps.search !== this.props.search || prevState.openGroup !== this.state.openGroup)) {
-            this.wrapper.current.scrollTop = 0;
-            this.setState({
-                startIndex  : 0,
-                skipTop     : 0,
-                skipBottom  : 0,
-                scrollHeight: 0,
-                // windowLength: 1
-            });
-        }
-        else if (this.wrapper.current && !this.state.scrollHeight/* && this.state.groupBy === "none"*/) {
-            this.setState(this.computeScrollState());
+        if (this.wrapper.current) {
+            if (prevProps.search !== this.props.search || prevState.openGroup !== this.state.openGroup) {
+                this.wrapper.current.scrollTop = 0;
+                this.setState({
+                    startIndex  : 0,
+                    skipTop     : 0,
+                    skipBottom  : 0,
+                    scrollHeight: 0
+                });
+            }
+            else if (!this.state.scrollHeight) {
+                this.setState(this.computeScrollState());
+            }
         }
     }
 
@@ -171,31 +199,16 @@ class PatientList extends React.Component
         }
     }
 
+    // Rendering methods -------------------------------------------------------
 
-    // shouldComponentUpdate(nextProps, nextState)
-    // {
-    //     if (nextProps.data.length !== this.props.data.length) {
-    //         return true;
-    //     }
-    // //     if (nextState.windowLength !== this.state.windowLength) {
-    // //         return true;
-    // //     }
-    // //     if (nextState.skipBottom !== this.state.skipBottom) {
-    // //         return true;
-    // //     }
-    // //     if (nextState.scrollHeight === this.state.scrollHeight) {
-    // //         return false;
-    // //     }
-    //     if (
-    //         // nextState.windowLength === this.state.windowLength &&
-    //         nextState.skipTop === this.state.skipTop &&
-    //         nextState.skipBottom === this.state.skipBottom //&&
-    //         // nextState.scrollHeight === this.state.scrollHeight
-    //     ) {
-    //         return false;
-    //     }
-    //     return true;
-    // }
+    renderAvatar(patient)
+    {
+        return (
+            <div className="avatar">
+                { patient.name.match(/\b[A-Z]/g).join("") }
+            </div>
+        );
+    }
 
     render()
     {
@@ -210,15 +223,14 @@ class PatientList extends React.Component
                     <h1>Population Cardiac Risk</h1>
                 </header>
                 { this.renderHeader() }
-                { this.renderList() }
+                { this.renderPatients() }
                 <Footer start={ start } end={ end } />
             </div>
         )
     }
 
-    renderList()
+    renderPatients()
     {
-        const { rowHeight, skipTop, skipBottom } = this.state;
         const { loading, error, data } = this.props;
 
         if (!data.length) {
@@ -231,15 +243,7 @@ class PatientList extends React.Component
             return <div className="patient-list has-message">{ String(this.props.error) }</div>
         }
 
-        return this.renderPatients();
-    
-        // return (
-        //     <div className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
-        //         {/* <div className="spacer" style={{ height: skipTop * rowHeight }} /> */}
-        //         { this.renderPatients() }
-        //         {/* <div className="spacer" style={{ height: skipBottom * rowHeight }} /> */}
-        //     </div>
-        // )
+        return this.renderList();
     }
 
     renderHeader() {
@@ -332,8 +336,8 @@ class PatientList extends React.Component
                                 Gender
                             </label>
                             <label
-                                className={ buildClassName({ "btn btn-default": 1, "active" : sortBy === "age" }) }
-                                onMouseDown={ () => this.props.dispatch(doSort(`age:${sortDir}`)) }>
+                                className={ buildClassName({ "btn btn-default": 1, "active" : sortBy === "dob" }) }
+                                onMouseDown={ () => this.props.dispatch(doSort(`dob:${sortDir}`)) }>
                                 Age
                             </label>
                         </div>
@@ -358,15 +362,9 @@ class PatientList extends React.Component
         )
     }
 
-    renderAvatar(patient) {
-        return (
-            <div className="avatar">
-                { patient.name.match(/\b[A-Z]/g).join("") }
-            </div>
-        );
-    }
+    
 
-    renderPatients()
+    renderList()
     {    
         const { sort } = this.props;
         const { startIndex, skipTop, windowLength, skipBottom, hideIncompatible, groupBy, openGroup, rowHeight } = this.state;
@@ -405,27 +403,38 @@ class PatientList extends React.Component
             return <div className="center">No records matching your search</div>
         }
 
-        // Now sort the records if needed
+        let sortArgs = [];
         if (sort) {
-            data.sort((a, b) => {
-                switch(sort) {
-                    case "name:desc":
-                        return String(a.name || "").localeCompare(String(b.name || ""));
-                    case "name:asc":
-                        return String(b.name || "").localeCompare(String(a.name || ""));
-                    case "age:desc":
-                        return a.dob > b.dob ? 1 : a.dob < b.dob ? -1 : 0;
-                    case "age:asc":
-                        return a.dob > b.dob ? -1 : a.dob < b.dob ? 1 : 0;
-                    case "gender:desc":
-                        return a.gender > b.gender ? -1 : a.gender < b.gender ? 1 : 0;
-                    case "gender:asc":
-                        return a.gender > b.gender ? 1 : a.gender < b.gender ? -1 : 0;
-                    default:
-                        return 0;
-                }
-            });
+            sortArgs.push(sort.split(":").join(" "))
         }
+        if (groupBy !== "none") {
+            sortArgs.push(groupBy)
+        }
+
+        data.sort(createSorter(sortArgs.join(", ")));
+
+        // Now sort the records if needed
+        // if (sort) {
+        //     createSorter(sortArgs.join(", "))
+        //     data.sort((a, b) => {
+        //         switch(sort) {
+        //             case "name:desc":
+        //                 return String(a.name || "").localeCompare(String(b.name || ""));
+        //             case "name:asc":
+        //                 return String(b.name || "").localeCompare(String(a.name || ""));
+        //             case "age:desc":
+        //                 return a.dob > b.dob ? 1 : a.dob < b.dob ? -1 : 0;
+        //             case "age:asc":
+        //                 return a.dob > b.dob ? -1 : a.dob < b.dob ? 1 : 0;
+        //             case "gender:desc":
+        //                 return a.gender > b.gender ? -1 : a.gender < b.gender ? 1 : 0;
+        //             case "gender:asc":
+        //                 return a.gender > b.gender ? 1 : a.gender < b.gender ? -1 : 0;
+        //             default:
+        //                 return 0;
+        //         }
+        //     });
+        // }
 
         // hide incompatible patients
         if (hideIncompatible) {
