@@ -44,12 +44,15 @@ class PatientList extends React.Component
             rowHeight       : 10,
             hideIncompatible: true,
             groupBy         : "none",
+            openGroup       : "female",
             showFilters     : false
         };
 
         this.wrapper = React.createRef();
 
         this.onScroll = this.onScroll.bind(this);
+
+        this.timer = null;
     }
 
     computeScrollState()
@@ -135,20 +138,28 @@ class PatientList extends React.Component
 
     onScroll(e)
     {
-        setTimeout(() => this.setState(this.computeScrollState()), 100);
+        // if (this.state.groupBy === "none") {
+            // if (this.timer) {
+            //     clearTimeout(this.timer);
+            // }
+            // this.timer = setTimeout(() => this.setState(this.computeScrollState()), 0);
+            this.setState(this.computeScrollState())
+        // }
     }
 
-    componentDidUpdate(prevProps)
+    componentDidUpdate(prevProps, prevState)
     {
-        if (prevProps.search !== this.props.search) {
+        if (prevProps.search !== this.props.search || prevState.openGroup !== this.state.openGroup) {
             this.wrapper.current.scrollTop = 0;
             this.setState({
+                startIndex  : 0,
                 skipTop     : 0,
                 skipBottom  : 0,
-                scrollHeight: 0
+                scrollHeight: 0,
+                // windowLength: 1
             });
         }
-        else if (this.wrapper.current && !this.state.scrollHeight) {
+        else if (this.wrapper.current && !this.state.scrollHeight/* && this.state.groupBy === "none"*/) {
             this.setState(this.computeScrollState());
         }
     }
@@ -356,20 +367,22 @@ class PatientList extends React.Component
     renderPatients()
     {    
         const { sort } = this.props;
-        const { startIndex, skipTop, windowLength, skipBottom, hideIncompatible, groupBy } = this.state;
+        const { startIndex, skipTop, windowLength, skipBottom, hideIncompatible, groupBy, openGroup } = this.state;
         const selectedPatientId = this.props.match.params.id || "";
         const start = startIndex + skipTop;
-        const end   = start + windowLength - skipBottom;
+        let end   = start + windowLength - skipBottom;
         const now = moment();
 
         let search = String(this.props.search || "").trim();
 
         let found = 0;
 
+        let data = [ ...this.props.data ];
+
         // Start by applying the search (if any) because that would reduce the
         // size of the dataset
-        let data = search ?
-            this.props.data.filter((rec, i) => {
+        if (search) {
+            data = this.props.data.filter((rec, i) => {
 
                 // Do we need to continue searching?
                 if (found >= end) {
@@ -382,8 +395,8 @@ class PatientList extends React.Component
                 }
 
                 return false;
-            }) :
-            this.props.data;
+            });
+        }
 
         // Exit early if there is no search match
         if (search && !data.length) {
@@ -392,12 +405,12 @@ class PatientList extends React.Component
 
         // Now sort the records if needed
         if (sort) {
-            data = [...data.sort((a, b) => {
+            data.sort((a, b) => {
                 switch(sort) {
                     case "name:desc":
-                        return a.name.localeCompare(b.name);
+                        return String(a.name || "").localeCompare(String(b.name || ""));
                     case "name:asc":
-                        return b.name.localeCompare(a.name);
+                        return String(b.name || "").localeCompare(String(a.name || ""));
                     case "age:desc":
                         return a.dob > b.dob ? 1 : a.dob < b.dob ? -1 : 0;
                     case "age:asc":
@@ -409,7 +422,7 @@ class PatientList extends React.Component
                     default:
                         return 0;
                 }
-            })];
+            });
         }
 
         // hide incompatible patients
@@ -449,43 +462,97 @@ class PatientList extends React.Component
 
         // Group by gender
         if (groupBy === "gender") {
-            const groups = {};
-            for (let i = start; i <= end; i++) {
+            const groups = {
+                male  : {
+                    data: [],
+                    length: data.reduce((prev, cur) => prev + (cur.gender === "male" ? 1 : 0), 0)
+                },
+                female: {
+                    data: [],
+                    length: data.reduce((prev, cur) => prev + (cur.gender === "female" ? 1 : 0), 0)
+                },
+                "Unknown Gender": {
+                    data: [],
+                    length: data.reduce((prev, cur) => prev + (cur.gender !== "female" && cur.gender !== "male" ? 1 : 0), 0)
+                }
+            };
+            for (let i = start; i < end; i++) {
                 const rec = data[i];
                 if (!rec) break;
-                if (!groups[rec.gender]) {
-                    groups[rec.gender] = [];
+
+                // if (sort.startsWith("name")) {
+                //     console.log(rec.gender)
+                // }
+
+                const gender = String(rec.gender || "Unknown Gender");
+
+                // if (groups[openGroup].length >= end) {
+                //     break;
+                // }
+
+                // Create the group if needed
+                // if (!groups[gender]) {
+                //     groups[gender] = { data: [], length: 0 };
+                // }
+
+                // if (groups[rec.gender].length >= end) {
+                //     continue;
+                // }
+
+                // if (groups[gender].data.length > windowLength) {
+                //     break;
+                // }
+                
+
+                if (openGroup === gender) {
+                    
+                    groups[gender].data.push(
+                        <Link
+                            to={"/" + rec.id}
+                            key={ rec.id }
+                            className={ "patient" + (selectedPatientId === rec.id ? " selected" : "") }
+                        >
+                            { this.renderAvatar(rec) }
+                            <div>
+                                <b dangerouslySetInnerHTML={{
+                                    __html: search ? highlight(rec.name, search) : rec.name
+                                }}/>
+                            </div>
+                            <div className="text-muted"><b>{ getAge(rec, " old") }</b>, { gender }</div>
+                        </Link>
+                    );
+                } else {
+                    end++
                 }
-                groups[rec.gender].push(
-                    <Link
-                        to={"/" + rec.id}
-                        key={ rec.id }
-                        className={ "patient" + (selectedPatientId === rec.id ? " selected" : "") }
-                    >
-                        { this.renderAvatar(rec) }
-                        <div>
-                            <b dangerouslySetInnerHTML={{
-                                __html: search ? highlight(rec.name, search) : rec.name
-                            }}/>
-                        </div>
-                        <div className="text-muted"><b>{ getAge(rec, " old") }</b>, { rec.gender || "unknown gender" }</div>
-                    </Link>
-                );
+
+                // groups[gender].length += 1;
             }
 
-            return Object.keys(groups).sort().map(groupName => {
-                const group = groups[groupName];
-                return (
-                    <>
-                        <div className="group-header">
-                            <b className="badge pull-right">{ group.length }</b>
-                            { groupName }
-                        </div>
-                        { group }
-                    </>
-                )
-            })
-            
+            const groupNames = Object.keys(groups);
+
+            // if (openGroup === "Unknown Gender" && sort.startsWith("name")) {
+            //     console.log(groups)
+            // }
+
+            return groupNames.filter(g => groups[g].length > 0).sort().map((groupName, i, all) => {
+                const group = groups[groupName].data;
+                return [
+                    <div className={ buildClassName({
+                        "group-header": 1,
+                        "open": openGroup === groupName
+                    })}
+                    key={ "header-" + groupName }
+                    style={{
+                        top: 35 * i,
+                        bottom: 35 * (all.length - i - 1)
+                    }}
+                    onClick={() => this.setState({ openGroup: groupName }) }>
+                        <i className="glyphicon glyphicon-signal pull-right"/>
+                        { groupName } <b className="badge">{ groups[groupName].length }</b>
+                    </div>,
+                    group
+                ];
+            });
         }
 
         // Group by gender
