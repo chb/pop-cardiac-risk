@@ -553,7 +553,7 @@ class PatientList extends React.Component
                         { groupName } <b className="badge">{ groups[groupName].length }</b>
                     </div>,
                     group.length ? 
-                        <div className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
+                        <div key="wrapper" className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
                             <div className="spacer" style={{ height: skipTop * rowHeight }} />
                             { group }
                             <div className="spacer" style={{ height: skipBottom * rowHeight }} />
@@ -568,7 +568,7 @@ class PatientList extends React.Component
         } 
 
         let win = [
-            <div className="spacer" style={{ height: skipTop * rowHeight }} />
+            <div key="spacer-top" className="spacer" style={{ height: skipTop * rowHeight }} />
         ];
 
         for (let i = start; i <= end; i++) {
@@ -591,7 +591,7 @@ class PatientList extends React.Component
             );
         }
 
-        win.push(<div className="spacer" style={{ height: skipBottom * rowHeight }} />);
+        win.push(<div key="spacer-bottom" className="spacer" style={{ height: skipBottom * rowHeight }} />);
 
         return (
             <div className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
