@@ -31,7 +31,6 @@ class Patient extends React.Component
         return (
             <Link
                 to={"/" + id}
-                key={ id }
                 className={ "patient" + (selected ? " selected" : "") }
             >
                 <Avatar patient={ patient } />
@@ -494,7 +493,9 @@ class PatientList extends React.Component
 
             const group = getGroup(rec);
 
-            group.data.push(<Patient patient={ rec } selected={ selectedPatientId === rec.id } search={ search } />);
+            group.data.push(
+                <Patient key={ rec.id } patient={ rec } selected={ selectedPatientId === rec.id } search={ search } />
+            );
         }
 
         const groupNames = Object.keys(groups);
@@ -573,7 +574,9 @@ class PatientList extends React.Component
 
             const gender = rec.gender || "Unknown Gender";
 
-            groups[gender].data.push(<Patient patient={ rec } selected={ selectedPatientId === rec.id } search={ search } />);
+            groups[gender].data.push(
+                <Patient key={ rec.id } patient={ rec } selected={ selectedPatientId === rec.id } search={ search } />
+            );
         }
 
         const groupNames = Object.keys(groups);
@@ -636,7 +639,7 @@ class PatientList extends React.Component
         for (let i = start; i <= end; i++) {
             const rec = data[i];
             if (!rec) break;
-            win.push(<Patient patient={ rec } selected={ selectedPatientId === rec.id } search={ search } />);
+            win.push(<Patient key={ rec.id } patient={ rec } selected={ selectedPatientId === rec.id } search={ search } />);
         }
 
         win.push(<div key="spacer-bottom" className="spacer" style={{ height: skipBottom * rowHeight }} />);
