@@ -1,4 +1,4 @@
-// import moment from "moment"
+import moment from "moment"
 import {
     reynoldsRiskScore,
     last,
@@ -83,6 +83,14 @@ export function loadPatients(client) {
             maxRows: 10000,
             onPage(data) {
                 dispatch(addPatients(data.map(o => {
+
+                    if (!o.dob) {
+                        o.age = -1;
+                    } else {
+                        const eol = o.deceasedDateTime ? moment(o.deceasedDateTime) : moment();
+                        o.age = moment.duration(eol.diff(o.dob, "days"), "days").asYears();
+                    }
+
                     o.name = getPatientDisplayName(JSON.parse(o.name || "{}"));
                     return o;
                 })));
