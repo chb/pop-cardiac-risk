@@ -7,7 +7,6 @@ import { search as doSearch, sort as doSort } from "../../store/patients"
 import { getAge, highlight, buildClassName } from '../../lib';
 import { Link, withRouter } from "react-router-dom";
 import "./PatientList.scss"
-import moment from 'moment';
 
 
 class Avatar extends React.Component
@@ -204,78 +203,6 @@ class PatientList extends React.Component
 
     // Data manipulation methods -----------------------------------------------
 
-    search(data, maxResults = Infinity)
-    {
-        let search = String(this.props.search || "").trim();
-
-        if (!search) {
-            return data;
-        }
-
-        let found = 0;
-
-        // Start by applying the search (if any) because that would reduce the
-        // size of the dataset
-        return data.filter((rec, i) => {
-
-            // Do we need to continue searching?
-            if (found >= maxResults) {
-                return false;
-            }
-
-            if (rec.name.toLowerCase().indexOf(search.toLowerCase()) > -1) {
-                found += 1;
-                return true;
-            }
-
-            return false;
-        });
-    }
-
-    stripIncompatible(data)
-    {
-        const { hideIncompatible } = this.state;
-        
-        // hide incompatible patients
-        if (!hideIncompatible) {
-            return data;
-        }
-
-        const now = moment();
-
-        return data.filter(rec => {
-
-            // Hide patients with no gender
-            if (!rec.gender) {
-                return false;
-            }
-
-            // Hide deceased patients
-            if (rec.deceasedDateTime || rec.deceasedBoolean) {
-                return false;
-            }
-
-            // Hide patients with no birthDate
-            if (!rec.dob) {
-                return false;
-            }
-
-            const ageInYears = moment.duration(now.diff(rec.dob, "days"), "days").asYears();
-
-            // Hide patients younger than 20 years
-            if (ageInYears < 20) {
-                return false;
-            }
-
-            // Hide patients older than 79 years
-            if (ageInYears > 79) {
-                return false;
-            }
-            
-            return true;
-        });
-    }
-
     sort(data)
     {
         const { sort } = this.props;
@@ -291,11 +218,9 @@ class PatientList extends React.Component
                 case "name:asc":
                     return String(b.name || "").localeCompare(String(a.name || ""));
                 case "age:desc":
-                case "dob:desc":
-                    return a.dob > b.dob ? 1 : a.dob < b.dob ? -1 : 0;
+                    return a.age - b.age;
                 case "age:asc":
-                case "dob:asc":
-                    return a.dob > b.dob ? -1 : a.dob < b.dob ? 1 : 0;
+                    return b.age - a.age;
                 case "gender:desc":
                     return a.gender > b.gender ? -1 : a.gender < b.gender ? 1 : 0;
                 case "gender:asc":
@@ -309,7 +234,6 @@ class PatientList extends React.Component
     filter()
     {
         const { hideIncompatible } = this.state;
-        const now = moment();
         const search = String(this.props.search || "").trim();
 
         return [...this.props.data.filter(rec => {
@@ -331,15 +255,13 @@ class PatientList extends React.Component
                     return false;
                 }
 
-                const ageInYears = moment.duration(now.diff(rec.dob, "days"), "days").asYears();
-
                 // Hide patients younger than 20 years
-                if (ageInYears < 20) {
+                if (rec.age < 20) {
                     return false;
                 }
 
                 // Hide patients older than 79 years
-                if (ageInYears > 79) {
+                if (rec.age > 79) {
                     return false;
                 }
             }
@@ -481,20 +403,20 @@ class PatientList extends React.Component
                                 Name
                             </label>
                             <label
-                                className={ buildClassName({ "btn btn-default": 1, "active": sortBy === "gender", "passive": groupBy === "gender" }) }
+                                className={ buildClassName({ "btn btn-default": 1, "active": sortBy === "gender" }) }
                                 onMouseDown={ () => this.props.dispatch(doSort(`gender:${sortDir}`)) }>
                                 Gender
                             </label>
                             <label
-                                className={ buildClassName({ "btn btn-default": 1, "active" : sortBy === "dob", "passive": groupBy === "age" }) }
-                                onMouseDown={ () => this.props.dispatch(doSort(`dob:${sortDir}`)) }>
+                                className={ buildClassName({ "btn btn-default": 1, "active" : sortBy === "age" }) }
+                                onMouseDown={ () => this.props.dispatch(doSort(`age:${sortDir}`)) }>
                                 Age
                             </label>
                         </div>
                     </div>
                     <div>
                         <label>Sort Direction</label>
-                        <div className={ buildClassName({ "btn-group btn-group-justified": 1, "passive": !sortBy || sortBy === groupBy }) }>
+                        <div className={ buildClassName({ "btn-group btn-group-justified": 1, "passive": !sortBy }) }>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active" : sortDir === "asc"}) }
                                 onMouseDown={ () => this.props.dispatch(doSort(`${sortBy}:asc`)) }>
@@ -586,7 +508,9 @@ class PatientList extends React.Component
                 })}
                 key={ "header-" + groupName }
                 onClick={() => this.setState({ openGroup: groupName }) }>
-                    <i className="glyphicon glyphicon-signal pull-right stat-btn"/>
+                    <Link to={"/groups/age/0-1"} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
+                        <i className="glyphicon glyphicon-signal"/>
+                    </Link>
                     { groupName } <b className="badge">{ groups[groupName].length }</b>
                 </div>,
                 group.length ? 
@@ -663,7 +587,9 @@ class PatientList extends React.Component
                 })}
                 key={ "header-" + groupName }
                 onClick={() => this.setState({ openGroup: groupName }) }>
-                    <i className="glyphicon glyphicon-signal pull-right stat-btn"/>
+                    <Link to={"/groups/age/0-1"} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
+                        <i className="glyphicon glyphicon-signal"/>
+                    </Link>
                     { groupName } <b className="badge">{ groups[groupName].length }</b>
                 </div>,
                 group.length ? 
@@ -694,13 +620,8 @@ class PatientList extends React.Component
 
         let search = String(this.props.search || "").trim();
 
-        let data = [ ...this.props.data ];
+        let data = this.filter();
 
-        // hide incompatible patients
-        data = this.stripIncompatible(data);
-
-        data = this.search(data, end);
-        
         // Exit early if there is no search match
         if (!data.length) {
             return <div className="center">No records matching your search</div>

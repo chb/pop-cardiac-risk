@@ -135,9 +135,9 @@
     font-weight   : bold;
     border-top    : 1px solid #FFF;
     border-bottom : 1px solid #BBB;
-    padding       : 1.5ex 1ex 1.5ex 1ex;
+    padding       : 1.5ex;
     color         : #666;
-    text-transform: capitalize;
+    // text-transform: capitalize;
     line-height   : 1;
     background    : #EEE;
     cursor        : pointer;
@@ -159,6 +159,7 @@
     }
 
     &.open {
+        color: #000;
         // bottom: auto !important;
         &:before {
             content: "▾";
@@ -179,6 +180,17 @@
         padding: 6px 10px;
         margin: -6px 0 -6px -10px;
         border-radius: 4px;
+        text-decoration: none;
+        transition: box-shadow 0.2s;
+
+        &:before {
+            content: "View";
+            margin: 0 0.5ch 0 0;
+            vertical-align: baseline;
+            line-height: inherit;
+            font-weight: bold;
+            opacity: 0;
+        }
         
         &:hover {
             background: $color-orange;
@@ -186,12 +198,8 @@
             color: #FFF;
             text-shadow: 0 0 1px #000;
 
-            &:after {
-                content: "View";
-                margin: -2px 0 2px 1ch;
-                vertical-align: top;
-                line-height: 13px;
-                font-weight: bold;
+            &:before {
+                opacity: 1;
             }
         }
     }
@@ -209,7 +217,7 @@
     z-index: 2;
 
     > div {
-        margin: 3px 1ex;
+        margin: 3px 1.5ex;
         /* box-shadow: 0 0 0 1px #369 inset; */
         justify-content: center;
         align-items: center;
@@ -306,7 +314,7 @@
 
         > div {
             border-top: 1px solid #DDD;
-            padding: 1.5ex 1ex;
+            padding: 1.5ex;
             width: 100%;
         }
     }
