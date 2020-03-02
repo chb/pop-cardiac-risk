@@ -10,6 +10,7 @@ import { merge, load } from "../../store/selectedPatient"
 // import ReactDOM from "react-dom";
 import CardiacRisk from "../CardiacRisk"
 import ClientContext from "../../ClientContext"
+import PageHeader     from "../PageHeader"
 
 // const SMOKING_STATUS = { 
 //     "449868002"      : { smoker: true , text: "Current every day smoker"       },
@@ -67,13 +68,11 @@ class DetailView extends React.Component
         const { id } = this.props;
         
         return (
-            <header className="app-header">
-                <Link to="/" className="back-link col-1 btn-empty">
-                    <b className="glyphicon glyphicon-chevron-left"/>&nbsp;Back
-                </Link>
-                <b className="col-2">Risk Score</b>
-                { id ? <div className="col-3 btn-empty">Reset</div> : null }
-            </header>
+            <PageHeader
+                left="back"
+                title="Risk Score"
+                right={ id ? <div className="col-3 btn-empty"><i className="glyphicon glyphicon-repeat"/></div> : null }
+            />
         )
     }
 

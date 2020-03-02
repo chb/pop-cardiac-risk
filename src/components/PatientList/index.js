@@ -6,6 +6,7 @@ import Checkbox from "../Checkbox/"
 import { search as doSearch, sort as doSort } from "../../store/patients"
 import { getAge, highlight, buildClassName } from '../../lib';
 import { Link, withRouter } from "react-router-dom";
+import PageHeader from "../PageHeader"
 import "./PatientList.scss"
 
 
@@ -289,9 +290,7 @@ class PatientList extends React.Component
 
         return (
             <div className={"page patients" + (id ? "" : " active")}>
-                <header className="app-header">
-                    <h1>Population Cardiac Risk</h1>
-                </header>
+                <PageHeader title="Population Cardiac Risk"/>
                 { this.renderHeader() }
                 { this.renderPatients() }
                 <Footer start={ start } end={ end } />
@@ -509,7 +508,7 @@ class PatientList extends React.Component
                 })}
                 key={ "header-" + groupName }
                 onClick={() => this.setState({ openGroup: groupName }) }>
-                    <Link to={"/groups/age/0-1"} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
+                    <Link to={"/groups/age/" + groups[groupName].start + ":" + groups[groupName].end} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
                         <i className="glyphicon glyphicon-signal"/>
                     </Link>
                     { groupName } <b className="badge">{ groups[groupName].length }</b>
@@ -590,7 +589,7 @@ class PatientList extends React.Component
                 })}
                 key={ "header-" + groupName }
                 onClick={() => this.setState({ openGroup: groupName }) }>
-                    <Link to={"/groups/age/0-1"} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
+                    <Link to={"/groups/gender/" + groupName} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
                         <i className="glyphicon glyphicon-signal"/>
                     </Link>
                     { groupName } <b className="badge">{ groups[groupName].length }</b>

@@ -1,4 +1,4 @@
-@import "./style/config.scss";
+@import "../../style/config.scss";
 
 body {
 
@@ -62,33 +62,6 @@ body {
 
 /* ========================================================================== */
 
-/* ---------------------------- app-header ---------------------------------- */
-.app-header {
-  background: #008eb0;
-  // height: 4rem;
-  // line-height: 4rem;
-  // padding: 0 1rem;
-  color: #FFF;
-  /* font-size: 2rem; */
-  display: flex;
-  flex: 0 0 3rem;
-  margin: 0;
-  justify-content: center;
-  align-items: center;
-}
-// .app-header > * {
-//   white-space: nowrap;
-//   overflow: hidden;
-//   text-overflow: ellipsis;
-//   max-width: 100%;
-// }
-.app-header h1 {
-  // line-height: 4rem;
-  padding: 0;
-  margin: 0 auto;
-  font-size: 2rem;
-  font-size: calc(20px + 0.5vw);
-}
 
 
 
@@ -108,17 +81,14 @@ body {
 }
 
 .page {
-  /* height: 100%; */
-  /* position: fixed; */
-  /* top: 0; */
-  /* bottom: 0; */
-  /* left: 0; */
   display: flex;
-  flex: 1;
+  flex: 2 1;
   flex-direction: column;
   // transition: all 3s ease-out;
   background: #FFF;
   max-width: 100%;
+  z-index: 2;
+  box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.3) inset;
 }
 
 
@@ -127,6 +97,7 @@ body {
   // transition-duration: 0;
   // background: #FFF;
   z-index: 1;
+  box-shadow: none;
   /* z-index: 2;
   background: #FFF; */
   // .app-header {
@@ -136,10 +107,15 @@ body {
   // }
 }
 
-.page.detail-view {
-  z-index: 2;
-  box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.3) inset;
+.page-contents {
+  overflow      : auto;
+  width         : 100%;
+  flex          : 1 1;
+  display       : flex;
+  flex-direction: column;
+  padding       : 1rem;
 }
+
 
 // @media (any-hover: none) and (max-width: 1023px) {
 //   .page {
@@ -162,10 +138,10 @@ body {
     // }
   }
 
-  .page.detail-view.active {
+  .page:not(.patients).active {
     transform: translateX(-100%);
   }
-  .page.detail-view.active .back-link {
+  .page:not(.patients).active .back-link {
     visibility: visible;
   }
   .page.patients:not(.active) {

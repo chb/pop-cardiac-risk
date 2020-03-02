@@ -1,11 +1,13 @@
-import React from 'react';
-import { Provider }  from "react-redux";
-import store from "./store"
-import { loadPatients } from "./store/patients"
-import PatientList from "./components/PatientList/"
-import Detail from "./components/DetailView/"
-import ClientContext from "./ClientContext"
-import PopulationView from "./components/PopulationView/"
+import React            from "react";
+import { Provider }     from "react-redux";
+import config           from "../../config";
+import store            from "../../store/";
+import { loadPatients } from "../../store/patients";
+import PatientList      from "../../components/PatientList/";
+import Detail           from "../../components/DetailView/";
+import ClientContext    from "../../ClientContext";
+// import PopulationView   from "../../components/PopulationView/";
+import GroupView        from "../../components/GroupView";
 import {
   BrowserRouter as Router,
   Switch,
@@ -27,15 +29,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    window.FHIR.oauth2.init({
-      // iss     : "https://smart-proxy-server.herokuapp.com/pop/presto1",
-      iss     : "https://smart-proxy-server.herokuapp.com/pop/mysql-leap",
-      // iss     : "http://localhost:4000/pop/presto1",
-      // iss     : "http://localhost:4000/pop/mysql-mina",
-      // iss     : "http://localhost:4000/pop/mysql-leap",
-      clientId: "whatever",
-      scope   : "system/Patient.read system/Observation.read offline_access"
-    })
+    window.FHIR.oauth2.init(config.fhir)
       .then(client => {
         this.client = client;
         window.SMARTClient = client;
@@ -72,8 +66,12 @@ class App extends React.Component {
           <div className="app">
             <ClientContext.Provider value={this.client}>
               <Switch>
-                <Route path="/groups/:id?">
+                {/* <Route path="/groups/:id?">
                   <PopulationView />
+                </Route> */}
+                <Route path="/groups/:groupBy/:condition">
+                    <PatientList />
+                    <GroupView/>
                 </Route>
                 <Route path="/:id?">
                   <PatientList />
