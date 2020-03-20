@@ -10,5 +10,47 @@ export default {
     },
     sql: {
         dialect: "MySQL" // or "Presto"
+    },
+    groups: {
+        "age" : {
+            "unknown"  : {
+                label: "Unknown Age",
+                matches: p => !p.age
+            },
+            "0-to-1"   : {
+                label: "0 to 1 year old",
+                matches: p => p.age > 0 && p.age <=1
+            },
+            "1-to-20"  : {
+                label: "1 to 20 years old",
+                matches: p => p.age > 1 && p.age <=20
+            },
+            "20-to-40" : {
+                label: "20 to 40 years old",
+                matches: p => p.age > 20 && p.age <=40
+            },
+            "40-to-80" : {
+                label: "40 to 80 years old",
+                matches: p => p.age > 40 && p.age <=80
+            },
+            "80-and-up": {
+                label: "80+ years old",
+                matches: p => p.age > 80
+            }
+        },
+        "gender": {
+            "m": {
+                label: "male",
+                matches: p => p.gender === "male"
+            },
+            "f": {
+                label: "female",
+                matches: p => p.gender === "female"
+            },
+            "o": {
+                label: "other/unknown gender",
+                matches: p => p.gender !== "male" && p.gender !== "female"
+            }
+        }
     }
 };

@@ -38,12 +38,10 @@
         }
     }
 
-    > :not(.title) {
-        &:hover {
-            background: rgba(#FFF, 0.1);
-            text-decoration: none;
-            color: #FFF;
-        }
+    > a:hover {
+        background: rgba(#FFF, 0.1);
+        text-decoration: none;
+        color: #FFF;
     }
 
     .back-link {

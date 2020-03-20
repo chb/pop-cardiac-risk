@@ -30,7 +30,7 @@ class PageHeader extends React.Component
                     null
                 }
                 <div className="title">{ title }</div>
-                { right }
+                { right || <i/>}
             </header>
         );
     }

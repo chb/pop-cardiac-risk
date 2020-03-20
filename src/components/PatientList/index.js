@@ -1,12 +1,13 @@
 import React               from 'react'
 import PropTypes           from "prop-types"
 import { connect }         from "react-redux"
-import Footer from "../Footer/"
-import Checkbox from "../Checkbox/"
+import Footer              from "../Footer/"
+import Checkbox            from "../Checkbox/"
 import { search as doSearch, sort as doSort } from "../../store/patients"
 import { getAge, highlight, buildClassName } from '../../lib';
 import { Link, withRouter } from "react-router-dom";
 import PageHeader from "../PageHeader"
+import config from "../../config"
 import "./PatientList.scss"
 
 
@@ -82,7 +83,7 @@ class PatientList extends React.Component
             rowHeight       : 10,
             hideIncompatible: true,
             groupBy         : "none",
-            openGroup       : "female",
+            openGroup       : "",
             showFilters     : false
         };
 
@@ -439,7 +440,6 @@ class PatientList extends React.Component
             skipTop,
             windowLength,
             skipBottom,
-            openGroup,
             rowHeight
         } = this.state;
 
@@ -457,23 +457,24 @@ class PatientList extends React.Component
             return <div className="center">No records found</div>
         }
 
-        const groups = {
-            "Unknown Age"       : { start: -1, end: 0       , data: [], length: 0, label: "Unknown Age"        },
-            "0 to 1 years old"  : { start: 0 , end: 1       , data: [], length: 0, label: "0 to 1 years old"   },
-            "1 to 20 years old" : { start: 1 , end: 20      , data: [], length: 0, label: "1 to 20 years old"  },
-            "20 to 40 years old": { start: 20, end: 40      , data: [], length: 0, label: "20 to 40 years old" },
-            "40 to 80 years old": { start: 40, end: 80      , data: [], length: 0, label: "40 to 80 years old" },
-            "80+ years old"     : { start: 80, end: Infinity, data: [], length: 0, label: "80+ years old"      }
-        };
+        const groups = {};
+        for (const key in config.groups.age) {
+            groups[key] = {
+                ...config.groups.age[key],
+                id: key,
+                data: [],
+                length: 0
+            };
+        }
 
         function getGroup(pt) {
             for (const g in groups) {
                 const group = groups[g];
-                if (pt.age > group.start && pt.age <= group.end) {
+                if (group.matches(pt)) {
                     return group;
                 }
             }
-            return groups["Unknown Age"];
+            return groups.unknown;
         }
 
         for (const g in groups) {
@@ -482,7 +483,9 @@ class PatientList extends React.Component
             }, 0)
         }
 
-        data = data.filter(rec => getGroup(rec).label === openGroup);
+        const openGroup  = groups[this.state.openGroup];
+
+        data = data.filter(rec => openGroup && openGroup.matches(rec));
 
         data = this.sort(data);
 
@@ -500,23 +503,23 @@ class PatientList extends React.Component
         const groupNames = Object.keys(groups);
 
         return groupNames.filter(g => groups[g].length > 0).sort().map((groupName, i, all) => {
-            const group = groups[groupName].data;
+            const group = groups[groupName];
             return [
                 <div className={ buildClassName({
                     "group-header": 1,
-                    "open": openGroup === groupName
+                    "open": openGroup === group
                 })}
                 key={ "header-" + groupName }
                 onClick={() => this.setState({ openGroup: groupName }) }>
-                    <Link to={"/groups/age/" + groups[groupName].start + ":" + groups[groupName].end} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
+                    <Link to={"/groups/age/" + groupName} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
                         <i className="glyphicon glyphicon-signal"/>
                     </Link>
-                    { groupName } <b className="badge">{ groups[groupName].length }</b>
+                    { group.label } <b className="badge">{ groups[groupName].length }</b>
                 </div>,
-                group.length ? 
+                group.data.length ? 
                     <div key="wrapper" className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
                         <div className="spacer" style={{ height: skipTop * rowHeight }} />
-                        { group }
+                        { group.data }
                         <div className="spacer" style={{ height: skipBottom * rowHeight }} />
                     </div> : null
             ];
@@ -530,7 +533,6 @@ class PatientList extends React.Component
             skipTop,
             windowLength,
             skipBottom,
-            openGroup,
             rowHeight
         } = this.state;
 
@@ -548,22 +550,29 @@ class PatientList extends React.Component
             return <div className="center">No records found</div>
         }
 
-        const groups = {
-            male  : {
+        const groups = {};
+        for (const key in config.groups.gender) {
+            groups[key] = {
+                ...config.groups.gender[key],
+                id: key,
                 data: [],
-                length: data.reduce((prev, cur) => prev + (cur.gender === "male" ? 1 : 0), 0)
-            },
-            female: {
-                data: [],
-                length: data.reduce((prev, cur) => prev + (cur.gender === "female" ? 1 : 0), 0)
-            },
-            "Unknown Gender": {
-                data: [],
-                length: data.reduce((prev, cur) => prev + (cur.gender !== "female" && cur.gender !== "male" ? 1 : 0), 0)
+                length: 0
+            };
+        }
+        for (const p of data) {
+            for (const gId in groups) {
+                const g = groups[gId];
+                if (g.matches(p)) {
+                    g.length += 1;
+                    break;
+                }
             }
-        };
+        }
 
-        data = data.filter(rec => (rec.gender || "Unknown Gender") === openGroup);
+        const groupNames = Object.keys(groups);
+        const openGroup  = groups[this.state.openGroup];
+
+        data = data.filter(rec => openGroup && openGroup.matches(rec));
 
         data = this.sort(data);
 
@@ -571,33 +580,39 @@ class PatientList extends React.Component
             const rec = data[i];
             if (!rec) break;
 
-            const gender = rec.gender || "Unknown Gender";
-
-            groups[gender].data.push(
-                <Patient key={ rec.id } patient={ rec } selected={ selectedPatientId === rec.id } search={ search } />
-            );
+            // const gender = rec.gender;
+            const groupName = groupNames.find(id => groups[id].matches(rec));
+            if (groupName) {
+                groups[groupName].data.push(
+                    <Patient key={ rec.id } patient={ rec } selected={ selectedPatientId === rec.id } search={ search } />
+                );
+            }
+            // console.log(group)
+            // group.data.push(
+            //     <Patient key={ rec.id } patient={ rec } selected={ selectedPatientId === rec.id } search={ search } />
+            // );
         }
 
-        const groupNames = Object.keys(groups);
+        
 
         return groupNames.filter(g => groups[g].length > 0).sort().map((groupName, i, all) => {
-            const group = groups[groupName].data;
+            const group = groups[groupName];
             return [
                 <div className={ buildClassName({
                     "group-header": 1,
-                    "open": openGroup === groupName
+                    "open": openGroup === group
                 })}
                 key={ "header-" + groupName }
                 onClick={() => this.setState({ openGroup: groupName }) }>
                     <Link to={"/groups/gender/" + groupName} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
                         <i className="glyphicon glyphicon-signal"/>
                     </Link>
-                    { groupName } <b className="badge">{ groups[groupName].length }</b>
+                    { group.label } <b className="badge">{ groups[groupName].length }</b>
                 </div>,
-                group.length ? 
+                group.data.length ? 
                     <div key="wrapper" className="patient-list" onScroll={ this.onScroll } ref={ this.wrapper }>
                         <div className="spacer" style={{ height: skipTop * rowHeight }} />
-                        { group }
+                        { group.data }
                         <div className="spacer" style={{ height: skipBottom * rowHeight }} />
                     </div> : null
             ];

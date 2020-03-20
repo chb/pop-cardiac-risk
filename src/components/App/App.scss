@@ -162,6 +162,27 @@ body {
   flex: 1;
 }
 
+.sub-header {
+    background: #EEE;
+    border-bottom: 1px solid #BBB;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex: 0 0 auto;
+    z-index: 2;
+    background: #EEE;
+    border-bottom: 1px solid #BBB;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex: 0 0 auto;
+    z-index: 2;
+    height: 45px;
+    padding: 5px;
+}
+
 
 
 .search-match {
