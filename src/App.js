@@ -29,7 +29,8 @@ class App extends React.Component {
   componentDidMount() {
     window.FHIR.oauth2.init({
       // iss     : "https://smart-proxy-server.herokuapp.com/pop/presto1",
-      iss     : "https://smart-proxy-server.herokuapp.com/pop/mysql-leap",
+      // iss     : "https://smart-proxy-server.herokuapp.com/pop/mysql-leap",
+      iss     : "http://localhost:4000/service/mysql-r3",
       // iss     : "http://localhost:4000/pop/presto1",
       // iss     : "http://localhost:4000/pop/mysql-mina",
       // iss     : "http://localhost:4000/pop/mysql-leap",
