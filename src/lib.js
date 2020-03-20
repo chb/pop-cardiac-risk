@@ -275,6 +275,10 @@ export function avg(records) {
     return records.reduce((prev, cur) => prev + cur.value, 0) / records.length;
 }
 
+/**
+ * Given a records array returns the value of the last record or undefined
+ * @param {Array<{value: string|number}>} records 
+ */
 export function last(records) {
     const index = records.length - 1;
     if (index < 0) return undefined;
@@ -370,4 +374,8 @@ export function highlight(str, stringToFind) {
 export function buildClassName(classes)
 {
     return Object.keys(classes).filter(c => classes[c]).join(" ");
+}
+
+export function getPath(obj, path) {
+    return path.split(".").reduce((prev, cur) => prev ? prev[cur] : undefined, obj);
 }

@@ -296,7 +296,7 @@ export default class CardiacRisk extends React.Component
                                 label: <><div>High</div><div className="text-muted">140+ mm/Hg</div></>,
                                 color: "rgb(0, 142, 176)",
                                 min  : 140,
-                                max  : 160 
+                                max  : 200 
                             }
                         ]}
                     />

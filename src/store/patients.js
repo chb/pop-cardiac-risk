@@ -72,12 +72,12 @@ export function loadPatients(client) {
         // let gotFirstChunk = false;
         return query(client, {
             sql: `SELECT 
-                '{id}',
-                '{gender}',
-                '{birthDate}' AS dob,
-                '{deceasedBoolean}',
-                '{deceasedDateTime}',
-                '{{name}}'
+                '{id}'               AS id,
+                '{gender}'           AS gender,
+                '{birthDate}'        AS dob,
+                '{deceasedBoolean}'  AS deceasedBoolean,
+                '{deceasedDateTime}' AS deceasedDateTime,
+                '{{name}}'           AS name
                 FROM Patient
                 LIMIT 2000`,
             maxRows: 10000,

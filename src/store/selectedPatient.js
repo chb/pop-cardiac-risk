@@ -4,20 +4,22 @@ import {
     // avg,
     // isSmoker,
     query,
-    getPatientDisplayName
+    getPatientDisplayName,
+    getPath
 } from "../lib"
+import moment from "moment"
 
 const initialState = {
     loading: false,
     error  : null,
     data: {
         // id          : "patient-id",
-        gender      : "male",
-        dob         : "1939-08-30",
+        gender          : "male",
+        dob             : "1939-08-30",
         // age         : 80,
         // deceasedBoolean : false,
         deceasedDateTime: "1989-08-30",
-        name        : "John Doe",
+        name            : "John Doe",
         // hsCRP       : 2,
         // cholesterol : 100,
         // HDL         : 70,
@@ -45,8 +47,7 @@ export function merge(payload) {
 }
 
 export function load(client, id) {
-    return function (dispatch, getState) {
-        // console.time("Loading data");
+    return function (dispatch) {
         dispatch(merge({
             loading: true,
             error: null,
@@ -99,8 +100,10 @@ export function load(client, id) {
                 deceasedDateTime: patient.deceasedDateTime
             }
 
+            // name ------------------------------------------------------------
             pt.name = getPatientDisplayName(JSON.parse(patient.name || "{}"));
 
+            // race ------------------------------------------------------------
             if (patient.extensions) {
                 const ext = JSON.parse(patient.extensions).find(
                     e => e.url === "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
@@ -117,103 +120,79 @@ export function load(client, id) {
                 }
             }
 
-            pt.cholesterol     = Math.random() > 0.33 ? 130 + Math.random() * 190 : null;
-            pt.sbp             = Math.random() > 0.33 ? 90  + Math.random() * 60  : null;
-            pt.hsCRP           = Math.random() > 0.33 ? 1   + Math.random() * 8   : null;
-            pt.HDL             = Math.random() > 0.33 ? 30  + Math.random() * 60  : null;
-            pt.smoker          = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
-            pt.hypertensionTmt = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
-            pt.diabetic        = Math.random() > 0.66 ? true : Math.random() < 0.33 ? false : undefined;
+            // on hypertension treatment (random) ------------------------------
+            pt.hypertensionTmt = Math.random() > 0.66 ?
+                true :
+                Math.random() < 0.33 ? false : undefined;
+
+            // diabetic (random) -----------------------------------------------
+            pt.diabetic = Math.random() > 0.66 ?
+                true :
+                Math.random() < 0.33 ? false : undefined;
+
+            return Promise.all([pt, loadObservations(client, pt.id)]);
+        })
+        .then(([pt, observations]) => {
+
+            // Total Cholesterol (last known value)
+            pt.cholesterol = getPath(observations, "cholesterol.0.value") || null;
+            
+            // HDL (last known value)
+            pt.HDL = getPath(observations, "HDL.0.value") || null;
+
+            // Smoking Status (last known value)
+            const smokingStatus = getPath(observations, "smoker.0.value");
+            if (!smokingStatus) {
+                pt.smoker = undefined;
+            } else {
+                pt.smoker = [
+                    "449868002",       // Current every day smoker
+                    "428041000124106", // Current some day smoker
+                    "77176002",        // Smoker, current status unknown
+                    "428071000124103", // Current Heavy tobacco smoker
+                    "428061000124105"  // Current Light tobacco smoker
+                ].indexOf(smokingStatus) > -1;
+            }
+
+            // Systolic Blood Pressure (last known value)
+            pt.sbp = getPath(observations, "sbp.0.value") || null;
             
             dispatch(merge({
                 data   : pt,
                 error  : null,
                 loading: false
             }));
-            // console.timeEnd("Loading data");
         }).catch(error => {
             dispatch(merge({
                 error,
                 loading: false
             }));
-            // console.timeEnd("Loading data");
         });
     };
 }
 
 export function loadObservations(client, id) {
-    
-    const selects = [
 
-        // hsCRP -----------------------------------------------------------
-        // `SELECT
-        //     'hsCRP'                                       AS observationType,
-        //     resource_json ->> '$.valueQuantity.value'     AS observationValue,
-        //     resource_json ->> '$.subject.reference'       AS patient,
-        //     DATE(resource_json ->> '$.effectiveDateTime') AS effectiveDateTime
-        // FROM Observation
-        // WHERE 
-        //     resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-        //     resource_json ->> '$.code.coding[0].code'   = '30522-7'`,
-
-        // totalCholesterol ------------------------------------------------
-        `SELECT
-            'totalCholesterol'                                 AS observationType,
-            json_extract_scalar(json, '$.valueQuantity.value') AS observationValue,
-            json_extract_scalar(json, '$.subject.reference'  ) AS patient,
-            json_extract_scalar(json, '$.effectiveDateTime'  ) AS effectiveDateTime
-        FROM Observation
-        WHERE 
-            json_extract_scalar(json, '$.code.coding[0].system') = 'http://loinc.org'
-            AND (
-                json_extract_scalar(json, '$.code.coding[0].code') = '14647-2' OR
-                json_extract_scalar(json, '$.code.coding[0].code') = '2093-3'
-            )
-            AND json_extract_scalar(json, '$.id') = '${id}'`,
-
-        // HDL -------------------------------------------------------------
-        // `SELECT
-        //     'HDL'                                         AS observationType,
-        //     resource_json ->> '$.valueQuantity.value'     AS observationValue,
-        //     resource_json ->> '$.subject.reference'       AS patient,
-        //     DATE(resource_json ->> '$.effectiveDateTime') AS effectiveDateTime
-        // FROM Observation
-        // WHERE 
-        //     resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-        //     resource_json ->> '$.code.coding[0].code'   = '2085-9'`,
-
-        // sbp -------------------------------------------------------------
-        `SELECT
-            'sbp'                                              AS observationType,
-            json_extract_scalar(json, '$.valueQuantity.value') AS observationValue,
-            json_extract_scalar(json, '$.subject.reference'  ) AS patient,
-            json_extract_scalar(json, '$.effectiveDateTime'  ) AS effectiveDateTime
-        FROM Observation
-        WHERE 
-            json_extract_scalar(json, '$.code.coding[0].system') = 'http://loinc.org'
-            AND (
-                json_extract_scalar(json, '$.code.coding[0].code') = '8480-6' OR
-                json_extract_scalar(json, '$.code.coding[0].code') = '8450-9' OR
-                json_extract_scalar(json, '$.code.coding[0].code') = '8451-7' OR
-                json_extract_scalar(json, '$.code.coding[0].code') = '8459-0' OR
-                json_extract_scalar(json, '$.code.coding[0].code') = '8460-8' OR
-                json_extract_scalar(json, '$.code.coding[0].code') = '8461-6'
-            )
-            AND json_extract_scalar(json, '$.id') = '${id}'`,
-
-        // smokingStatus ---------------------------------------------------
-        // `SELECT
-        //     'smokingStatus'                                           AS observationType,
-        //     resource_json ->> '$.valueCodeableConcept.coding[0].code' AS observationValue,
-        //     resource_json ->> '$.subject.reference'                   AS patient,
-        //     DATE(resource_json ->> '$.effectiveDateTime')             AS effectiveDateTime
-        // FROM Observation
-        // WHERE 
-        //     resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-        //     resource_json ->> '$.code.coding[0].code'   = '72166-2'`
+    const codes = [
+        '14647-2', '2093-3', // totalCholesterol
+        // '30522-7',           // hsCRP
+        '2085-9',            // HDL
+        // '8480-6', '8450-9', '8451-7', '8459-0', '8460-8', '8461-6', // Blood pressure
+        '55284-4', // Blood pressure as components
+        '72166-2' // Smoking Status
     ];
-
-    const sql = selects.join(" UNION ALL ") + " ORDER BY effectiveDateTime ASC";
+    
+    const sql = `SELECT
+        '{code.coding[0].code}' AS code,
+        '{valueQuantity.value}' AS observationValue,
+        '{subject.reference}'   AS patient,
+        '{effectiveDateTime}'   AS effectiveDateTime,
+        '{component}'           AS component
+    FROM Observation
+    WHERE 
+        '{subject.reference}'     = 'Patient/${id}' AND
+        '{code.coding[0].system}' = 'http://loinc.org' AND
+        '{code.coding[0].code}' IN('${codes.join("', '")}')`;
 
     const  observations = {
         hsCRP       : [],
@@ -226,40 +205,60 @@ export function loadObservations(client, id) {
     return query(client, {
         sql,
         onPage(data) {
+
+            // Sorting on the server is slow because the entire Observations
+            // needs to be sorted. It is faster to sort on the client because
+            // we don't have that many results
+            data.sort((a, b) => moment(a.effectiveDateTime).diff(b.effectiveDateTime, "seconds"));
+
             data.forEach(observation => {
-                switch (observation.observationType) {
-                    case "hsCRP":
+                switch (observation.code) {
+
+                    // hsCRP
+                    case "30522-7": 
                         observations.hsCRP.push({
                             value: parseFloat(observation.observationValue),
                             date : observation.effectiveDateTime
                         });
                     break;
-                    case "totalCholesterol":
+
+                    // totalCholesterol
+                    case "14647-2":
+                    case "2093-3":
                         observations.cholesterol.push({
                             value: parseFloat(observation.observationValue),
                             date : observation.effectiveDateTime
                         });
                     break;
-                    case "HDL":
+
+                    // HDL
+                    case "2085-9":
                         observations.HDL.push({
                             value: parseFloat(observation.observationValue),
                             date : observation.effectiveDateTime
                         });
                     break;
-                    case "sbp":
+
+                    // Systolic Blood Pressure from component
+                    case "55284-4":
+                        const component = JSON.parse(observation.component);
                         observations.sbp.push({
-                            value: parseFloat(observation.observationValue),
+                            value: parseFloat(getPath(component, "0.valueQuantity.value")),
                             date : observation.effectiveDateTime
                         });
                     break;
-                    case "smokingStatus":
+
+                    // smokingStatus
+                    case "72166-2":
                         observations.smoker.push({
                             value: observation.observationValue,
                             date : observation.effectiveDateTime
                         });
                     break;
+
+                    // This shouldn't happen
                     default:
-                        console.warn(`Unknown observation type "${observation.observationType}"`);
+                        console.warn(`Unknown observation type "${observation.code}"`);
                     break;
                 }
             });
