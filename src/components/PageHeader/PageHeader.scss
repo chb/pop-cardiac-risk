@@ -1,0 +1,54 @@
+.app-header {
+
+    background     : #008eb0;
+    color          : #FFF;
+    display        : flex;
+    flex           : 0 0 3rem;
+    margin         : 0;
+    // height: 3em;
+    justify-content: center;
+    align-items    : center;
+    // overflow: hidden;
+
+    > * {
+        flex           : 0 0 4rem;
+        height         : 100%;
+        display        : flex;
+        align-items    : center;
+        justify-content: center;
+        color          : rgba(#FFF, 0.7);
+        white-space    : nowrap;
+        text-decoration: none;
+        
+        .glyphicon {
+            top: 0;
+        }
+
+        &.title {
+            flex           : 1 1 0;
+            justify-content: center;
+            align-items    : center;
+            white-space    : normal;
+            line-height    : normal;
+            display        : flex;
+            color          : #FFF;
+            font-weight    : 600;
+            font-size      : 16px;
+            font-size      : calc(14px + 0.5vw);
+        }
+    }
+
+    > a:hover {
+        background: rgba(#FFF, 0.1);
+        text-decoration: none;
+        color: #FFF;
+    }
+
+    .back-link {
+        visibility: hidden;
+    }
+}
+
+// .page.active .app-header .back-link {
+//     visibility: visible;
+// }
