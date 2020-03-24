@@ -78,8 +78,7 @@ export function loadPatients(client) {
                 '{deceasedBoolean}'  AS deceasedBoolean,
                 '{deceasedDateTime}' AS deceasedDateTime,
                 '{{name}}'           AS name
-                FROM Patient
-                LIMIT 2000`,
+                FROM Patient`,
             maxRows: 10000,
             onPage(data) {
                 dispatch(addPatients(data.map(o => {
