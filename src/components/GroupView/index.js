@@ -151,7 +151,7 @@ class Chart extends React.Component
                 spline: {
                     lineWidth: 2,
                     // marker   : false,
-                    dashStyle: "ShortDot",
+                    // dashStyle: "ShortDot",
                     shadow: {
                         color: "#000",
                         offsetX: 0,
