@@ -320,7 +320,7 @@ export default function serversReducer(state = initialState, action)
         case SET_PATIENTS: {
             const idIndex = {};
             action.payload.forEach((o, i) => {
-                idIndex[o.id] = i;
+                idIndex[o.id] = o;
             });
             return {
                 ...state,
@@ -335,7 +335,7 @@ export default function serversReducer(state = initialState, action)
         case ADD_PATIENTS: {
             const idIndex = {};
             action.payload.forEach((o, i) => {
-                idIndex[o.id] = i;
+                idIndex[o.id] = o;
             });
             return {
                 ...state,
