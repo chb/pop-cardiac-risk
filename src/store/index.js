@@ -11,6 +11,7 @@ import HDL              from "./HDL"
 import sbp              from "./sbp"
 import hsCRP            from "./hsCRP"
 import totalCholesterol from "./totalCholesterol"
+import groups           from "./groups"
 
 const store = createStore(
     combineReducers({
@@ -19,7 +20,8 @@ const store = createStore(
         totalCholesterol,
         hsCRP,
         HDL,
-        sbp
+        sbp,
+        groups
     }),
     applyMiddleware(thunk)
 );
