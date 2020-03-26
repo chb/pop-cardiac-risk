@@ -315,7 +315,7 @@ class PatientList extends React.Component
 
         return (
             <div className={"page patients" + (id ? "" : " active")}>
-                <PageHeader title="Population Cardiac Risk"/>
+                <PageHeader title={ <Link to="/">Population Cardiac Risk</Link>}/>
                 { this.renderHeader() }
                 { this.renderPatients() }
                 <Footer start={ start } end={ end } />

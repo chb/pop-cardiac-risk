@@ -10,6 +10,11 @@
     align-items    : center;
     // overflow: hidden;
 
+    a {
+        color          : #FFF;
+        text-decoration: none; 
+    }
+
     > * {
         flex           : 0 0 4rem;
         height         : 100%;
