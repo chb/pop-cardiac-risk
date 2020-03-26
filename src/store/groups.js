@@ -1,4 +1,4 @@
-import { query, getPath } from "../lib"
+import { query, getPath, getQuery } from "../lib"
 
 const initialState = {
     loading: false,
@@ -52,7 +52,12 @@ export function load({ startDate, endDate, patientId }) {
     };
 }
 
-export function loadAll({ startDate, endDate, minAge = 40, maxAge = 80 }) {
+/**
+ * Load the observations for all the patients that match the currently selected
+ * filters
+ * @param {*} param0 
+ */
+export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
     return dispatch => {
         dispatch(merge({ loading: true, error: null, data: [] }));
 
@@ -61,6 +66,34 @@ export function loadAll({ startDate, endDate, minAge = 40, maxAge = 80 }) {
             '2085-9',            // HDL
             '55284-4'            // Blood pressure as components
         ];
+
+        const { all } = getQuery();
+
+        let patientFilters = [];
+        if (gender) {
+            if (gender === "male") {
+                patientFilters.push("gender = 'male'");
+            }
+            else if (gender === "female") {
+                patientFilters.push("gender = 'female'");
+            }
+            else {
+                patientFilters.push("gender NOT IN('male', 'female')");
+            }
+        }
+        else if (minAge !== undefined && maxAge !== undefined) {
+            patientFilters.push(
+                `DATE_ADD(DOB, INTERVAL ${minAge} YEAR) <= CURDATE()`,
+                `DATE_ADD(DOB, INTERVAL ${maxAge} YEAR) >= CURDATE()`
+            );
+        }
+
+        if (!all || (minAge !== undefined && maxAge !== undefined)) {
+            patientFilters.push(
+                "'{deceasedBoolean}'  IS NULL",
+                "'{deceasedDateTime}' IS NULL"
+            );
+        }
         
         const sql = `SELECT
             o.code,
@@ -89,11 +122,7 @@ export function loadAll({ startDate, endDate, minAge = 40, maxAge = 80 }) {
                 '{deceasedBoolean}'  AS deceasedBoolean,
                 '{deceasedDateTime}' AS deceasedDateTime
             FROM Patient
-            WHERE
-                DATE_ADD(DOB, INTERVAL ${minAge} YEAR) <= CURDATE()
-                AND DATE_ADD(DOB, INTERVAL ${maxAge} YEAR) >= CURDATE()
-                AND '{deceasedBoolean}'  IS NULL
-                AND '{deceasedDateTime}' IS NULL
+            ${patientFilters.length ? "WHERE " + patientFilters.join(" AND ") : "" }
         ) AS p ON o.patient = p.id`;
         
         const data = {

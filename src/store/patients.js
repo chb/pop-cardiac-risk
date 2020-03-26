@@ -5,23 +5,26 @@ import {
     avg,
     isSmoker,
     query,
-    getPatientDisplayName
+    getPatientDisplayName,
+    setQuery
 } from "../lib"
 
+const urlQuery = new URLSearchParams(window.location.search);
+
 const initialState = {
-    loading: false,
-    error  : null,
+    loading              : false,
+    error                : null,
     
-    selectedPatientId: null,
+    selectedPatientId    : null,
 
     patientsLoadStartTime: Date.now(),
-    patientsLoadEndTime: Date.now(),
-    search : "",
-    sort   : "",
-    data   : [],
-    idIndex: {},
-    observations_loading: false,
-    observations_error: null
+    patientsLoadEndTime  : Date.now(),
+    search               : urlQuery.get("q"   ) || "",
+    sort                 : urlQuery.get("sort") || "",
+    data                 : [],
+    idIndex              : {},
+    observations_loading : false,
+    observations_error   : null
 };
 
 const SET_LOADING  = "patients/setLoading";
@@ -369,12 +372,14 @@ export default function serversReducer(state = initialState, action)
         }
 
         case SEARCH:
+            setQuery({ q: action.payload });
             return {
                 ...state,
                 search: action.payload
             };
         
         case SORT:
+            setQuery({ sort: action.payload });
             return {
                 ...state,
                 sort: action.payload

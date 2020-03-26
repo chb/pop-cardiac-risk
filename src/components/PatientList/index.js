@@ -4,7 +4,7 @@ import { connect }         from "react-redux"
 import Footer              from "../Footer/"
 import Checkbox            from "../Checkbox/"
 import { search as doSearch, sort as doSort } from "../../store/patients"
-import { getAge, highlight, buildClassName } from '../../lib';
+import { getAge, highlight, buildClassName, getQuery, setQuery } from '../../lib';
 import { Link, withRouter } from "react-router-dom";
 import PageHeader from "../PageHeader"
 import config from "../../config"
@@ -81,14 +81,16 @@ class PatientList extends React.Component
             scrollHeight    : 0,
             windowLength    : 1,
             rowHeight       : 10,
-            hideIncompatible: true,
-            groupBy         : "none",
-            openGroup       : "",
-            showFilters     : false
+            hideIncompatible: getQuery("all") !== "1",
+            groupBy         : getQuery("group") || "none",
+            openGroup       : getQuery("openGroup") || "",
+            showFilters     : getQuery("cfg")
         };
 
         this.wrapper = React.createRef();
+
         this.onScroll = this.onScroll.bind(this);
+        this.onSearch = this.onSearch.bind(this);
     }
 
     computeScrollState()
@@ -172,14 +174,36 @@ class PatientList extends React.Component
         return nextState;
     }
 
+    // Event handlers ----------------------------------------------------------
+
+    onSearch(e)
+    {
+        const q = e.target.value;
+        if (q !== this.props.search) {
+            this.props.dispatch(doSearch(q));
+        }
+    }
+
     onScroll()
     {
         this.setState(this.computeScrollState());
     }
 
+    // Lifecycle ---------------------------------------------------------------
+
     componentDidUpdate(prevProps, prevState)
     {
+        setQuery({
+            cfg  : this.state.showFilters ? 1 : null,
+            sort : this.props.sort,
+            q    : this.props.search,
+            group: this.state.groupBy === "none" ? null : this.state.groupBy,
+            openGroup: this.state.openGroup || null,
+            all: this.state.hideIncompatible ? null : 1
+        });
+
         if (this.wrapper.current) {
+
             if (prevProps.search !== this.props.search || prevState.openGroup !== this.state.openGroup) {
                 this.wrapper.current.scrollTop = 0;
                 this.setState({
@@ -318,7 +342,7 @@ class PatientList extends React.Component
 
     renderHeader()
     {
-        const { search, sort } = this.props;
+        const { sort, search } = this.props;
         const [ sortBy, sortDir = "asc" ] = sort.split(":");
         const { groupBy, showFilters } = this.state;
         return (
@@ -335,9 +359,7 @@ class PatientList extends React.Component
                         className="form-control"
                         placeholder="Search patients"
                         value={search}
-                        onChange={
-                            e => this.props.dispatch(doSearch(e.target.value))
-                        }
+                        onChange={ this.onSearch }
                     />
                     <span className="clear-search" title="Clear Search" onClick={
                         () => this.props.dispatch(doSearch(""))
@@ -393,7 +415,7 @@ class PatientList extends React.Component
                         <div className={ buildClassName({ "btn-group btn-group-justified": 1, "passive": !sortBy }) }>
                             <label
                                 className={ buildClassName({ "btn btn-default": 1, "active": !sortBy }) }
-                                onMouseDown={ () => this.props.dispatch(doSort(`:${sortDir}`)) }>
+                                onMouseDown={ () => this.props.dispatch(doSort(``)) }>
                                 None
                             </label>
                             <label
@@ -443,6 +465,8 @@ class PatientList extends React.Component
             rowHeight
         } = this.state;
 
+        const { groupID } = this.props.match.params;
+
         const selectedPatientId = this.props.match.params.id || "";
         
         const start = startIndex + skipTop;
@@ -483,7 +507,7 @@ class PatientList extends React.Component
             }, 0)
         }
 
-        const openGroup  = groups[this.state.openGroup];
+        const openGroup = groups[this.state.openGroup];
 
         data = data.filter(rec => openGroup && openGroup.matches(rec));
 
@@ -511,7 +535,14 @@ class PatientList extends React.Component
                 })}
                 key={ "header-" + groupName }
                 onClick={() => this.setState({ openGroup: groupName }) }>
-                    <Link to={"/groups/age/" + groupName} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
+                    <Link
+                        to={"/groups/age/" + groupName}
+                        onClick={e => e.stopPropagation() }
+                        className={ buildClassName({
+                            "pull-right stat-btn": 1,
+                            "active": groupID === groupName
+                        })}
+                    >
                         <i className="glyphicon glyphicon-signal"/>
                     </Link>
                     { group.label } <b className="badge">{ groups[groupName].length }</b>
@@ -535,6 +566,8 @@ class PatientList extends React.Component
             skipBottom,
             rowHeight
         } = this.state;
+
+        const { groupID } = this.props.match.params;
 
         const selectedPatientId = this.props.match.params.id || "";
         
@@ -604,7 +637,14 @@ class PatientList extends React.Component
                 })}
                 key={ "header-" + groupName }
                 onClick={() => this.setState({ openGroup: groupName }) }>
-                    <Link to={"/groups/gender/" + groupName} onClick={e => e.stopPropagation() } className="pull-right stat-btn">
+                    <Link
+                        to={"/groups/gender/" + groupName}
+                        onClick={e => e.stopPropagation() }
+                        className={ buildClassName({
+                            "pull-right stat-btn": 1,
+                            "active": groupID === groupName
+                        })}
+                    >
                         <i className="glyphicon glyphicon-signal"/>
                     </Link>
                     { group.label } <b className="badge">{ groups[groupName].length }</b>

@@ -379,3 +379,30 @@ export function buildClassName(classes)
 export function getPath(obj, path) {
     return path.split(".").reduce((prev, cur) => prev ? prev[cur] : undefined, obj);
 }
+
+export function setQuery(q = {}) {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    for (const name in q) {
+        const param = q[name];
+        if (!param && param !== 0) {
+            params.delete(name);
+        }
+        else {
+            params.set(name, param);
+        }
+    }
+    window.history.replaceState({}, document.title, url.href);
+}
+
+export function getQuery(param = "") {
+    const query = new URLSearchParams(window.location.search);
+    if (param) {
+        return query.get(param);
+    }
+    const out = {};
+    for (const [name, value] of query.entries()) {
+        out[name] = value;
+    }
+    return out;
+}
