@@ -69,7 +69,7 @@ class App extends React.Component {
                 {/* <Route path="/groups/:id?">
                   <PopulationView />
                 </Route> */}
-                <Route path="/groups/:groupBy/:condition">
+                <Route path="/groups/:groupBy/:groupID">
                     <PatientList />
                     <GroupView/>
                 </Route>

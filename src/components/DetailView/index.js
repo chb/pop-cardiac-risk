@@ -3,7 +3,7 @@ import PropTypes   from "prop-types"
 import { connect } from "react-redux"
 // import * as lib from "../../lib"
 // import Chart from "../Chart";
-import { Link, withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 // import { selectPatientId } from "../store/patients"
 import "./DetailView.scss"
 import { merge, load } from "../../store/selectedPatient"

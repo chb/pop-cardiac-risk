@@ -34,41 +34,6 @@ class Chart extends React.Component
                 plotBorderWidth: 1,
                 plotBorderColor: "rgba(0, 0, 0, 0.3)",
                 marginRight    : 1,
-                // events: {
-                //     drilldown: (e) => {
-
-                //         if (!e.seriesOptions) {
-
-                //             const point = e.point,
-                //                   chart = this.chart,
-                //                   patient = point.patient;
-                            
-                //             let drillDown = {
-                //                 name: e.point.patient.name,
-                //                 type: "spline",
-                //                 color: 'rgb(244, 128, 78)',
-                //                 showInLegend: true,
-                //                 dashStyle: null,
-                //                 // marker: {
-                //                 //     symbol: "circle"
-                //                 // },
-                //                 data: point.series.data.filter(d => d.patient.id === patient.id).map(p => ({
-                //                     x: p.x,
-                //                     y: p.y,
-                //                     patient: p.patient
-                //                 })).sort((a, b) => a.x - b.x)
-                //             };
-        
-                //             // Show the loading label
-                //             chart.showLoading('Simulating Ajax ...');
-        
-                //             setTimeout(function () {
-                //                 chart.hideLoading();
-                //                 chart.addSeriesAsDrilldown(point, drillDown);
-                //             }, 1000);
-                //         }
-                //     }
-                // }
             },
             title: {
                 text: ""
@@ -107,51 +72,18 @@ class Chart extends React.Component
                             }
                         }
                     },
-                    // dataSorting: {
-                    //     enabled: true,
-                    //     sortKey: "x"
-                    // },
                     point: {
                         events: {
                             click: (e) => {
                                 if (this.props.onPatientSelect) {
                                     this.props.onPatientSelect(e.point.patient)
                                 }
-                                // if (this.patient && this.patient.id) {
-                                //     history.push("/groups/" + this.patient.id);
-                                // }
-                                // console.log(this, e);
-
-                                // this.series.chart.showLoading('Loading...');
-                                // setTimeout(() => {
-
-                                    // let drillDown = {
-                                    //     name: this.patient.name,
-                                    //     type: "spline",
-                                    //     color: 'rgba(0, 142, 176, 0.5)',
-                                    //     showInLegend: false,
-                                    //     dashStyle: null,
-                                    //     // marker: {
-                                    //     //     symbol: "circle"
-                                    //     // },
-                                    //     data: this.series.data.filter(d => d.patient.id === this.patient.id).map(p => ({
-                                    //         x: p.x,
-                                    //         y: p.y,
-                                    //         patient: p.patient
-                                    //     })).sort((a, b) => a.x - b.x)
-                                    // };
-
-                                    // // this.series.chart.hideLoading();
-                                    // this.series.chart.addSeriesAsDrilldown(e.point, drillDown);
-                                // }, 1000);
                             }
                         }
                     }
                 },
                 spline: {
                     lineWidth: 2,
-                    // marker   : false,
-                    // dashStyle: "ShortDot",
                     shadow: {
                         color: "#000",
                         offsetX: 0,
@@ -195,7 +127,8 @@ class Chart extends React.Component
 
     componentDidUpdate() {
         const { patient } = this.props;
-
+        const { history } = this.props;
+        // this.chart.showLoading();
         if (patient) {
             let drillDown = {
                 name : patient.name,
