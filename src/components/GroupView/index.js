@@ -331,7 +331,7 @@ class GroupView extends React.Component
         seriesSBP[1].data = seriesSBP[1].data.map(p => ({
             x: p.x,
             y: p.y / p.count
-        })).sort((a, b) => a.x - b.x);
+        }));
 
         // HDL -----------------------------------------------------------------
         const seriesHDL = [
@@ -382,7 +382,7 @@ class GroupView extends React.Component
         seriesHDL[1].data = seriesHDL[1].data.map(p => ({
             x: p.x,
             y: p.y / p.count
-        })).sort((a, b) => a.x - b.x);
+        }));
 
         // cholesterol ---------------------------------------------------------
         const seriesCholesterol = [
@@ -433,7 +433,7 @@ class GroupView extends React.Component
         seriesCholesterol[1].data = seriesCholesterol[1].data.map(p => ({
             x: p.x,
             y: p.y / p.count
-        })).sort((a, b) => a.x - b.x);
+        }));
 
         let header = null;
         if (selectedPatient) {
@@ -492,6 +492,7 @@ class GroupView extends React.Component
                             softMax: 320,
                             endOnTick: false,
                             maxPadding: 0,
+                            tickInterval: 50,
                             title: {
                                 text: "Total Cholesterol"
                             },
@@ -554,6 +555,7 @@ class GroupView extends React.Component
                             softMax: 100,
                             endOnTick: false,
                             maxPadding: 0.1,
+                            tickInterval: 25,
                             plotLines: [
                                 {
                                     value: 40,
@@ -608,9 +610,10 @@ class GroupView extends React.Component
                                 text: 'Systolic Blood Pressure'
                             },
                             softMin: 80,
-                            softMax: 160,
+                            softMax: 200,
                             endOnTick: false,
                             maxPadding: 0.1,
+                            tickInterval: 10,
                             plotLines: [
                                 {
                                     value: 100,

@@ -123,7 +123,8 @@ export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
                 '{deceasedDateTime}' AS deceasedDateTime
             FROM Patient
             ${patientFilters.length ? "WHERE " + patientFilters.join(" AND ") : "" }
-        ) AS p ON o.patient = p.id`;
+        ) AS p ON o.patient = p.id
+        ORDER BY o.effectiveDateTime`;
         
         const data = {
             cholesterol : [],
