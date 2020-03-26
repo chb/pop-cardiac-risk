@@ -22,12 +22,12 @@ class Chart extends React.Component
     };
 
     static defaultProps = {
-        height: "216px"
+        height: "206px"
     };
 
     componentDidMount()
     {    
-        const { history } = this.props;
+        // const { history } = this.props;
         this.chart = window.Highcharts.chart(this.props.id, {
             chart: {
                 zoomType       : "x",
@@ -63,6 +63,7 @@ class Chart extends React.Component
                     },
                 },
                 scatter: {
+                    color: 'rgba(0, 142, 176, 0.5)',
                     marker: {
                         radius: 4,
                         symbol: "circle",
@@ -134,7 +135,8 @@ class Chart extends React.Component
             let drillDown = {
                 name : patient.name,
                 type : "spline",
-                color: 'rgb(244, 128, 78)',
+                // color: 'rgb(244, 128, 78)',
+                color: 'rgb(0, 142, 176)',
                 showInLegend: false,
                 visible: true,
                 dashStyle: "Solid",
@@ -147,8 +149,26 @@ class Chart extends React.Component
                     patient: p.patient
                 })).sort((a, b) => a.x - b.x)
             };
-            this.chart.series.forEach(s => s.remove(false));
-            this.chart.update({ series: [ drillDown ]}, true, true, false);
+
+            const tooltip = {
+                formatter() {
+                    if (this.series.name === "Monthly Average") {
+                        return '<span style="color:' + this.point.color +
+                            '"> ● </span> Average for ' +
+                            moment(this.x).format("MMM YYYY") + '<b>: ' +
+                            (Math.round(this.y * 100) / 100) + '</b>';
+                    }
+                    return '<span style="color:' + this.point.color +
+                        '"> ● </span> <b>' + this.point.patient.name + '</b><br>' +
+                        moment(this.x).format("YYYY-MM-DD") +
+                        ' - <b>' + this.y + '</b>';
+                }
+            }
+            // this.chart.series.forEach(s => s.remove(false));
+            this.chart.update({
+                tooltip,
+                series: [ drillDown ],
+            }, true, false, false);
         } else {
             // this.chart.series.forEach(s => s.remove(false));
             this.chart.update(this.props.chartOptions, true, false, false);
@@ -172,7 +192,7 @@ class Chart extends React.Component
             height      : this.props.height,
             minHeight   : this.props.height,
             marginBottom: 15
-        }}/>;
+        }} className="custom-chart"/>;
     }
 }
 
@@ -205,8 +225,8 @@ class GroupView extends React.Component
     {
         const { startDate, endDate } = this.state;
 
-        const { condition: oldCondition, groupBy: oldGroupBy } = prevProps.match.params;
-        const { condition: newCondition, groupBy: newGroupBy } = this.props.match.params;
+        const { groupID: oldCondition, groupBy: oldGroupBy } = prevProps.match.params;
+        const { groupID: newCondition, groupBy: newGroupBy } = this.props.match.params;
         if (
             oldCondition !== newCondition     ||
             oldGroupBy !== newGroupBy         ||
@@ -219,17 +239,24 @@ class GroupView extends React.Component
 
     load()
     {
-        const { condition, groupBy }   = this.props.match.params;
+        const { groupID, groupBy }   = this.props.match.params;
         const { startDate, endDate }   = this.state;
 
-        let group = config.groups[groupBy][condition];
+        let group = config.groups[groupBy][groupID];
 
-        this.props.load({
+        const options = {
             startDate,
-            endDate,
-            minAge: group.minAge,
-            maxAge: group.maxAge
-        });
+            endDate
+        };
+
+        if (groupBy === "gender") {
+            options.gender = groupID === "f" ? "female" : "male";
+        } else {
+            options.minAge = group.minAge;
+            options.maxAge = group.maxAge;
+        }
+
+        this.props.load(options);
     }
 
     renderStage()
@@ -251,8 +278,8 @@ class GroupView extends React.Component
             return <div className="center">{String(error)}</div>
         }
 
-        const { condition, groupBy }   = this.props.match.params;
-        let group = config.groups[groupBy][condition];
+        const { groupID, groupBy }   = this.props.match.params;
+        let group = config.groups[groupBy][groupID];
         let title = group.label + " patients";
 
         // SBP -----------------------------------------------------------------
@@ -260,14 +287,16 @@ class GroupView extends React.Component
             {
                 name : "Systolic Blood Pressure",
                 type : "scatter",
-                color: 'rgba(244, 128, 78, 0.5)',
+                color: 'rgba(0, 142, 176, 0.5)',
+                showInLegend: true,
                 data : []
             },
             {
                 name   : "Monthly Average",
-                color  : 'rgba(0, 142, 176, 1)',
+                color  : 'rgb(244, 128, 78)',
                 data   : [],
                 type   : "spline",
+                dashStyle: "ShortDot",
                 marker : false,
                 visible: false
             }
@@ -310,11 +339,13 @@ class GroupView extends React.Component
                 name : "HDL",
                 type : "scatter",
                 color: 'rgba(0, 142, 176, 0.5)',
+                showInLegend: true,
                 data : []
             },
             {
                 name   : "Monthly Average",
                 color  : 'rgba(244, 128, 78, 1)',
+                dashStyle: "ShortDot",
                 data   : [],
                 type   : "spline",
                 marker : false,
@@ -359,6 +390,7 @@ class GroupView extends React.Component
                 name : "Total Cholesterol",
                 type : "scatter",
                 color: 'rgba(0, 142, 176, 0.5)',
+                showInLegend: true,
                 data : []
             },
             {
@@ -366,6 +398,7 @@ class GroupView extends React.Component
                 color  : 'rgba(244, 128, 78, 1)',
                 data   : [],
                 type   : "spline",
+                dashStyle: "ShortDot",
                 marker : false,
                 visible: false
             }
@@ -411,15 +444,28 @@ class GroupView extends React.Component
             }, " old");
 
             header = (
-                <div className="text-center">
-                    <h3>
-                        <b>{ selectedPatient.name }</b> - { ageAsString }, { selectedPatient.gender || "Unknown gender" }
-                    </h3>
-                    <button className="btn btn-primary btn-sm" onClick={() => {
-                        this.setState({ selectedPatient: null });
-                    }}>Show all patients</button>
-                    <hr/>
+                <>
+                <div className="row">
+                    <div className="col-lg-6 text-center">
+                        <h3 style={{ marginTop: 0 }}>
+                            <i className="glyphicon glyphicon-user"/> <b>{ selectedPatient.name }</b> - { ageAsString }, { selectedPatient.gender || "Unknown gender" }
+                        </h3>
+                    </div>
+                    <div className="col-lg-6 text-center">
+                        <h3 style={{ marginTop: 0 }}>
+                            <div className="btn-group btn-group-justified">
+                                <button type="button" className="btn btn-default" style={{ width: "14em" }} onClick={() => this.setState({ selectedPatient: null })}>
+                                    <i className="glyphicon glyphicon-signal"/> Show all patients
+                                </button>
+                                <button type="button" className="btn btn-default" style={{ width: "14em" }} onClick={() => this.props.history.push("/" + selectedPatient.id)}>
+                                    <i className="glyphicon glyphicon-dashboard"/> Cardiac Risk Calculator
+                                </button>
+                            </div>
+                        </h3>
+                    </div>
                 </div>
+                <hr style={{ margin: "5px 0" }}/>
+                </>
             );
         }
 
@@ -606,10 +652,10 @@ class GroupView extends React.Component
 
     render()
     {
-        const { condition, groupBy }   = this.props.match.params;
+        const { groupID, groupBy }   = this.props.match.params;
         const { startDate, endDate }   = this.state;
 
-        let group = config.groups[groupBy][condition];
+        let group = config.groups[groupBy][groupID];
         let title = group.label + " patients";
 
         return (

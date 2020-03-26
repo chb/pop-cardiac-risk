@@ -82,18 +82,18 @@ body {
 
 .page {
   display: flex;
-  flex: 2 1;
+  flex: 3 1 400px;
   flex-direction: column;
   // transition: all 3s ease-out;
   background: #FFF;
-  max-width: 100%;
+  // max-width: 100%;
   z-index: 2;
   box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.3) inset;
 }
 
 
 .page.patients {
-  flex: 0 1 400px;
+  flex: 0 0 400px;
   // transition-duration: 0;
   // background: #FFF;
   z-index: 1;
@@ -191,4 +191,24 @@ body {
   border-radius: 2px;
   color: #000;
   text-shadow: 0 1px 0 #FFF;
+}
+
+.custom-chart {
+  width: 100% !important;
+  // height: 216px !important;
+
+  > div {
+    width : 100%  !important;
+    height: 206px !important;
+    // max-width: calc(100% - 30px) !important;
+    overflow: hidden;
+  }
+
+  svg {
+    max-width: 100% !important;
+    height   : 100% !important;
+    // max-width: calc(100% - 30px) !important;
+    overflow: hidden;
+  }
+  // overflow: hidden;
 }
