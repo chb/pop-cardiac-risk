@@ -53,6 +53,7 @@ class Chart extends React.Component
             },
             plotOptions: {
                 series: {
+                    animation: false,
                     turboThreshold: 100000,
                     marker: {
                         symbol   : "circle",
@@ -149,8 +150,8 @@ class Chart extends React.Component
             this.chart.series.forEach(s => s.remove(false));
             this.chart.update({ series: [ drillDown ]}, true, true, false);
         } else {
-            this.chart.series.forEach(s => s.remove(false));
-            this.chart.update(this.props.chartOptions, true, true, false);
+            // this.chart.series.forEach(s => s.remove(false));
+            this.chart.update(this.props.chartOptions, true, false, false);
         }
     //     this.chart.hideNoData();
     //     this.chart.showLoading();
@@ -273,15 +274,19 @@ class GroupView extends React.Component
         ];
 
         data.sbp.forEach(rec => {
-            const avgKey  = rec.date.substr(0, 8) + "15";
-            const avgDate = moment(avgKey).toDate();
+            const avgYear  = rec.date.getFullYear();
+            const avgMonth = rec.date.getMonth();
+            const avgDate  = new Date(avgYear, avgMonth, 15);
+
             seriesSBP[0].data.push({
-                x      : new Date(rec.date),
+                x      : rec.date,
                 y      : rec.value,
                 patient: patients[rec.patient]
             });
 
-            let pt = seriesSBP[1].data.find(p => moment(p.x).isSame(avgDate, "month"));
+            let pt = seriesSBP[1].data.find(
+                p => p.x.getFullYear() === avgYear && p.x.getMonth() === avgMonth
+            );
             if (pt) {
                 pt.y += rec.value
                 pt.count += 1
@@ -318,15 +323,19 @@ class GroupView extends React.Component
         ];
 
         data.HDL.forEach((rec, i) => {
-            const avgKey = rec.date.substr(0, 8) + "15";
-            const avgDate = moment(avgKey).toDate();
+            const avgYear  = rec.date.getFullYear();
+            const avgMonth = rec.date.getMonth();
+            const avgDate  = new Date(avgYear, avgMonth, 15);
+
             seriesHDL[0].data.push({
-                x      : new Date(rec.date),
+                x      : rec.date,
                 y      : rec.value,
                 patient: patients[rec.patient]
             });
 
-            let pt = seriesHDL[1].data.find(p => moment(p.x).isSame(avgDate, "month"));
+            let pt = seriesHDL[1].data.find(
+                p => p.x.getFullYear() === avgYear && p.x.getMonth() === avgMonth
+            );
             if (pt) {
                 pt.y += rec.value
                 pt.count += 1
@@ -363,15 +372,19 @@ class GroupView extends React.Component
         ];
 
         data.cholesterol.forEach((rec, i) => {
-            const avgKey = rec.date.substr(0, 8) + "15";
-            const avgDate = moment(avgKey).toDate();
+            const avgYear  = rec.date.getFullYear();
+            const avgMonth = rec.date.getMonth();
+            const avgDate  = new Date(avgYear, avgMonth, 15);
+
             seriesCholesterol[0].data.push({
-                x      : new Date(rec.date),
+                x      : rec.date,
                 y      : rec.value,
                 patient: patients[rec.patient]
             });
 
-            let pt = seriesCholesterol[1].data.find(p => moment(p.x).isSame(avgDate, "month"));
+            let pt = seriesCholesterol[1].data.find(
+                p => p.x.getFullYear() === avgYear && p.x.getMonth() === avgMonth
+            );
             if (pt) {
                 pt.y += rec.value
                 pt.count += 1

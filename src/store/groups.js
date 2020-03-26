@@ -142,7 +142,7 @@ export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
                         case "2093-3":
                             data.cholesterol.push({
                                 value  : parseFloat(observation.observationValue),
-                                date   : observation.effectiveDateTime,
+                                date   : new Date(observation.effectiveDateTime),
                                 patient: observation.patient.split("/").pop()
                             });
                         break;
@@ -151,7 +151,7 @@ export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
                         case "2085-9":
                             data.HDL.push({
                                 value  : parseFloat(observation.observationValue),
-                                date   : observation.effectiveDateTime,
+                                date   : new Date(observation.effectiveDateTime),
                                 patient: observation.patient.split("/").pop()
                             });
                         break;
@@ -161,7 +161,7 @@ export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
                             const component = JSON.parse(observation.component);
                             data.sbp.push({
                                 value  : parseFloat(getPath(component, "0.valueQuantity.value")),
-                                date   : observation.effectiveDateTime,
+                                date   : new Date(observation.effectiveDateTime),
                                 patient: observation.patient.split("/").pop()
                             });
                         break;
