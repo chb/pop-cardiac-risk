@@ -32,16 +32,6 @@ export default class CardiacRisk extends React.Component
         sbp: PropTypes.number,
 
         /**
-         * High Sensitivity C-Reactive Protein (hsCRP) in mg/dL
-         */
-        hsCRP: PropTypes.number,
-
-        /**
-         * family history of heart attack as boolean
-         */
-        hha: PropTypes.bool,
-
-        /**
          * HDL in mm/Hg
          */
         HDL: PropTypes.number,
@@ -79,23 +69,10 @@ export default class CardiacRisk extends React.Component
         setCholesterol: PropTypes.func,
 
         /**
-         * A function that will receive CRP value as number. If passed,
-         * the "CRP" slider will be editable.
-         */
-        setCRP: PropTypes.func,
-
-        /**
          * A function that will receive blood pressure value as number.
          * If passed, the "Systolic blood pressure" slider will be editable.
          */
         setSBP: PropTypes.func,
-
-        /**
-         * A function that will receive "family history of heart attack" value
-         * as boolean. If passed, the "family history of heart attack" checkbox
-         * will be editable. It will be read-only otherwise.
-         */
-        setHHA: PropTypes.func,
 
         /**
          * A function that will receive "current smoker" value as boolean.
@@ -251,8 +228,7 @@ export default class CardiacRisk extends React.Component
 
         } = this.props;
 
-        const eol = deceasedDateTime ? moment(deceasedDateTime) : moment();
-        const ageInYears = moment.duration(eol.diff(dob, "days"), "days").asYears();
+        const ageInYears = this.getAgeInYears();
 
         const ageAsString = getAge({
             dob,
