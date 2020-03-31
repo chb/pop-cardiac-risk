@@ -18,6 +18,21 @@
         background: $color-orange;
     }
 
+    .warnings {
+        position: sticky;
+        top: -1rem;
+        z-index: 20;
+        margin: -1rem -1rem 0;
+
+        .warning {
+            background: #ffeab1;
+            color: #5a3300;
+            padding: 0.5ex 2ex;
+            border: 1px solid;
+            border-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.2);
+        }
+    }
+
     .horizontal-section {
         padding: 10px 0 10px 2.5em;
 

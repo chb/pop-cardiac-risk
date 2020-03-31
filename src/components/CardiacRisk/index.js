@@ -130,8 +130,93 @@ export default class CardiacRisk extends React.Component
         precision: 1
     };
 
+    getCompatibilityError()
+    {
+        if (!this.props.name) {
+            return "The patient has no name defined";
+        }
+
+        if (!this.props.gender) {
+            return "The patient gender is unknown";
+        }
+
+        if (!this.props.dob) {
+            return "The patient birth date is unknown";
+        }
+
+        if (this.props.deceasedBoolean || this.props.deceasedDateTime) {
+            return "The patient is deceased";
+        }
+
+        const age = this.getAgeInYears();
+        if (age < 40) {
+            return "This calculator works for patient who are at least 40 years old.";
+        }
+        if (age >= 80) {
+            return "This calculator works for patient who are at up to 79 years old.";
+        }
+        return null
+    }
+
+    getCompatibilityWarnings()
+    {
+        const warnings = [];
+
+        if (this.props.hypertensionTmt === undefined) {
+            warnings.push("No data available for previous hypertension treatments. Please use the checkbox below.");
+        }
+
+        if (this.props.smoker === undefined) {
+            warnings.push("No data available for smoking status. Please use the checkbox below.");
+        }
+
+        if (this.props.afroAmerican === undefined) {
+            warnings.push("It is unknown if the patient is afro-american. Please use the checkbox below.");
+        }
+
+        if (this.props.diabetic === undefined) {
+            warnings.push("It is unknown if the patient is diabetic. Please use the checkbox below.");
+        }
+
+        if (this.props.sbp === null) {
+            warnings.push("No data available for systolic blood pressure. Please use the slider below.");
+        }
+
+        if (this.props.HDL === null) {
+            warnings.push("No data available for HDL. Please use the slider below.");
+        }
+        
+        if (this.props.cholesterol === null) {
+            warnings.push("No data available for total cholesterol. Please use the slider below.");
+        }
+
+        return warnings;
+    }
+
+    getAgeInYears()
+    {
+        const { dob, deceasedBoolean, deceasedDateTime } = this.props;
+
+        if (deceasedBoolean) {
+            return null;
+        }
+
+        const eol = deceasedDateTime ? moment(deceasedDateTime) : moment();
+        return moment.duration(eol.diff(dob, "days"), "days").asYears();
+    }
+
     render()
     {
+        const error = this.getCompatibilityError();
+
+        if (error) {
+            return (
+                <div className="center">
+                    <h3 className="text-danger">{ error }</h3>
+                </div>
+            );
+        }
+
         const {
 
             // patient demographics
@@ -198,9 +283,20 @@ export default class CardiacRisk extends React.Component
             hypertensionTreatment: hypertensionTmt,
             diabetes: diabetic
         }, precision, precision);
+
+        const warnings = this.getCompatibilityWarnings();
         
         return (
             <div className="cardiac-risk">
+                { warnings ?
+                    <div className="warnings"> { warnings.map((w, i) => (
+                        <div className="warning" key={ "warning-" + i }>
+                            <i className="glyphicon glyphicon-alert">&nbsp;</i>{ w }
+                        </div>
+                    ))}</div> :
+                    null
+                }
+                
                 <div className="horizontal-section">
                     <header>
                         <span className="item-number">1</span>
