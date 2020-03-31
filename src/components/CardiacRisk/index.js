@@ -1,9 +1,9 @@
-import React       from "react"
-import PropTypes   from "prop-types"
-import moment      from "moment"
+import React     from "react"
+import PropTypes from "prop-types"
+import moment    from "moment"
+import Slider    from "../Slider/"
+import Checkbox  from "../Checkbox/"
 import { getAge, calcASCVD, buildClassName } from "../../lib";
-import Slider from "../Slider/"
-import Checkbox from "../Checkbox/"
 import "./CardiacRisk.scss"
 
 

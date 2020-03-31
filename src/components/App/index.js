@@ -6,7 +6,6 @@ import { loadPatients } from "../../store/patients";
 import PatientList      from "../../components/PatientList/";
 import Detail           from "../../components/DetailView/";
 import ClientContext    from "../../ClientContext";
-// import PopulationView   from "../../components/PopulationView/";
 import GroupView        from "../../components/GroupView";
 import {
   BrowserRouter as Router,
@@ -29,9 +28,11 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    // @ts-ignore
     window.FHIR.oauth2.init(config.fhir)
       .then(client => {
         this.client = client;
+        // @ts-ignore
         window.SMARTClient = client;
         this.setState({
           authorized: true,
@@ -66,9 +67,6 @@ class App extends React.Component {
           <div className="app">
             <ClientContext.Provider value={this.client}>
               <Switch>
-                {/* <Route path="/groups/:id?">
-                  <PopulationView />
-                </Route> */}
                 <Route path="/groups/:groupBy/:groupID">
                     <PatientList />
                     <GroupView/>

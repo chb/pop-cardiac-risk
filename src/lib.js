@@ -1,7 +1,7 @@
 import React  from "react"
 import moment from "moment"
 
-export function query(client, {
+export function query({
     sql,
     rowFormat = "object",
     maxRows = 10000,
@@ -15,7 +15,8 @@ export function query(client, {
     }
 
     function run(body) {
-        return client.request({
+        // @ts-ignore
+        return window.SMARTClient.request({
             url   : "/",
             method: "POST",
             mode  : "cors",
@@ -28,7 +29,8 @@ export function query(client, {
     }
 
     function getPage(id) {
-        return client.request({
+        // @ts-ignore
+        return window.SMARTClient.request({
             url: id,
             mode: "cors"
         }).then(handle)

@@ -16,7 +16,6 @@ class Chart extends React.Component
         chartOptions   : PropTypes.object.isRequired,
         id             : PropTypes.string.isRequired,
         height         : PropTypes.string,
-        history        : PropTypes.object.isRequired,
         patient        : PropTypes.object,
         onPatientSelect: PropTypes.func 
     };
@@ -27,7 +26,7 @@ class Chart extends React.Component
 
     componentDidMount()
     {    
-        // const { history } = this.props;
+        // @ts-ignore
         this.chart = window.Highcharts.chart(this.props.id, {
             chart: {
                 zoomType       : "x",
@@ -129,7 +128,6 @@ class Chart extends React.Component
 
     componentDidUpdate() {
         const { patient } = this.props;
-        const { history } = this.props;
         // this.chart.showLoading();
         if (patient) {
             let drillDown = {
@@ -478,7 +476,6 @@ class GroupView extends React.Component
                 </h4>
                 <Chart
                     id="chart-cholesterol"
-                    history={ this.props.history }
                     patient={ selectedPatient }
                     onPatientSelect={(pt) => this.setState({ selectedPatient: pt })}
                     chartOptions={{
@@ -537,7 +534,6 @@ class GroupView extends React.Component
                 </h4>
                 <Chart
                     id="chart-hdl"
-                    history={ this.props.history }
                     patient={ selectedPatient }
                     onPatientSelect={(pt) => this.setState({ selectedPatient: pt })}
                     chartOptions={{
@@ -597,7 +593,6 @@ class GroupView extends React.Component
                 </h4>
                 <Chart
                     id="chart-sbp"
-                    history={ this.props.history }
                     patient={ selectedPatient }
                     onPatientSelect={(pt) => this.setState({ selectedPatient: pt })}
                     chartOptions={{

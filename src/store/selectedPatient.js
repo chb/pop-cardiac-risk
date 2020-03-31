@@ -1,33 +1,9 @@
-import {
-    // reynoldsRiskScore,
-    // last,
-    // avg,
-    // isSmoker,
-    query,
-    getPatientDisplayName,
-    getPath
-} from "../lib"
-import moment from "moment"
+import { query, getPatientDisplayName } from "../lib";
 
 const initialState = {
     loading: false,
     error  : null,
-    data: {
-        // id          : "patient-id",
-        gender          : "male",
-        dob             : "1939-08-30",
-        // age         : 80,
-        // deceasedBoolean : false,
-        deceasedDateTime: "1989-08-30",
-        name            : "John Doe",
-        // hsCRP       : 2,
-        // cholesterol : 100,
-        // HDL         : 70,
-        // LDL         : 80,
-        // sbp         : 120,
-        // smoker      : false,
-        // hha         : false // Family history of heart attack
-    }
+    data: {}
 };
 
 const SET_LOADING  = "selectedPatient/setLoading";
@@ -46,7 +22,7 @@ export function merge(payload) {
     return { type: MERGE, payload };
 }
 
-export function load(client, id) {
+export function load(id) {
     return function (dispatch) {
         dispatch(merge({
             loading: true,
@@ -69,11 +45,11 @@ export function load(client, id) {
 
         let patient;
         
-        return query(client, {
+        return query({
             sql: `SELECT 
-                '{id}'               AS "id",
-                '{gender}'           AS "gender",
-                '{birthDate}'        AS "dob",
+                resource_id          AS "id",
+                gender,
+                DOB                  AS "dob",
                 '{deceasedBoolean}'  AS "deceasedBoolean",
                 '{deceasedDateTime}' AS "deceasedDateTime",
                 '{{name}}'           AS "name",
@@ -89,7 +65,7 @@ export function load(client, id) {
         .then(() => {
             
             if (!patient) {
-                throw new Error("Patient not found")
+                throw new Error("Patient not found");
             }
 
             const pt = {
@@ -130,18 +106,18 @@ export function load(client, id) {
                 true :
                 Math.random() < 0.33 ? false : undefined;
 
-            return Promise.all([pt, loadObservations(client, pt.id)]);
+            return Promise.all([pt, loadObservations(pt.id)]);
         })
         .then(([pt, observations]) => {
 
             // Total Cholesterol (last known value)
-            pt.cholesterol = getPath(observations, "cholesterol.0.value") || null;
+            pt.cholesterol = observations.cholesterol;
             
             // HDL (last known value)
-            pt.HDL = getPath(observations, "HDL.0.value") || null;
+            pt.HDL = observations.HDL;
 
             // Smoking Status (last known value)
-            const smokingStatus = getPath(observations, "smoker.0.value");
+            const smokingStatus = observations.smoker;
             if (!smokingStatus) {
                 pt.smoker = undefined;
             } else {
@@ -155,7 +131,7 @@ export function load(client, id) {
             }
 
             // Systolic Blood Pressure (last known value)
-            pt.sbp = getPath(observations, "sbp.0.value") || null;
+            pt.sbp = observations.sbp;
             
             dispatch(merge({
                 data   : pt,
@@ -171,89 +147,92 @@ export function load(client, id) {
     };
 }
 
-export function loadObservations(client, id) {
+export function loadObservations(id) {
 
-    const codes = [
-        '14647-2', '2093-3', // totalCholesterol
-        // '30522-7',           // hsCRP
-        '2085-9',            // HDL
-        // '8480-6', '8450-9', '8451-7', '8459-0', '8460-8', '8461-6', // Blood pressure
-        '55284-4', // Blood pressure as components
-        '72166-2' // Smoking Status
-    ];
-    
-    const sql = `SELECT
-        '{code.coding[0].code}' AS code,
-        '{valueQuantity.value}' AS observationValue,
-        '{subject.reference}'   AS patient,
-        '{effectiveDateTime}'   AS effectiveDateTime,
-        '{component}'           AS component
-    FROM Observation
-    WHERE 
-        '{subject.reference}'     = 'Patient/${id}' AND
-        '{code.coding[0].system}' = 'http://loinc.org' AND
-        '{code.coding[0].code}' IN('${codes.join("', '")}')`;
+    const sql = [
+
+        // totalCholesterol ----------------------------------------------------
+        `(
+            SELECT
+                \`code\`,
+                '{valueQuantity.value}' AS observationValue
+            FROM Observation
+            WHERE 
+                subject = '${id}' AND code IN('14647-2', '2093-3')
+            ORDER BY effectiveDateTime DESC
+            LIMIT 1
+        )`,
+
+        // HDL -----------------------------------------------------------------
+        `(
+            SELECT
+                \`code\`,
+                '{valueQuantity.value}' AS observationValue
+            FROM Observation
+            WHERE 
+                subject = '${id}' AND code = '2085-9'
+            ORDER BY effectiveDateTime DESC
+            LIMIT 1
+        )`,
+
+        // Smoking Status ------------------------------------------------------
+        `(
+            SELECT
+                \`code\`,
+                '{valueCodeableConcept.coding[0].code}' AS observationValue
+            FROM Observation
+            WHERE 
+                subject = '${id}' AND code = '72166-2'
+            ORDER BY effectiveDateTime DESC
+            LIMIT 1
+        )`,
+
+        // Blood pressure ------------------------------------------------------
+        `(
+            SELECT
+                \`code\`,
+                '{component[0].valueQuantity.value}' AS observationValue
+            FROM Observation
+            WHERE 
+                subject = '${id}' AND code = '55284-4'
+            ORDER BY effectiveDateTime DESC
+            LIMIT 1
+        )`
+
+    ].join(" UNION ");
 
     const  observations = {
-        hsCRP       : [],
-        cholesterol : [],
-        HDL         : [],
-        sbp         : [],
-        smoker      : [],
+        cholesterol : null,
+        HDL         : null,
+        sbp         : null,
+        smoker      : null
     };
 
-    return query(client, {
+    return query({
         sql,
         onPage(data) {
-
-            // Sorting on the server is slow because the entire Observations
-            // needs to be sorted. It is faster to sort on the client because
-            // we don't have that many results
-            data.sort((a, b) => moment(a.effectiveDateTime).diff(b.effectiveDateTime, "seconds"));
-
             data.forEach(observation => {
                 switch (observation.code) {
-
-                    // hsCRP
-                    case "30522-7": 
-                        observations.hsCRP.push({
-                            value: parseFloat(observation.observationValue),
-                            date : observation.effectiveDateTime
-                        });
-                    break;
 
                     // totalCholesterol
                     case "14647-2":
                     case "2093-3":
-                        observations.cholesterol.push({
-                            value: parseFloat(observation.observationValue),
-                            date : observation.effectiveDateTime
-                        });
+                        observations.cholesterol = parseFloat(observation.observationValue);
                     break;
 
                     // HDL
                     case "2085-9":
-                        observations.HDL.push({
-                            value: parseFloat(observation.observationValue),
-                            date : observation.effectiveDateTime
-                        });
+                        observations.HDL = parseFloat(observation.observationValue);
                     break;
 
                     // Systolic Blood Pressure from component
                     case "55284-4":
-                        const component = JSON.parse(observation.component);
-                        observations.sbp.push({
-                            value: parseFloat(getPath(component, "0.valueQuantity.value")),
-                            date : observation.effectiveDateTime
-                        });
+                        observations.sbp = parseFloat(observation.observationValue);
                     break;
 
                     // smokingStatus
                     case "72166-2":
-                        observations.smoker.push({
-                            value: observation.observationValue,
-                            date : observation.effectiveDateTime
-                        });
+                        observations.smoker = observation.observationValue;
                     break;
 
                     // This shouldn't happen

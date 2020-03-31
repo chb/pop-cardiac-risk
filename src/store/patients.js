@@ -1,9 +1,5 @@
 import moment from "moment"
 import {
-    reynoldsRiskScore,
-    last,
-    avg,
-    isSmoker,
     query,
     getPatientDisplayName,
     setQuery
@@ -70,14 +66,12 @@ export function sort(payload) {
 
 export function loadPatients(client) {
     return function (dispatch, getState) {
-        // console.time("Loading data");
         dispatch(merge({ loading: true, error: null }));
-        // let gotFirstChunk = false;
-        return query(client, {
+        return query({
             sql: `SELECT 
-                '{id}'               AS id,
-                '{gender}'           AS gender,
-                '{birthDate}'        AS dob,
+                resource_id          AS id,
+                gender               AS gender,
+                DOB                  AS dob,
                 '{deceasedBoolean}'  AS deceasedBoolean,
                 '{deceasedDateTime}' AS deceasedDateTime,
                 '{{name}}'           AS name
@@ -85,7 +79,6 @@ export function loadPatients(client) {
             maxRows: 10000,
             onPage(data) {
                 dispatch(addPatients(data.map(o => {
-
                     if (!o.dob) {
                         o.age = -1;
                     } else {
@@ -96,214 +89,10 @@ export function loadPatients(client) {
                     o.name = getPatientDisplayName(JSON.parse(o.name || "{}"));
                     return o;
                 })));
-                // if (!gotFirstChunk) {
-                //     gotFirstChunk = true;
-                //     dispatch(setLoading(false));
-                // }
             }
         })
-        .then(() => {
-            // dispatch(loadObservations(client));
-            dispatch(merge({
-                error: null,
-                loading: false
-            }));
-            // console.timeEnd("Loading data");
-        }).catch(error => {
-            dispatch(merge({
-                error,
-                loading: false
-            }));
-            // console.timeEnd("Loading data");
-        });
-    };
-}
-
-export function loadObservations(client) {
-    return function (dispatch, getState) {
-
-        dispatch(merge({ observations_error: null, observations_loading: true }));
-
-        const selects = [
-
-            // hsCRP -----------------------------------------------------------
-            `SELECT
-                'hsCRP'                                       AS observationType,
-                resource_json ->> '$.valueQuantity.value'     AS observationValue,
-                resource_json ->> '$.subject.reference'       AS patient,
-                DATE(resource_json ->> '$.effectiveDateTime') AS effectiveDateTime
-            FROM Observation
-            WHERE 
-                resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-                resource_json ->> '$.code.coding[0].code'   = '30522-7'`,
-    
-            // totalCholesterol ------------------------------------------------
-            `SELECT
-                'totalCholesterol'                            AS observationType,
-                resource_json ->> '$.valueQuantity.value'     AS observationValue,
-                resource_json ->> '$.subject.reference'       AS patient,
-                DATE(resource_json ->> '$.effectiveDateTime') AS effectiveDateTime
-            FROM Observation
-            WHERE 
-                resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND (
-                    resource_json ->> '$.code.coding[0].code' = '14647-2' OR
-                    resource_json ->> '$.code.coding[0].code' = '2093-3'
-                )`,
-    
-            // HDL -------------------------------------------------------------
-            `SELECT
-                'HDL'                                         AS observationType,
-                resource_json ->> '$.valueQuantity.value'     AS observationValue,
-                resource_json ->> '$.subject.reference'       AS patient,
-                DATE(resource_json ->> '$.effectiveDateTime') AS effectiveDateTime
-            FROM Observation
-            WHERE 
-                resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-                resource_json ->> '$.code.coding[0].code'   = '2085-9'`,
-    
-            // sbp -------------------------------------------------------------
-            `SELECT
-                'sbp'                                         AS observationType,
-                resource_json ->> '$.valueQuantity.value'     AS observationValue,
-                resource_json ->> '$.subject.reference'       AS patient,
-                DATE(resource_json ->> '$.effectiveDateTime') AS effectiveDateTime
-            FROM Observation
-            WHERE 
-                resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND (
-                    resource_json ->> '$.code.coding[0].code' = '8480-6' OR
-                    resource_json ->> '$.code.coding[0].code' = '8450-9' OR
-                    resource_json ->> '$.code.coding[0].code' = '8451-7' OR
-                    resource_json ->> '$.code.coding[0].code' = '8459-0' OR
-                    resource_json ->> '$.code.coding[0].code' = '8460-8' OR
-                    resource_json ->> '$.code.coding[0].code' = '8461-6'
-                )`,
-    
-            // smokingStatus ---------------------------------------------------
-            `SELECT
-                'smokingStatus'                                           AS observationType,
-                resource_json ->> '$.valueCodeableConcept.coding[0].code' AS observationValue,
-                resource_json ->> '$.subject.reference'                   AS patient,
-                DATE(resource_json ->> '$.effectiveDateTime')             AS effectiveDateTime
-            FROM Observation
-            WHERE 
-                resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-                resource_json ->> '$.code.coding[0].code'   = '72166-2'`
-        ];
-    
-        const sql = selects.join(" UNION ALL ") + " ORDER BY effectiveDateTime ASC";
-
-        return client.request({
-            url    : "sql",
-            method : "POST",
-            mode   : "cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: sql })
-        }).then(o => {
-
-            const patients = getState().patients.data;
-
-            patients.forEach(ptRec => {
-                ptRec.hsCRP       = [];
-                ptRec.cholesterol = [];
-                ptRec.HDL         = [];
-                ptRec.sbp         = [];
-                ptRec.smoker      = [];
-            });
-
-            o.forEach(observation => {
-                const ptRec = patients.find(p => `Patient/${p.id}` === observation.patient);
-
-                if (!ptRec) {
-                    console.warn(`Could not find patient ${observation.patient}`);
-                    return;
-                }
-
-                switch (observation.observationType) {
-                    case "hsCRP":
-                        ptRec.hsCRP.push({
-                            value: parseFloat(observation.observationValue),
-                            date : observation.effectiveDateTime
-                        });
-                    break;
-                    case "totalCholesterol":
-                        ptRec.cholesterol.push({
-                            value: parseFloat(observation.observationValue),
-                            date : observation.effectiveDateTime
-                        });
-                    break;
-                    case "HDL":
-                        ptRec.HDL.push({
-                            value: parseFloat(observation.observationValue),
-                            date : observation.effectiveDateTime
-                        });
-                    break;
-                    case "sbp":
-                        ptRec.sbp.push({
-                            value: parseFloat(observation.observationValue),
-                            date : observation.effectiveDateTime
-                        });
-                    break;
-                    case "smokingStatus":
-                        ptRec.smoker.push({
-                            value: observation.observationValue,
-                            date : observation.effectiveDateTime
-                        });
-                    break;
-                    default:
-                        console.warn(`Unknown observation type "${observation.observationType}"`);
-                    break;
-                }
-            });
-
-            dispatch(merge({
-                data                : patients,
-                observations_error  : null,
-                observations_loading: false
-            }));
-
-            console.timeEnd("Loading data");
-
-            dispatch(computeScore());
-
-        }).catch(error => {
-            dispatch(merge({
-                observations_error  : error,
-                observations_loading: false
-            }));
-        });
-    };
-}
-
-export function computeScore() {
-    return function (dispatch, getState) {
-        
-        const patients = getState().patients.data;
-        // debugger;
-        patients.forEach(ptRec => {
-            
-            ptRec.score = {
-                avg: reynoldsRiskScore({
-                    age        : ptRec.age,
-                    gender     : ptRec.gender,
-                    sbp        : avg(ptRec.sbp),
-                    hsCRP      : avg(ptRec.hsCRP),
-                    cholesterol: avg(ptRec.cholesterol),
-                    HDL        : avg(ptRec.HDL),
-                    smoker     : isSmoker(ptRec.smoker)
-                }),
-                last: reynoldsRiskScore({
-                    age        : ptRec.age,
-                    gender     : ptRec.gender,
-                    sbp        : last(ptRec.sbp),
-                    hsCRP      : last(ptRec.hsCRP),
-                    cholesterol: last(ptRec.cholesterol),
-                    HDL        : last(ptRec.HDL),
-                    smoker     : isSmoker(ptRec.smoker)
-                })
-            };
-        });
-        // debugger;
-        dispatch(merge({ data: patients }));
+        .then(() => dispatch(merge({ error: null, loading: false })))
+        .catch(error => dispatch(merge({ error, loading: false })));
     };
 }
 

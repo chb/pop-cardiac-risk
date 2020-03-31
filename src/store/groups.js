@@ -41,7 +41,7 @@ export function load({ startDate, endDate, patientId }) {
 
         sql += " ORDER BY '{effectiveDateTime}' ASC"
 
-        return query(window.SMARTClient, {
+        return query({
             sql,
             onPage(payload) {
                 dispatch({ type: ADD_DATA, payload });
@@ -132,7 +132,7 @@ export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
             sbp         : []
         };
 
-        return query(window.SMARTClient, {
+        return query({
             sql,
             onPage(payload) {
                 payload.forEach(observation => {
