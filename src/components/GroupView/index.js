@@ -679,7 +679,7 @@ class GroupView extends React.Component
                                     max={ moment(endDate).subtract(1, "day").format(dateFormat) }
                                     value={ startDate }
                                     onChange={ e => this.setState({ startDate: moment(e.target.valueAsDate).utc().format(dateFormat)}) }
-                                    style={{ width: "9em" }}
+                                    style={{ minWidth: "9em" }}
                                 />
                             </div>
                         </div>
@@ -693,7 +693,7 @@ class GroupView extends React.Component
                                     max={ moment().format(dateFormat) }
                                     value={ endDate }
                                     onChange={ e => this.setState({ endDate: moment(e.target.valueAsDate).utc().format(dateFormat)}) }
-                                    style={{ width: "9em" }}
+                                    style={{ minWidth: "9em" }}
                                 />
                             </div>
                         </div>
