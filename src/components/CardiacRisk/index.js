@@ -127,10 +127,10 @@ export default class CardiacRisk extends React.Component
 
         const age = this.getAgeInYears();
         if (age < 40) {
-            return "This calculator works for patient who are at least 40 years old.";
+            return "This calculator is not applicable for patients under 40 years of age.";
         }
         if (age >= 80) {
-            return "This calculator works for patient who are at up to 79 years old.";
+            return "This calculator is not applicable for patients over 79 years of age.";
         }
         return null
     }
@@ -148,7 +148,7 @@ export default class CardiacRisk extends React.Component
         }
 
         if (this.props.afroAmerican === undefined) {
-            warnings.push("It is unknown if the patient is afro-american. Please use the checkbox below.");
+            warnings.push("It is unknown if the patient is black or african american. Please use the checkbox below.");
         }
 
         if (this.props.diabetic === undefined) {
