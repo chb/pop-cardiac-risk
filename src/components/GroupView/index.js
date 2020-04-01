@@ -668,9 +668,9 @@ class GroupView extends React.Component
                     left="back"
                 />
                 <header className="text-center sub-header">
-                    <div className="row" style={{ width: "100%" }}>
+                    <div className="row" style={{ width: "100%", fontSize: "small" }}>
                         <div className="col-xs-6 text-center">
-                            <div className="input-group" style={{ maxWidth: "100px", margin: "auto" }}>
+                            <div className="input-group" style={{ width: "100px", margin: "auto" }}>
                                 <span className="input-group-addon"><b>From</b></span>
                                 <input
                                     type="date"
@@ -679,11 +679,12 @@ class GroupView extends React.Component
                                     max={ moment(endDate).subtract(1, "day").format(dateFormat) }
                                     value={ startDate }
                                     onChange={ e => this.setState({ startDate: moment(e.target.valueAsDate).utc().format(dateFormat)}) }
+                                    style={{ width: "9em" }}
                                 />
                             </div>
                         </div>
-                        <div className="col-xs-6 text-center" style={{ maxWidth: "100px", margin: "auto" }}>
-                            <div className="input-group">
+                        <div className="col-xs-6 text-center">
+                            <div className="input-group" style={{ width: "100px", margin: "auto" }}>
                                 <span className="input-group-addon"><b>To</b></span>
                                 <input
                                     type="date"
@@ -692,6 +693,7 @@ class GroupView extends React.Component
                                     max={ moment().format(dateFormat) }
                                     value={ endDate }
                                     onChange={ e => this.setState({ endDate: moment(e.target.valueAsDate).utc().format(dateFormat)}) }
+                                    style={{ width: "9em" }}
                                 />
                             </div>
                         </div>

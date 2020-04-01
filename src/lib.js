@@ -383,7 +383,8 @@ export function getPath(obj, path) {
 }
 
 export function setQuery(q = {}) {
-    const url = new URL(window.location.href);
+    const href1 = window.location.href;
+    const url = new URL(href1);
     const params = url.searchParams;
     for (const name in q) {
         const param = q[name];
@@ -394,7 +395,10 @@ export function setQuery(q = {}) {
             params.set(name, param);
         }
     }
-    window.history.replaceState({}, document.title, url.href);
+    const href2 = url.href;
+    if (href2 !== href1) {
+        window.history.replaceState({}, document.title, href2);
+    }
 }
 
 export function getQuery(param = "") {

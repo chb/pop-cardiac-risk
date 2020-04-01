@@ -44,7 +44,18 @@ class DetailView extends React.Component
             <PageHeader
                 left="back"
                 title="Risk Score"
-                right={ id ? <div className="col-3 btn-empty"><i className="glyphicon glyphicon-repeat"/></div> : null }
+                right={
+                    id ?
+                    <div className="col-3 btn-empty" onMouseDown={() => {
+                        const { id, load } = this.props;
+                        if (id) {
+                            load(id);
+                        }
+                    }}>
+                        <i className="glyphicon glyphicon-repeat"/>
+                    </div> :
+                    null
+                }
             />
         )
     }
