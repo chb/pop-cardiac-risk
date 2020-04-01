@@ -314,7 +314,7 @@ class PatientList extends React.Component
         const end   = start + windowLength - this.props.offscreenRows * 2
 
         return (
-            <div className={"page patients" + (id ? "" : " active")}>
+            <div className={"page patients" + (this.props.location.pathname === "/" ? " active" : "")}>
                 <PageHeader title={ <Link to="/">Population Cardiac Risk</Link>}/>
                 { this.renderHeader() }
                 { this.renderPatients() }

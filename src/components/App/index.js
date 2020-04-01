@@ -7,6 +7,7 @@ import PatientList      from "../../components/PatientList/";
 import Detail           from "../../components/DetailView/";
 import ClientContext    from "../../ClientContext";
 import GroupView        from "../../components/GroupView";
+import Page             from "../Page";
 import {
   BrowserRouter as Router,
   Switch,
@@ -66,14 +67,17 @@ class App extends React.Component {
         <Provider store={store}>
           <div className="app">
             <ClientContext.Provider value={this.client}>
+              <PatientList />
               <Switch>
                 <Route path="/groups/:groupBy/:groupID">
-                    <PatientList />
+                  <Page>
                     <GroupView/>
+                  </Page>
                 </Route>
                 <Route path="/:id?">
-                  <PatientList />
-                  <Detail />
+                  <Page>
+                    <Detail />
+                  </Page>
                 </Route>
               </Switch>
             </ClientContext.Provider>

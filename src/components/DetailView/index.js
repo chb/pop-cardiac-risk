@@ -121,7 +121,7 @@ class Wrapper extends React.Component
     {
         const { id } = this.props.match.params;
         return (
-            <div className={"page detail-view" + (id ? " active" : "")}>
+            <div className="page detail-view">
                 <DetailView
                     { ...this.props }
                     id={ id }

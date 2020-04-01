@@ -19,12 +19,13 @@ class PageHeader extends React.Component
 
     render()
     {
-        const { title, left, right, history } = this.props;
+        const { title, left, right } = this.props;
+
         return (
             <header className="app-header">
                 {
                     left === "back" ?
-                    <Link to="#" onClick={() => history.goBack()} className="back-link">
+                    <Link to={{ pathname: "/" }} className="back-link">
                         <b className="glyphicon glyphicon-chevron-left"/>
                     </Link> :
                     null

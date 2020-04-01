@@ -214,6 +214,11 @@ class GroupView extends React.Component
         };
     }
 
+    shouldComponentUpdate(nextProps)
+    {
+        return nextProps.location.pathname !== "/";
+    }
+
     componentDidMount()
     {
         this.load();
@@ -657,7 +662,7 @@ class GroupView extends React.Component
         let title = group.label + " patients";
 
         return (
-            <div className="page active">
+            <div className="page">
                 <PageHeader
                     title={ title }
                     left="back"
