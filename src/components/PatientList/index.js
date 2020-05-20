@@ -308,7 +308,6 @@ class PatientList extends React.Component
 
     render()
     {
-        const id = this.props.match.params.id;
         const { windowLength, topOffscreenRows } = this.state;
         const start = topOffscreenRows;
         const end   = start + windowLength - this.props.offscreenRows * 2
