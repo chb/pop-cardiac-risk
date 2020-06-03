@@ -1,9 +1,9 @@
-import React               from 'react';
+import React               from "react";
 import PropTypes           from "prop-types";
 import { connect }         from "react-redux";
-import * as lib            from "../lib"
 import moment              from "moment";
-import { selectPatientId } from "../store/patients"
+import * as lib            from "../lib";
+import { selectPatientId } from "../store/patients";
 
 
 class Grid extends React.Component {
@@ -77,7 +77,7 @@ class Grid extends React.Component {
         className={selectedPatientId === rec.id ? "selected" : null}
         onClick={() => this.props.dispatch(selectPatientId(rec.id))}
       >
-        <td className="text-left">{ rec.id || "-" }</td>
+        <td className="text-left">{rec.id || "-"}</td>
         <td className="text-left">{lib.getPatientDisplayName(JSON.parse(rec.name || "{}"))}</td>
         <td>{rec.gender || "-"}</td>
         <td>{rec.dob ? moment(rec.dob).format("YYYY-MM-DD") : "-"}</td>

@@ -21,7 +21,7 @@ class Navigator extends React.Component
     {
         if (nextProps.location.pathname === "/") {
             const page = ReactDOM.findDOMNode(this);
-            if (page) {
+            if (page && page instanceof Element) {
                 page.classList.remove("active");
                 return false
             }
@@ -35,11 +35,9 @@ class Navigator extends React.Component
      */
     componentDidUpdate()
     {
-        console.log("componentDidUpdate")
+        // console.log("componentDidUpdate")
         const page = ReactDOM.findDOMNode(this);
-        if (page) {
-            // console.log("HERE", ReactDOM.findDOMNode(this))
-            // setTimeout(() => page.classList[this.props.location.pathname === "/" ? "remove" : "add"]("active"), 0);
+        if (page && page instanceof Element) {
             setTimeout(() => page.classList.add("active"), 0);
         }
     }
@@ -50,9 +48,8 @@ class Navigator extends React.Component
      */
     componentDidMount()
     {
-        // console.log("componentDidMount")
         const page = ReactDOM.findDOMNode(this);
-        if (page) {
+        if (page && page instanceof Element) {
             page.classList[this.props.location.pathname === "/" ? "remove" : "add"]("active");
         }
     }

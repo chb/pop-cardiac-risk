@@ -436,7 +436,9 @@ export default class CardiacRisk extends React.Component
                     <div className="small what-now">
                         <div>
                             <div className="img hidden-xs">
-                                <img src={ require("./runner.png")} alt="Runner" />
+                                <img
+                                // @ts-ignore
+                                src={ require("./runner.png")} alt="Runner" />
                             </div>
                             <div style={{ flex: 4 }}>
                                 <b className="color-green">Diet and exercise</b>
@@ -448,7 +450,9 @@ export default class CardiacRisk extends React.Component
                         
                         <div>
                             <div className="img hidden-xs">
-                                <img src={ require("./smoker.png")} alt="Smoker" />
+                                <img
+                                // @ts-ignore
+                                src={ require("./smoker.png")} alt="Smoker" />
                             </div>
                             <div style={{ flex: 4 }}>
                                 <b className="color-green">Staying smoke-free</b>
@@ -461,7 +465,9 @@ export default class CardiacRisk extends React.Component
                         
                         <div>
                             <div className="img hidden-xs">
-                                <img src={ require("./doctor.png")} alt="Doctor" />
+                                <img
+                                // @ts-ignore
+                                src={ require("./doctor.png")} alt="Doctor" />
                             </div>
                             <div style={{ flex: 4 }}>
                                 <b className="color-green">Ask your doctor</b>
@@ -474,7 +480,9 @@ export default class CardiacRisk extends React.Component
                         
                         <div>
                             <div className="img hidden-xs">
-                                <img src={ require("./needle.png")} alt="Needle" />
+                                <img 
+                                // @ts-ignore
+                                src={ require("./needle.png")} alt="Needle" />
                             </div>
                             <div style={{ flex: 4 }}>
                                 <b className="color-green">Consider retesting</b>

@@ -15,6 +15,7 @@ export default class Chart extends React.Component
         //     "Roboto,\"Helvetica Neue\",Arial,sans-serif,\"Apple Color Emoji\"" +
         //     ",\"Segoe UI Emoji\",\"Segoe UI Symbol\"";
 
+        // @ts-ignore
         this.chart = window.Highcharts.chart(this.props.id, {
             chart: {
                 type               : "spline",
