@@ -1,4 +1,5 @@
 import moment from "moment"
+import * as adapter from "./adapters/mysql"
 import {
     query,
     getPatientDisplayName,
@@ -68,14 +69,7 @@ export function loadPatients(client) {
     return function (dispatch, getState) {
         dispatch(merge({ loading: true, error: null }));
         return query({
-            sql: `SELECT 
-                resource_id          AS id,
-                gender               AS gender,
-                DOB                  AS dob,
-                '{deceasedBoolean}'  AS deceasedBoolean,
-                '{deceasedDateTime}' AS deceasedDateTime,
-                '{{name}}'           AS name
-                FROM Patient`,
+            sql: adapter.loadPatients(),
             maxRows: 10000,
             onPage(data) {
                 dispatch(addPatients(data.map(o => {

@@ -1,4 +1,5 @@
 import { query, getPatientDisplayName } from "../lib";
+import config from "../config"
 
 const initialState = {
     loading: false,
@@ -46,23 +47,13 @@ export function load(id) {
         let patient;
         
         return query({
-            sql: `SELECT 
-                resource_id          AS "id",
-                gender,
-                DOB                  AS "dob",
-                '{deceasedBoolean}'  AS "deceasedBoolean",
-                '{deceasedDateTime}' AS "deceasedDateTime",
-                '{{name}}'           AS "name",
-                '{{extension}}'      AS "extensions"
-                FROM Patient
-                WHERE '{id}' = '${id}'`,
+            sql: config.sqlAdapter.loadPatient(id),
             onPage(data) {
                 if (data[0]) {
                     patient = data[0];
                 }
             }
-        })  
-        .then(() => {
+        }).then(() => {
             
             if (!patient) {
                 throw new Error("Patient not found");
@@ -149,59 +140,9 @@ export function load(id) {
 
 export function loadObservations(id) {
 
-    const sql = [
+    const sql = config.sqlAdapter.loadPatientObservations(id);
 
-        // totalCholesterol ----------------------------------------------------
-        `(
-            SELECT
-                \`code\`,
-                '{valueQuantity.value}' AS observationValue
-            FROM Observation
-            WHERE 
-                subject = '${id}' AND code IN('14647-2', '2093-3')
-            ORDER BY effectiveDateTime DESC
-            LIMIT 1
-        )`,
-
-        // HDL -----------------------------------------------------------------
-        `(
-            SELECT
-                \`code\`,
-                '{valueQuantity.value}' AS observationValue
-            FROM Observation
-            WHERE 
-                subject = '${id}' AND code = '2085-9'
-            ORDER BY effectiveDateTime DESC
-            LIMIT 1
-        )`,
-
-        // Smoking Status ------------------------------------------------------
-        `(
-            SELECT
-                \`code\`,
-                '{valueCodeableConcept.coding[0].code}' AS observationValue
-            FROM Observation
-            WHERE 
-                subject = '${id}' AND code = '72166-2'
-            ORDER BY effectiveDateTime DESC
-            LIMIT 1
-        )`,
-
-        // Blood pressure ------------------------------------------------------
-        `(
-            SELECT
-                \`code\`,
-                '{component[0].valueQuantity.value}' AS observationValue
-            FROM Observation
-            WHERE 
-                subject = '${id}' AND code = '55284-4'
-            ORDER BY effectiveDateTime DESC
-            LIMIT 1
-        )`
-
-    ].join(" UNION ");
-
-    const  observations = {
+    const observations = {
         cholesterol : null,
         HDL         : null,
         sbp         : null,
