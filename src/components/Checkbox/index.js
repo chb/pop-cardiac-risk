@@ -18,6 +18,7 @@ export default class Checkbox extends React.Component
             checked,
             indeterminate,
             readOnly,
+            disabled,
             label,
             ...rest
         } = this.props;
@@ -29,7 +30,8 @@ export default class Checkbox extends React.Component
                     "checkbox-wrap": true,
                     indeterminate: indeterminate || checked === undefined,
                     checked: !indeterminate && checked,
-                    readOnly
+                    readOnly,
+                    disabled
                 })}
                 onClick={() => this.onClick()}
             >

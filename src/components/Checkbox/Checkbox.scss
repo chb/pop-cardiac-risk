@@ -56,7 +56,15 @@
 
     &.readOnly .checkbox {
         background: #f4f2ef;
-        // cursor: not-allowed;
+    }
+
+    &.disabled {
+        color: #777;
+        pointer-events: none;
+
+        .checkbox {
+            background: #c9c7c2;
+        }
     }
 
     .checkbox-label {
