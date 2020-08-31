@@ -11,7 +11,8 @@ import Page                  from "../Page";
 import {
     BrowserRouter as Router,
     Switch,
-    Route
+    Route,
+    Redirect
 } from "react-router-dom";
 import './App.scss';
 
@@ -76,10 +77,13 @@ class App extends React.Component {
                             <GroupView/>
                         </Page>
                     </Route>
-                    <Route path="/:id?">
+                    <Route path="/:id?" exact>
                         <Page>
                             <Detail />
                         </Page>
+                    </Route>
+                    <Route path="*">
+                        <Redirect to="/" />
                     </Route>
                 </Switch>
             </div>
