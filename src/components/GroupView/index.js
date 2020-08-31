@@ -23,7 +23,7 @@ class Chart extends React.Component
     };
 
     static defaultProps = {
-        height: "206px"
+        height: "278px"
     };
 
     componentDidMount()
