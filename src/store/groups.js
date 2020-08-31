@@ -1,5 +1,4 @@
-import { query, getPath, getQuery } from "../lib"
-import config from "../config"
+import { query, getPath, getQuery, getAdapter } from "../lib"
 
 const initialState = {
     loading: false,
@@ -23,7 +22,7 @@ export function merge(payload) {
  * @param {*} param0 
  */
 export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
-    return dispatch => {
+    return (dispatch, getState) => {
         dispatch(merge({ loading: true, error: null, data: [] }));
 
         const data = {
@@ -32,7 +31,9 @@ export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
             sbp         : []
         };
 
-        const sql = config.sqlAdapter.loadObservations({
+        const adapter = getAdapter(getState().settings.adapter);
+
+        const sql = adapter.loadObservations({
             startDate,
             endDate,
             minAge,
@@ -68,6 +69,7 @@ export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
     
                         // Systolic Blood Pressure from component
                         case "55284-4":
+                        case "85354-9":
                             const component = JSON.parse(observation.component);
                             data.sbp.push({
                                 value  : parseFloat(getPath(component, "0.valueQuantity.value")),

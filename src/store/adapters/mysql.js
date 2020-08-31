@@ -62,7 +62,7 @@ export function loadObservations({ startDate, endDate, minAge, maxAge, gender, a
     const codes = [
         '14647-2', '2093-3', // totalCholesterol
         '2085-9',            // HDL
-        '55284-4'            // Blood pressure as components
+        '55284-4', '85354-9' // Blood pressure as components
     ];
 
     let patientFilters = [];

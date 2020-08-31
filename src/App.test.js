@@ -8,19 +8,19 @@ import { calcASCVD } from "./lib"
 describe("ascvd", () => {
 
   const optimal = {
-    totalCholesterol      : 170,
-    hdl                   : 50,
-    sbp                   : 110,
-    hypertensionTreatment : false,
-    diabetes              : false,
-    smoker                : false
+    totalCholesterol     : 170,
+    hdl                  : 50,
+    sbp                  : 110,
+    hypertensionTreatment: false,
+    diabetes             : false,
+    smoker               : false
   };
 
   const base = {
     ...optimal,
-    age                   : 45,
-    africanAmerican       : false,
-    gender                : "M"
+    age                  : 45,
+    africanAmerican      : false,
+    gender               : "M"
   };
 
   it('optimal 50yo white male -> 2.1', () => {

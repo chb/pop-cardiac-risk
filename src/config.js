@@ -1,20 +1,39 @@
-import * as MySQLAdapter from "./store/adapters/mysql"
+const BACKEND_HOST = process.env.NODE_ENV === "development" ?
+    "http://localhost:4000" :
+    "https://smart-proxy-server.herokuapp.com"
 
 export default {
-    fhir: {
-        // iss     : "https://smart-proxy-server.herokuapp.com/pop/presto1",
-        // iss     : "https://smart-proxy-server.herokuapp.com/pop/mysql-leap",
-        // iss     : "https://smart-proxy-server.herokuapp.com/service/mysql-r3",
-        iss     : "https://smart-proxy-server.herokuapp.com/service/mysql-gcp",
-        // iss     : "http://localhost:4000/service/mysql-r3",
-        // iss     : "http://localhost:4000/pop/presto1",
-        // iss     : "http://localhost:4000/pop/mysql-mina",
-        // iss     : "http://localhost:4000/pop/mysql-leap",
-        // iss     : "http://localhost:4000/service/mysql-gcp",
-        clientId: "whatever",
-        scope   : "system/Patient.read system/Observation.read offline_access"
+    defaultAdapter: "mysql1", // MUST point to one of the adapters listed below!
+    adapters : {
+        mysql1: {
+            label   : "MySQL STU3 Database",
+            iss     : `${BACKEND_HOST}/service/mysql-gcp`,
+            clientId: "whatever",
+            scope   : "system/Patient.read system/Observation.read offline_access",
+            type    : "mysql"
+        },
+        // mysql2: {
+        //     label   : "MySQL STU3 Database (old)",
+        //     iss     : `${BACKEND_HOST}/service/mysql-r3`,
+        //     clientId: "whatever",
+        //     scope   : "system/Patient.read system/Observation.read offline_access",
+        //     type    : "mysql"
+        // },
+        // mysql3: {
+        //     label   : "MySQL DSTU2 Database",
+        //     iss     : `${BACKEND_HOST}/service/mysql-leap`,
+        //     clientId: "whatever",
+        //     scope   : "system/Patient.read system/Observation.read offline_access",
+        //     type    : "mysql"
+        // },
+        presto: {
+            label   : "Presto STU3 Database",
+            iss     : `${BACKEND_HOST}/service/presto-leap-2`,
+            clientId: "whatever",
+            scope   : "system/Patient.read system/Observation.read offline_access",
+            type    : "presto"
+        }
     },
-    sqlAdapter: MySQLAdapter,
     groups: {
         "age" : {
             "unknown": {

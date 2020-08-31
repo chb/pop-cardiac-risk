@@ -1,3 +1,5 @@
+/// <reference path="../../../@types/index.d.ts"/>
+
 import React          from "react";
 import PropTypes      from "prop-types";
 import { withRouter } from "react-router-dom";
@@ -221,7 +223,9 @@ class GroupView extends React.Component
 
     componentDidMount()
     {
-        this.load();
+        if (this.props.authorized) {
+            this.load();
+        }
     }
 
     componentDidUpdate(prevProps, prevState)
@@ -707,12 +711,14 @@ class GroupView extends React.Component
 
 const ConnectedGroupView = connect(
     state => ({
-        loading : state.groups.loading,
-        error   : state.groups.error,
-        data    : state.groups.data,
-        patients: state.patients.idIndex
+        loading   : state.groups.loading,
+        error     : state.groups.error,
+        data      : state.groups.data,
+        patients  : state.patients.idIndex,
+        authorized: state.smart.authorized
     }),
     dispatch => ({
+        // @ts-ignore
         load: options => dispatch(loadAll(options))
     })
 )(GroupView);

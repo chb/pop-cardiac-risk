@@ -258,7 +258,7 @@ class PatientList extends React.Component
 
     filter()
     {
-        const { hideIncompatible } = this.state;
+        const { hideIncompatible, groupBy } = this.state;
         const search = String(this.props.search || "").trim();
 
         return [...this.props.data.filter(rec => {
@@ -280,13 +280,13 @@ class PatientList extends React.Component
                     return false;
                 }
 
-                // Hide patients younger than 20 years
-                if (rec.age < 20) {
+                // Hide patients younger than 40 years
+                if (rec.age < 40 && groupBy !== "age") {
                     return false;
                 }
 
                 // Hide patients older than 79 years
-                if (rec.age > 79) {
+                if (rec.age > 79 && groupBy !== "age") {
                     return false;
                 }
             }
@@ -376,13 +376,14 @@ class PatientList extends React.Component
                     <div>
                         <Checkbox
                             checked={this.state.hideIncompatible}
+                            disabled={this.state.groupBy === "age"}
                             onChange={on => this.setState({ hideIncompatible: on })}
                             label={
                                 <>
                                     <b>Hide incompatible patients</b>
                                     <div className="small text-muted">
                                         Only show patients with known age and gender, who are
-                                        not deceased and are between 20 and 79 years old.
+                                        not deceased and are between 40 and 79 years old.
                                     </div>
                                 </>
                             }

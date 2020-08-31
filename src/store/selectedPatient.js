@@ -1,5 +1,6 @@
-import { query, getPatientDisplayName } from "../lib";
-import config from "../config"
+// import { Action } from "redux";
+import { query, getPatientDisplayName, getAdapter } from "../lib";
+// import config from "../config"
 
 const initialState = {
     loading: false,
@@ -24,7 +25,7 @@ export function merge(payload) {
 }
 
 export function load(id) {
-    return function (dispatch) {
+    return function (dispatch, getState) {
         dispatch(merge({
             loading: true,
             error: null,
@@ -45,9 +46,11 @@ export function load(id) {
         }));
 
         let patient;
+
+        const adapter = getAdapter(getState().settings.adapter)
         
         return query({
-            sql: config.sqlAdapter.loadPatient(id),
+            sql: adapter.loadPatient(id),
             onPage(data) {
                 if (data[0]) {
                     patient = data[0];
@@ -97,7 +100,7 @@ export function load(id) {
                 true :
                 Math.random() < 0.33 ? false : undefined;
 
-            return Promise.all([pt, loadObservations(pt.id)]);
+            return Promise.all([pt, loadObservations(pt.id, adapter)]);
         })
         .then(([pt, observations]) => {
 
@@ -138,9 +141,9 @@ export function load(id) {
     };
 }
 
-export function loadObservations(id) {
+export function loadObservations(id, adapter) {
 
-    const sql = config.sqlAdapter.loadPatientObservations(id);
+    const sql = adapter.loadPatientObservations(id);
 
     const observations = {
         cholesterol : null,
@@ -168,6 +171,7 @@ export function loadObservations(id) {
 
                     // Systolic Blood Pressure from component
                     case "55284-4":
+                    case "85354-9":
                         observations.sbp = parseFloat(observation.observationValue);
                     break;
 

@@ -1,91 +1,102 @@
-import React            from "react";
-import { Provider }     from "react-redux";
-import config           from "../../config";
-import store            from "../../store/";
-import { loadPatients } from "../../store/patients";
-import PatientList      from "../../components/PatientList/";
-import Detail           from "../../components/DetailView/";
-import ClientContext    from "../../ClientContext";
-import GroupView        from "../../components/GroupView";
-import Page             from "../Page";
+import React                 from "react";
+import PropTypes             from "prop-types";
+import { Provider, connect } from "react-redux";
+import store                 from "../../store/";
+import { loadPatients }      from "../../store/patients";
+import { authorize }         from "../../store/smart";
+import PatientList           from "../../components/PatientList/";
+import Detail                from "../../components/DetailView/";
+import GroupView             from "../../components/GroupView";
+import Page                  from "../Page";
 import {
-  BrowserRouter as Router,
-  Switch,
-  Route
+    BrowserRouter as Router,
+    Switch,
+    Route
 } from "react-router-dom";
 import './App.scss';
 
 
+class AppContainer extends React.Component {
+    render() {
+        return (
+            <Router>
+                <Provider store={store}>
+                    <ConnectedApp />
+                </Provider>
+            </Router>
+        );
+    }
+}
 
 class App extends React.Component {
   
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      authorized: false,
-      authError: null
+    static propTypes = {
+        loading   : PropTypes.bool,
+        authError : PropTypes.instanceOf(Error),
+        authorized: PropTypes.bool,
+        authorize : PropTypes.func
     };
-  }
 
-  componentDidMount() {
-    // @ts-ignore
-    window.FHIR.oauth2.init(config.fhir)
-      .then(client => {
-        this.client = client;
-        // @ts-ignore
-        window.SMARTClient = client;
-        this.setState({
-          authorized: true,
-          authError: null
-        }, () => {
-          store.dispatch(loadPatients(client));
-        });
-      })
-      .catch(error => {
-        this.setState({
-          authorized: false,
-          authError: error
-        })
-      })
-      .finally(() => {
-        setTimeout(() => document.body.classList.add("loaded"), 1000);
-      })
-  }
-
-  render() {
-    if (this.state.authError) {
-      return String(this.state.authError);
+    componentDidMount() {
+        this.props.authorize().then(() => this.props.loadPatients());
+        document.body.classList.add("loaded");
     }
 
-    if (!this.state.authorized) {
-      return "Authorizing...";
-    }
+    render() {
+        const { loading, authError, authorized } = this.props;
 
-    return (
-      <Router>
-        <Provider store={store}>
-          <div className="app">
-            <ClientContext.Provider value={this.client}>
-              <PatientList />
-              <Switch>
-                <Route path="/groups/:groupBy/:groupID">
-                  <Page>
-                    <GroupView/>
-                  </Page>
-                </Route>
-                <Route path="/:id?">
-                  <Page>
-                    <Detail />
-                  </Page>
-                </Route>
-              </Switch>
-            </ClientContext.Provider>
-          </div>
-        </Provider>
-      </Router>
-    );
-  }
+        if (loading) {
+          return (
+              <div className="center loading-screen active">
+                  <h2><i className="loader"/> Authorizing...</h2>
+              </div>
+          )
+        }
+
+        if (authError) {
+          return (
+              <div className="center">
+                  <pre style={{ whiteSpace: "pre-wrap" }}>
+                      { String(authError) }
+                  </pre>
+              </div>
+          );
+        }
+
+        if (!authorized) {
+            return <div className="center">Failed to authorize!</div>;
+        }
+
+        return (
+            <div className="app">
+                <PatientList />
+                <Switch>
+                    <Route path="/groups/:groupBy/:groupID">
+                        <Page>
+                            <GroupView/>
+                        </Page>
+                    </Route>
+                    <Route path="/:id?">
+                        <Page>
+                            <Detail />
+                        </Page>
+                    </Route>
+                </Switch>
+            </div>
+        );
+    }
 }
 
-export default App;
+const ConnectedApp = connect(state => ({
+    authError : state.smart.error,
+    authorized: state.smart.authorized,
+    loading   : state.smart.loading
+}), dispatch => ({
+    // @ts-ignore
+    authorize: () => dispatch(authorize()),
+    // @ts-ignore
+    loadPatients: () => dispatch(loadPatients())
+}))(App);
+
+
+export default AppContainer;

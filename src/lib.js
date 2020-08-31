@@ -1,5 +1,44 @@
-import React  from "react"
-import moment from "moment"
+import React              from "react"
+import moment             from "moment"
+import * as mysqlAdapter  from "./store/adapters/mysql"
+import * as prestoAdapter from "./store/adapters/presto"
+
+
+export function wait(time = 0) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
+export function waitForSmartClient() {
+    // @ts-ignore
+    const client = window.SMARTClient;
+    if (client) {
+        return Promise.resolve(client);
+    }
+    return wait(50).then(waitForSmartClient);
+}
+
+export function getAdapter(config) {
+    switch (config.type) {
+        case "mysql":
+            return mysqlAdapter;
+        case "presto":
+            return prestoAdapter;
+        default:
+            throw new Error(`Unknown adapter type "${config.type}"`);
+    }
+}
+
+export function authorize(options) {
+    sessionStorage.clear();
+    // @ts-ignore
+    window.SMARTClient = null;
+    // @ts-ignore
+    return window.FHIR.oauth2.init(options).then(client => {
+        // @ts-ignore
+        window.SMARTClient = client;
+        return client;
+    });
+}
 
 export function query({
     sql,
@@ -36,7 +75,7 @@ export function query({
         }).then(handle)
     }
 
-    return run({ query: sql, rowFormat, maxRows });
+    return waitForSmartClient().then(() => run({ query: sql, rowFormat, maxRows }));
 }
 
 export function makeArray(x) {

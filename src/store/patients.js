@@ -1,9 +1,11 @@
 import moment from "moment"
-import * as adapter from "./adapters/mysql"
+// import * as adapter from "./adapters/mysql"
+// import * as adapter from "./adapters/presto"
 import {
     query,
     getPatientDisplayName,
-    setQuery
+    setQuery,
+    getAdapter
 } from "../lib"
 
 const urlQuery = new URLSearchParams(window.location.search);
@@ -65,9 +67,13 @@ export function sort(payload) {
     return { type: SORT, payload };
 }
 
-export function loadPatients(client) {
+export function loadPatients() {
     return function (dispatch, getState) {
         dispatch(merge({ loading: true, error: null }));
+        const settings = getState().settings;
+        // const adapterConfig = settings.adapters.find(a => a.id === settings.selectedAdapter);
+        const adapter = getAdapter(settings.adapter);
+        // console.log("***", adapter, settings.adapter);
         return query({
             sql: adapter.loadPatients(),
             maxRows: 10000,
@@ -76,7 +82,9 @@ export function loadPatients(client) {
                     if (!o.dob) {
                         o.age = -1;
                     } else {
-                        const eol = o.deceasedDateTime ? moment(o.deceasedDateTime) : moment();
+                        const eol = o.deceasedDateTime ?
+                            moment(o.deceasedDateTime, "YYYY-MM-DDThh:mm:ssZZ") :
+                            moment();
                         o.age = moment.duration(eol.diff(o.dob, "days"), "days").asYears();
                     }
 

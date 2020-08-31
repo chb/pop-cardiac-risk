@@ -28,12 +28,16 @@ class DetailView extends React.Component
         }
     }
 
-    componentDidUpdate()
+    componentDidUpdate(prevProps)
     {
         const { selectedPatient, id, loading, error, load } = this.props;
-        if (id && !loading && !error && (!selectedPatient.id || selectedPatient.id !== id)) {
-            load(id);
-        }
+        
+        if (!id) return;
+        if (loading) return;
+        if (error && prevProps.id === id) return;
+        if (selectedPatient.id === id) return;
+
+        load(id);
     }
 
     renderHeader()
@@ -156,6 +160,7 @@ const DetailPage = connect(
         setAfroAmerican   : afroAmerican    => dispatch(merge({ data: { afroAmerican    }})),
         setSmoker         : smoker          => dispatch(merge({ data: { smoker          }})),
         setHypertensionTmt: hypertensionTmt => dispatch(merge({ data: { hypertensionTmt }})),
+        // @ts-ignore
         load              : id              => dispatch(load(id))
     })
 )(Wrapper);
