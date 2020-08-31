@@ -87,5 +87,12 @@ export default {
                 matches: p => p.gender !== "male" && p.gender !== "female"
             }
         }
+    },
+    observationCodes: {
+        totalCholesterol: [ '14647-2', '2093-3' ],
+        HDL: [ '2085-9' ],
+        BP: ['55284-4', '85354-9'], // Blood pressure as components
+        smokingStatus: [ '72166-2' ],
+        SBP: '8480-6' // Systolic blood pressure
     }
 };

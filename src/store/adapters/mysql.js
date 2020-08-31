@@ -1,3 +1,5 @@
+import config from "../../config"
+
 /**
  * Returns an SQL query that can be executed against MySQL database and should
  * select all the patients. Note that patient's name is returned as JSON string
@@ -38,9 +40,9 @@ export function loadPatient(id)
  * Returns an SQL query that can be executed against MySQL database and should
  * return all the observations for all patients within the specified time
  * interval. The observations we need include:
- * - totalCholesterol (14647-2, 2093-3)
- * - HDL (2085-9)
- * - Blood pressure (55284-4)
+ * - totalCholesterol
+ * - HDL
+ * - Blood pressure
  * @param {object} options
  * @param {string} options.startDate The effectiveDateTime of the observations
  *     should be the same or after `options.startDate`.
@@ -60,9 +62,9 @@ export function loadPatient(id)
 export function loadObservations({ startDate, endDate, minAge, maxAge, gender, all })
 {
     const codes = [
-        '14647-2', '2093-3', // totalCholesterol
-        '2085-9',            // HDL
-        '55284-4', '85354-9' // Blood pressure as components
+        ...config.observationCodes.totalCholesterol,
+        ...config.observationCodes.HDL,
+        ...config.observationCodes.BP
     ];
 
     let patientFilters = [];
@@ -128,10 +130,10 @@ export function loadObservations({ startDate, endDate, minAge, maxAge, gender, a
  * Returns an SQL query that can be executed against MySQL database and should
  * return all the observations for the specified patient. The observations we
  * need include:
- * - totalCholesterol (14647-2, 2093-3)
- * - HDL (2085-9)
- * - Smoking Status (72166-2)
- * - Blood pressure (55284-4)
+ * - totalCholesterol
+ * - HDL
+ * - Smoking Status
+ * - Blood pressure (as components)
  * 
  * @param {string} id Patient ID 
  */
@@ -146,7 +148,7 @@ export function loadPatientObservations(id)
                 resource_json -> '$.valueQuantity.value' AS observationValue
             FROM Observation
             WHERE 
-                subject = '${id}' AND code IN('14647-2', '2093-3')
+                subject = '${id}' AND code IN('${config.observationCodes.totalCholesterol.join("', '")}')
             ORDER BY effectiveDateTime DESC
             LIMIT 1
         )`,
@@ -158,7 +160,7 @@ export function loadPatientObservations(id)
                 resource_json -> '$.valueQuantity.value' AS observationValue
             FROM Observation
             WHERE 
-                subject = '${id}' AND code = '2085-9'
+                subject = '${id}' AND code IN('${config.observationCodes.HDL.join("', '")}')
             ORDER BY effectiveDateTime DESC
             LIMIT 1
         )`,
@@ -170,7 +172,7 @@ export function loadPatientObservations(id)
                 resource_json -> '$.valueCodeableConcept.coding[0].code' AS observationValue
             FROM Observation
             WHERE 
-                subject = '${id}' AND code = '72166-2'
+                subject = '${id}' AND code IN('${config.observationCodes.smokingStatus.join("', '")}')
             ORDER BY effectiveDateTime DESC
             LIMIT 1
         )`,
@@ -182,7 +184,7 @@ export function loadPatientObservations(id)
                 resource_json -> '$.component[0].valueQuantity.value' AS observationValue
             FROM Observation
             WHERE 
-                subject = '${id}' AND code = '55284-4'
+                subject = '${id}' AND code IN('${config.observationCodes.BP.join("', '")}')
             ORDER BY effectiveDateTime DESC
             LIMIT 1
         )`

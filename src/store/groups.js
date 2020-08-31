@@ -1,4 +1,5 @@
-import { query, getPath, getQuery, getAdapter } from "../lib"
+import { query, getQuery, getAdapter } from "../lib"
+import config from "../config"
 
 const initialState = {
     loading: false,
@@ -46,42 +47,41 @@ export function loadAll({ startDate, endDate, minAge, maxAge, gender }) {
             sql,
             onPage(payload) {
                 payload.forEach(observation => {
-                    switch (observation.code) {
-    
-                        // totalCholesterol
-                        case "14647-2":
-                        case "2093-3":
-                            data.cholesterol.push({
-                                value  : parseFloat(observation.observationValue),
-                                date   : new Date(observation.effectiveDateTime),
-                                patient: observation.patient.split("/").pop()
-                            });
-                        break;
-    
-                        // HDL
-                        case "2085-9":
-                            data.HDL.push({
-                                value  : parseFloat(observation.observationValue),
-                                date   : new Date(observation.effectiveDateTime),
-                                patient: observation.patient.split("/").pop()
-                            });
-                        break;
-    
-                        // Systolic Blood Pressure from component
-                        case "55284-4":
-                        case "85354-9":
-                            const component = JSON.parse(observation.component);
+
+                    // totalCholesterol
+                    if (config.observationCodes.totalCholesterol.includes(observation.code)) {
+                        data.cholesterol.push({
+                            value  : parseFloat(observation.observationValue),
+                            date   : new Date(observation.effectiveDateTime),
+                            patient: observation.patient.split("/").pop()
+                        });
+                    }
+
+                    // HDL
+                    else if (config.observationCodes.HDL.includes(observation.code)) {
+                        data.HDL.push({
+                            value  : parseFloat(observation.observationValue),
+                            date   : new Date(observation.effectiveDateTime),
+                            patient: observation.patient.split("/").pop()
+                        });
+                    }
+
+                    // Systolic Blood Pressure from component
+                    else if (config.observationCodes.BP.includes(observation.code)) {
+                        const component = JSON.parse(observation.component);
+                        const entry = component.find(x => x.code.coding[0].code === config.observationCodes.SBP);
+                        if (entry) {    
                             data.sbp.push({
-                                value  : parseFloat(getPath(component, "0.valueQuantity.value")),
+                                value  : parseFloat(entry.valueQuantity.value),
                                 date   : new Date(observation.effectiveDateTime),
                                 patient: observation.patient.split("/").pop()
                             });
-                        break;
-    
-                        // This shouldn't happen
-                        default:
-                            console.warn(`Unknown observation type "${observation.code}"`);
-                        break;
+                        }
+                    }
+
+                    // This shouldn't happen
+                    else {
+                        console.warn(`Unknown observation type "${observation.code}"`);
                     }
                 });
             }

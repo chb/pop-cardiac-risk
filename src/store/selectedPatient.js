@@ -1,6 +1,5 @@
-// import { Action } from "redux";
 import { query, getPatientDisplayName, getAdapter } from "../lib";
-// import config from "../config"
+import config from "../config"
 
 const initialState = {
     loading: false,
@@ -156,34 +155,30 @@ export function loadObservations(id, adapter) {
         sql,
         onPage(data) {
             data.forEach(observation => {
-                switch (observation.code) {
 
-                    // totalCholesterol
-                    case "14647-2":
-                    case "2093-3":
-                        observations.cholesterol = parseFloat(observation.observationValue);
-                    break;
+                // totalCholesterol
+                if (config.observationCodes.totalCholesterol.includes(observation.code)) {
+                    observations.cholesterol = parseFloat(observation.observationValue);
+                }
 
-                    // HDL
-                    case "2085-9":
-                        observations.HDL = parseFloat(observation.observationValue);
-                    break;
+                // HDL
+                else if (config.observationCodes.HDL.includes(observation.code)) {
+                    observations.HDL = parseFloat(observation.observationValue);
+                }
 
-                    // Systolic Blood Pressure from component
-                    case "55284-4":
-                    case "85354-9":
-                        observations.sbp = parseFloat(observation.observationValue);
-                    break;
+                // Systolic Blood Pressure from component
+                else if (config.observationCodes.BP.includes(observation.code)) {
+                    observations.sbp = parseFloat(observation.observationValue);
+                }
 
-                    // smokingStatus
-                    case "72166-2":
-                        observations.smoker = observation.observationValue;
-                    break;
+                // smokingStatus
+                else if (config.observationCodes.smokingStatus.includes(observation.code)) {
+                    observations.smoker = observation.observationValue;
+                }
 
-                    // This shouldn't happen
-                    default:
-                        console.warn(`Unknown observation type "${observation.code}"`);
-                    break;
+                // This shouldn't happen
+                else {
+                    console.warn(`Unknown observation type "${observation.code}"`);
                 }
             });
         }
