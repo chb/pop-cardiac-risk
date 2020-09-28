@@ -1,0 +1,76 @@
+@import "../../style/config.scss";
+
+
+.checkbox-wrap {
+    display    : inline-block;
+    line-height: inherit;
+    cursor     : default;
+    user-select: none;
+
+    .checkbox {
+        display       : inline-block;
+        width         : 2ex;
+        height        : 2ex;
+        vertical-align: baseline;
+        margin        : 0;
+        border-radius : 3px;
+        position      : relative;
+        top           : 0.15em;
+        background    : #FFF;
+        border        : 1px solid rgba(82, 79, 75, 0.5);
+    }
+
+    &.checked .checkbox {
+        background: $color-orange;
+        border-color: rgba(0, 0, 0, 0.15);
+
+        &:after {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+            background: url("checked.svg") center center no-repeat;
+            background-size: 100%;
+        }
+    }
+
+    &.indeterminate .checkbox {
+        background: #f4f2ef;
+        &:after {
+            content   : "";
+            display: block;
+            position: absolute;
+            z-index: 2;
+            border: 0.4ex solid transparent;
+            top: -1px;
+            right: -1px;
+            bottom: -1px;
+            left: -1px;
+            border-radius: 5px;
+            box-shadow: 0px 3px 6px 2px rgba(0, 0, 0, 0.1) inset,
+                        0px 0px 1px 0px rgba(0, 0, 0, 0.8) inset;
+        }
+    }
+
+    &.readOnly .checkbox {
+        background: #f4f2ef;
+    }
+
+    &.disabled {
+        color: #777;
+        pointer-events: none;
+
+        .checkbox {
+            background: #c9c7c2;
+        }
+    }
+
+    .checkbox-label {
+        display: inline;
+        margin: 0;
+        padding-left: 0.5ch;
+        white-space: normal;
+    }
+}

@@ -1,70 +1,108 @@
+import React              from "react"
+import moment             from "moment"
+import * as mysqlAdapter  from "./store/adapters/mysql"
+import * as prestoAdapter from "./store/adapters/presto"
 
 /**
- * Used in fetch Promise chains to reject if the "ok" property is not true
+ * Returns a promise that will be resolved after @time milliseconds
+ * @param {number} [time = 0] 
+ * @return {Promise<void>}
  */
-export async function checkResponse(resp) {
-    if (!resp.ok) {
-        const text = await resp.text();
-        throw new Error(
-            "Request failed:\n" +
-            `${resp.status} ${resp.statusText}\nURL: ${resp.url}\n\n${text}`
-        );
+export function wait(time = 0) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
+/**
+ * After our app is successfully authorized, the SMART Client instance will be
+ * available at `window.SMARTClient`. This function will wait for that and than
+ * resolve with the instance.
+ * @return {Promise<object>}
+ */
+export function waitForSmartClient() {
+    // @ts-ignore
+    const client = window.SMARTClient;
+    if (client) {
+        return Promise.resolve(client);
     }
-    return resp;
+    return wait(50).then(waitForSmartClient);
 }
 
 /**
- * Used in fetch Promise chains to return the JSON version of the response.
- * Note that `resp.json()` will throw on empty body so we use resp.text()
- * instead.
- * @param {Response} resp
- * @returns {Promise<object|string>}
+ * Get the database adapter depending on the selected type of connection
+ * @param {object} config 
  */
-export function responseToJSON(resp) {
-    return resp.text().then(text => text.length ? JSON.parse(text) : "");
+export function getAdapter(config) {
+    switch (config.type) {
+        case "mysql":
+            return mysqlAdapter;
+        case "presto":
+            return prestoAdapter;
+        default:
+            throw new Error(`Unknown adapter type "${config.type}"`);
+    }
 }
 
-export function query(sql)
-{
-    return fetch("http://localhost:3003/sql", {
-        method : "POST",
-        mode   : "cors",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ query: sql })
-    })
-    .then(checkResponse)
-    .then(responseToJSON);
+export function authorize(options) {
+    sessionStorage.clear();
+    // @ts-ignore
+    window.SMARTClient = null;
+    // @ts-ignore
+    return window.FHIR.oauth2.init(options).then(client => {
+        // @ts-ignore
+        window.SMARTClient = client;
+        return client;
+    });
 }
 
-export function getAllPatients() {
-    // First get all patients with as much info as we can get for them in a
-    // convenient way
-    let sql = `SELECT
-        o1.resource_json ->> '$.valueQuantity.value' AS hsCRP,
-        o2.resource_json ->> '$.valueQuantity.value' AS totalCholesterol,
-        o3.resource_json ->> '$.valueQuantity.value' AS HDL
-    FROM Observation AS o1
-    RIGHT JOIN Observation AS o2 ON (o1.resource_json ->> '$.subject.reference'     = o2.resource_json ->> '$.subject.reference')
-    RIGHT JOIN Observation AS o3 ON (o1.resource_json ->> '$.subject.reference'     = o3.resource_json ->> '$.subject.reference')
-    WHERE 
-        o1.resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-        o1.resource_json ->> '$.code.coding[0].code'   = '30522-7' AND
-        o2.resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-        o2.resource_json ->> '$.code.coding[0].code'   = '2093-3' AND
-        o3.resource_json ->> '$.code.coding[0].system' = 'http://loinc.org' AND
-        o3.resource_json ->> '$.code.coding[0].code'   = '2085-9'
-    ORDER BY o1.resource_json ->> '$.issued'
-    `;
+export function query({
+    sql,
+    rowFormat = "object",
+    maxRows = 10000,
+    onPage = (data) => {}}) {
+                
+    async function handle(obj) {
+        await onPage(obj.data);
+        if (obj.meta.continue) {
+            return getPage(obj.meta.continue)
+        }
+    }
 
-    return query(sql)
-        .then(console.log)
-        .catch(console.error);
+    function run(body) {
+        // @ts-ignore
+        return window.SMARTClient.request({
+            url   : "/",
+            method: "POST",
+            mode  : "cors",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body),
+        })
+        .then(handle);
+    }
+
+    function getPage(id) {
+        // @ts-ignore
+        return window.SMARTClient.request({
+            url: id,
+            mode: "cors"
+        }).then(handle)
+    }
+
+    return waitForSmartClient().then(() => run({ query: sql, rowFormat, maxRows }));
+}
+
+export function makeArray(x) {
+    return Array.isArray(x) ? x : [x];
 }
 
 export function getPatientDisplayName(name) {
-    return `${name[0].given[0]} ${name[0].family[0]}`;
+
+    try {
+        return `${makeArray(name[0].given)[0]} ${makeArray(name[0].family)[0]}`;
+    } catch {
+        return `NO NAME`
+    }
 }
 
 /**
@@ -108,9 +146,9 @@ export function roundToPrecision(n, precision, fixed) {
  * @param {number}  p.HDL HDL or "Good" Cholesterol
  * @param {number}  p.age Years (Maximum age must be 80)
  * @param {Boolean} p.smoker
- * @param {Boolean} p.fx_of_mi
+ * @param {Boolean} [p.hha]
  */
-export function reynoldsRiskScore(p) {
+export function reynoldsRiskScore(p, precision = 1, fixed = 0) {
 
     if (!p.gender ||
         !p.age ||
@@ -118,9 +156,9 @@ export function reynoldsRiskScore(p) {
         !p.hsCRP ||
         !p.cholesterol ||
         !p.HDL)
-        return "N/A";
+        return null;
 
-    let result = null, params;
+    let result, params;
   
     if (p.gender === "female") {
         params = {
@@ -130,7 +168,7 @@ export function reynoldsRiskScore(p) {
             cholesterol: 1.382,
             HDL        : -1.172,
             smoker     : 0.818,
-            fx_of_mi   : 0.438
+            hha        : 0.438
         }
     } else {
         params = {
@@ -140,7 +178,7 @@ export function reynoldsRiskScore(p) {
             cholesterol: 0.963,
             HDL        : -0.772,
             smoker     : 0.405,
-            fx_of_mi   : 0.541
+            hha        : 0.541
         }
     }
   
@@ -150,7 +188,7 @@ export function reynoldsRiskScore(p) {
       , b4 = params.cholesterol  * Math.log(p.cholesterol)
       , b5 = params.HDL          * Math.log(p.HDL)
       , b6 = params.smoker       * (p.smoker ? 1 : 0)
-      , b7 = params.fx_of_mi     * (p.fx_of_mi ? 1 : 0);
+      , b7 = params.hha          * (p.hha ? 1 : 0);
   
     var B = b1 + b2 + b3 + b4 + b5 + b6 + b7;
   
@@ -160,13 +198,142 @@ export function reynoldsRiskScore(p) {
         result = (1 - Math.pow(0.8990,  (Math.exp(B-33.097)))) * 100
     }
 
-    return Math.round((result < 10 ? result.toPrecision(1) : result.toPrecision(2)))
+    return roundToPrecision(result, precision, fixed);
+}
+
+/**
+ * 
+ * @param {Object}   options
+ * @param {string}   options.gender male|female|m|M|f|F
+ * @param {number}   options.sbp Systolic Blood Pressure
+ * @param {boolean}  options.africanAmerican
+ * @param {number}   options.totalCholesterol Total Cholesterol
+ * @param {number}   options.hdl HDL or "Good" Cholesterol
+ * @param {number}   options.age Years (Maximum age must be 79)
+ * @param {boolean}  [options.smoker]
+ * @param {boolean}  [options.diabetes]
+ * @param {boolean}  [options.hypertensionTreatment]
+ */
+export function calcASCVD(options, precision = 1, fixed = 0)
+{    
+    // const required = ["age", "totalCholesterol", "hdl", "sbp", "africanAmerican", "gender"];
+    // for( const param of required) {
+    //     if (options[param] === undefined) {
+    //         throw new Error(`"${param}" option is required`);
+    //         // return NaN;
+    //     }
+    // }
+
+    const {
+        age,
+        totalCholesterol,
+        hdl,
+        sbp,
+        hypertensionTreatment,
+        africanAmerican,
+        gender,
+        diabetes,
+        smoker
+    } = options;
+
+    const logAge = Math.log(age);
+    const logTCH = Math.log(totalCholesterol);
+    const logHDL = Math.log(hdl);
+    const logSBP = Math.log(sbp);
+
+    let s0_10, mnxb, prediction = 0;
+
+    if (String(gender).charAt(0).toUpperCase() === "M") {
+      
+      // Black male ------------------------------------------------------------
+      if (africanAmerican) {
+        s0_10 = 0.89536;
+        mnxb  = 19.5425;
+        
+        prediction = (
+          2.469 * logAge +
+          0.302 * logTCH +
+          (-0.307 * logHDL) +
+          logSBP * (hypertensionTreatment ? 1.916 : 1.809) +
+          (smoker ? 0.549 : 0) +
+          (diabetes ? 0.645 : 0)
+        );
+      }
+      
+      // White male ------------------------------------------------------------
+      else {
+        s0_10 = 0.91436;
+        mnxb  = 61.1816;
+
+        prediction = (
+          12.344 * logAge +
+          11.853 * logTCH +
+          (-2.664 * logAge * logTCH) +
+          (-7.99  * logHDL) +
+          1.769 * logAge * logHDL +
+          logSBP * (hypertensionTreatment ? 1.797 : 1.764) +
+          (smoker ? 7.837 : 0) +
+          (smoker ? -1.795 * logAge : 0) +
+          (diabetes ? 0.658 : 0)
+        );
+      }
+    }
+    else if (String(gender).charAt(0).toUpperCase() === "F") {
+      
+      // Black female ----------------------------------------------------------
+      if (africanAmerican) {
+        s0_10 = 0.95334
+        mnxb = 86.6081
+        
+        prediction = (
+            17.1141 * logAge +
+            0.9396 * logTCH +
+            (-18.9196 * logHDL) +
+            4.4748 * logAge * logHDL +
+            logSBP * (hypertensionTreatment ? 29.2907 : 27.8197) +
+            logSBP * logAge * (hypertensionTreatment ? -6.4321 : -6.0873) +
+            (smoker ? 0.6908 : 0) +
+            (diabetes ? 0.8738 : 0)
+        );
+      }
+      
+      // White female ----------------------------------------------------------
+      else {
+        s0_10 = 0.96652
+        mnxb = -29.1817
+        
+        prediction = (
+            (-29.799 * logAge) +
+            4.884 * logAge * logAge +
+            13.54  * logTCH +
+            (-3.114 * logAge * logTCH) +
+            (-13.578 * logHDL) +
+            3.149 * logAge * logHDL +
+            logSBP * (hypertensionTreatment ? 2.019 : 1.957) +
+            (smoker ? 7.574 : 0) +
+            (smoker ? -1.665 * logAge : 0) +
+            (diabetes ? 0.661 : 0)
+        );
+      }
+    }
+    else {
+        // throw new Error(`Unknown gender "${gender}"`);
+        return NaN;
+    }
+  
+    const risk = 1 - Math.pow(s0_10, Math.exp(prediction - mnxb))
+
+    return roundToPrecision(risk * 100, precision, fixed);
 }
 
 export function avg(records) {
     return records.reduce((prev, cur) => prev + cur.value, 0) / records.length;
 }
 
+/**
+ * Given a records array returns the value of the last record or undefined
+ * @param {Array<{value: string|number}>} records 
+ */
 export function last(records) {
     const index = records.length - 1;
     if (index < 0) return undefined;
@@ -184,3 +351,117 @@ export function isSmoker(records) {
     );
 }
 
+/**
+ * Given a duration, formats it like "2 hours, 35 minutes and 10 seconds"
+ * @param {Number} ms The duration as number of milliseconds 
+ * @returns {String}
+ */
+export function formatDuration(ms)
+{
+    let out = [];
+    let meta = [
+        { label: "week",   n: 1000 * 60 * 60 * 24 * 7 },
+        { label: "day" ,   n: 1000 * 60 * 60 * 24     },
+        { label: "hour",   n: 1000 * 60 * 60          },
+        { label: "minute", n: 1000 * 60               },
+        { label: "second", n: 1000                    }
+    ];
+
+    meta.reduce((prev, cur) => {
+        let chunk = Math.floor(prev / cur.n);
+        if (chunk) {
+            out.push(`${chunk} ${cur.label}${chunk > 1 ? "s" : ""}`);
+            return prev - chunk * cur.n;
+        }
+        return prev;
+    }, ms);
+
+    if (!out.length) {
+        out.push(`0 ${meta.pop().label}s`);
+    }
+
+    if (out.length > 1) {
+        let last = out.pop();
+        out[out.length - 1] += " and " + last;
+    }
+
+    return out.join(", ");
+}
+
+export function getAge(patient, suffix = "") {
+    if (patient.deceasedBoolean) {
+        return <span className="label label-warning">deceased</span>;
+    }
+    if (patient.deceasedDateTime) {
+        return (
+            <>
+                <span className="label label-warning">deceased</span> at {
+                moment.duration(
+                    moment(patient.deceasedDateTime).diff(patient.dob, "days"),
+                    "days"
+                ).humanize()}
+            </>
+        );
+    }
+    if (!patient.dob || !moment(patient.dob).isValid()) {
+        return <span className="label label-danger">Unknown age</span>;
+    }
+    return moment.duration(moment().diff(patient.dob, "days"), "days").humanize() + suffix;
+}
+
+/**
+ * 
+ * @param {String} str 
+ * @param {String} stringToFind 
+ */
+export function highlight(str, stringToFind) {
+    let temp  = str;
+    let index = str.toLocaleLowerCase().indexOf(stringToFind.toLocaleLowerCase());
+    while (index > -1) {
+        const replacement = `<span class="search-match">${temp.substr(index, stringToFind.length)}</span>`;
+        const endIndex = index + stringToFind.length;
+        temp  = temp.substring(0, index) + replacement + temp.substring(endIndex);
+        index = temp.toLocaleLowerCase().indexOf(stringToFind.toLocaleLowerCase(), index + replacement.length);
+    }
+    return temp;
+}
+
+export function buildClassName(classes)
+{
+    return Object.keys(classes).filter(c => classes[c]).join(" ");
+}
+
+export function getPath(obj, path) {
+    return path.split(".").reduce((prev, cur) => prev ? prev[cur] : undefined, obj);
+}
+
+export function setQuery(q = {}) {
+    const href1 = window.location.href;
+    const url = new URL(href1);
+    const params = url.searchParams;
+    for (const name in q) {
+        const param = q[name];
+        if (!param && param !== 0) {
+            params.delete(name);
+        }
+        else {
+            params.set(name, param);
+        }
+    }
+    const href2 = url.href;
+    if (href2 !== href1) {
+        window.history.replaceState({}, document.title, href2);
+    }
+}
+
+export function getQuery(param = "") {
+    const query = new URLSearchParams(window.location.search);
+    if (param) {
+        return query.get(param);
+    }
+    const out = {};
+    for (const [name, value] of query.entries()) {
+        out[name] = value;
+    }
+    return out;
+}

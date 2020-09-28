@@ -1,71 +1,25 @@
 # pop-cardiac-risk
-Population level cardiac-risk app
+## Population level cardiac-risk app
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The main view is a patient browser and a cardiac risk calculator. This is designed to work with large volumes of data (tested with 2 million patients). The patients are listed in the sidebar and can be sorted, grouped and searched in real time. Incompatible patients that do not have enough information are filtered out by default but that can be turned off.
+An ASCVD Risk Calculator for the selected patient is displayed on the right side. All of the input values are editable and the changes are applied in real time. This way the user can test how a change in blood pressure would affect the patient’s risk score for example. 
 
-## Available Scripts
+If the patients are grouped by age or gender in the sidebar, we see them rendered in groups. These groups are also cohorts that we can analyse. In the screenshot below we can see all the Cholesterol, HDL and SBP measurements of all the female patients within a selected time period. The measured values are plotted over colored areas to improve the ability to quickly identify outliers in a purely visual way. 
 
-In the project directory, you can run:
+If the user clicks on any of the data points above, an “user history view” is rendered. In this case we can see all the lab measurements (that our cardiac risk calculator is interested in) for the selected patient, within the selected time interval. From here we can go to the risk calculator for the selected patient, or to go back to the history view for the entire cohort.
 
-### `npm start`
+This app is viewable live using a combination of synthetic and fully de-identified real world data at [https://pop-cardiac-risk.herokuapp.com](https://pop-cardiac-risk.herokuapp.com).
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## Install
+```sh
+git clone https://github.com/chb/pop-cardiac-risk
+cd pop-cardiac-risk
+npm i
+```
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+## Run
+The local development version of the app is designed to connect to local version of the Population Health App Server which is not publicly available yet. To workaround that, you need to use the production build which will connect to the online database. To do so run:
+```sh
+npx http-server build/ -o
+```

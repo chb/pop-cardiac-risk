@@ -1,0 +1,23 @@
+.app-footer {
+    background : #EEE;
+    height     : 2rem;
+    line-height: 2rem;
+    color      : #666;
+    font-size  : 0.8rem;
+    display    : flex;
+    flex       : 1 0 2rem;
+    text-shadow: 0 1px 0 #FFF;
+    box-shadow : 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+    z-index    : 2;
+    justify-content: center;
+
+    .dropup .dropdown-menu {
+        left: auto;
+        right: 0;
+    }
+}
+
+.center + .app-footer {
+    flex: 0 0 2rem;
+    border-top: 1px solid #BBB;
+}

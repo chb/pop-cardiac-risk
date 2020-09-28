@@ -1,10 +1,8 @@
-import React from "react"
-// import PropTypes from "prop-types";
+import React       from "react";
+import moment      from "moment";
 import { connect } from "react-redux";
-import * as lib from "../lib"
-import moment from "moment";
-import Chart from "./Chart";
-// import { selectPatientId } from "../store/patients"
+import * as lib    from "../lib";
+import Chart       from "./Chart";
 
 const SMOKING_STATUS = { 
     "449868002"      : { smoker: true , text: "Current every day smoker"       },
@@ -95,14 +93,9 @@ class Detail extends React.Component
         );
     }
     render() {
-        // console.log(this.props);
         const {
             id, dob, gender, deceasedBoolean, deceasedDateTime, smoker, name,
-            // hsCRP,
-            // cholesterol,
-            HDL,
-            // sbp,
-            score
+            HDL, score
         } = this.props;
 
         // No patient selected

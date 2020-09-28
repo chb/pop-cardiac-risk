@@ -1,0 +1,215 @@
+@import "../../style/config.scss";
+
+body {
+
+  #root {
+    transition: opacity 1.4s;
+  }
+
+  &.loaded {
+    > .loader {
+      display: none;
+    }
+    #root {
+      opacity: 1 !important;
+    }
+  }
+}
+
+.selected .text-muted {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+
+.chart {
+  margin: 1rem 0;
+  min-height: 400px;
+}
+
+.form-control {
+  font: inherit;
+}
+
+.color-green { color: $color-green; }
+
+.spin {
+  animation: spin 2s linear infinite;
+}
+
+.loader {
+  display         : inline-block;
+  line-height     : 1em;
+  vertical-align  : text-bottom;
+  width           : 1em;
+  height          : 1em;
+  border-radius   : 100%;
+  margin          : -1px 0 1px 0;
+  border-width    : 2px;
+  border-style    : solid;
+  border-top-color: transparent !important;
+  animation       : spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(359deg);
+  }
+}
+
+/* ========================================================================== */
+
+
+
+
+.app {
+  display: flex;
+  /* flex: 1; */
+  flex-direction: row;
+  flex-wrap: nowrap;
+  /* justify-content: stretch; */
+  position: fixed;
+  /* height: 100%; */
+  bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  // z-index: 2;
+}
+
+.page {
+  display: flex;
+  flex   : 3 1 380px;
+  flex-direction: column;
+  // transition: all 3s ease-out;
+  background: #FFF;
+  // max-width: 100%;
+  z-index: 2;
+  box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.3) inset;
+}
+
+
+.page.patients {
+  flex: 0 0 380px;
+  // transition-duration: 0;
+  // background: #FFF;
+  z-index: 1;
+  box-shadow: none;
+  /* z-index: 2;
+  background: #FFF; */
+  // .app-header {
+  //   background: #008eb0 url("http://apps.smarthealthit.org/api/v1/images/hrmkhyspg4vwptt5frzp") 0.5rem center no-repeat;
+  //   background-size: 2rem;
+  //   padding-left: 3rem;
+  // }
+}
+
+.page-contents {
+  overflow      : auto;
+  width         : 100%;
+  flex          : 1 1;
+  display       : flex;
+  flex-direction: column;
+  padding       : 1rem;
+}
+
+
+// @media (any-hover: none) and (max-width: 1023px) {
+//   .page {
+//     transition: transform 0.3s ease-out;
+//   }
+// }
+@media (max-width: 1023px) {
+  .page {
+    width     : 100%;
+    min-width : 100%;
+    box-shadow: none;
+    transition: transform 0.3s ease-out;
+  }
+
+  .page.active {
+    transform: translateX(-100%);
+  }
+  .page.active .back-link {
+    visibility: visible;
+  }
+
+  .page.patients {
+    transform: translateX(-20%);
+  }
+  .page.patients.active {
+    transform: translateX(0);
+  }
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* font-family: monospace; */
+  /* white-space: pre-wrap; */
+  /* flex: 1; */
+  /* background: #E9E9E9; */
+  flex-direction: column;
+  /* height: 100%; */
+  flex: 1;
+  padding: 2rem;
+  text-align: center;
+}
+
+.sub-header {
+    background: #EEE;
+    border-bottom: 1px solid #BBB;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex: 0 0 auto;
+    z-index: 2;
+    background: #EEE;
+    border-bottom: 1px solid #BBB;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex: 0 0 auto;
+    z-index: 2;
+    height: 45px;
+    padding: 5px;
+}
+
+
+
+.search-match {
+  background: #ffe9a1;
+  box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.3) inset;
+  border-radius: 2px;
+  color: #000;
+  text-shadow: 0 1px 0 #FFF;
+}
+
+.custom-chart {
+  width: 100% !important;
+  // height: 216px !important;
+
+  > div {
+    width : 100%  !important;
+    height: 278px !important;
+    // max-width: calc(100% - 30px) !important;
+    overflow: hidden;
+  }
+
+  svg {
+    max-width: 100% !important;
+    height   : 100% !important;
+    // max-width: calc(100% - 30px) !important;
+    overflow: hidden;
+  }
+  // overflow: hidden;
+}
+
+input[type=date].form-control {
+  line-height: normal;
+}
