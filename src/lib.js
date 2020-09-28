@@ -3,11 +3,21 @@ import moment             from "moment"
 import * as mysqlAdapter  from "./store/adapters/mysql"
 import * as prestoAdapter from "./store/adapters/presto"
 
-
+/**
+ * Returns a promise that will be resolved after @time milliseconds
+ * @param {number} [time = 0] 
+ * @return {Promise<void>}
+ */
 export function wait(time = 0) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
+/**
+ * After our app is successfully authorized, the SMART Client instance will be
+ * available at `window.SMARTClient`. This function will wait for that and than
+ * resolve with the instance.
+ * @return {Promise<object>}
+ */
 export function waitForSmartClient() {
     // @ts-ignore
     const client = window.SMARTClient;
@@ -17,6 +27,10 @@ export function waitForSmartClient() {
     return wait(50).then(waitForSmartClient);
 }
 
+/**
+ * Get the database adapter depending on the selected type of connection
+ * @param {object} config 
+ */
 export function getAdapter(config) {
     switch (config.type) {
         case "mysql":

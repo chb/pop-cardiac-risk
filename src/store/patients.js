@@ -1,6 +1,4 @@
 import moment from "moment"
-// import * as adapter from "./adapters/mysql"
-// import * as adapter from "./adapters/presto"
 import {
     query,
     getPatientDisplayName,
@@ -13,9 +11,7 @@ const urlQuery = new URLSearchParams(window.location.search);
 const initialState = {
     loading              : false,
     error                : null,
-    
     selectedPatientId    : null,
-
     patientsLoadStartTime: Date.now(),
     patientsLoadEndTime  : Date.now(),
     search               : urlQuery.get("q"   ) || "",
@@ -71,7 +67,6 @@ export function loadPatients() {
     return function (dispatch, getState) {
         dispatch(merge({ loading: true, error: null }));
         const settings = getState().settings;
-        // const adapterConfig = settings.adapters.find(a => a.id === settings.selectedAdapter);
         const adapter = getAdapter(settings.adapter);
         // console.log("***", adapter, settings.adapter);
         return query({
