@@ -15,7 +15,6 @@
     "@testing-library/react": "^9.4.0",
     "@testing-library/user-event": "^7.2.1",
     "moment": "^2.24.0",
-    "node-sass": "^4.14.1",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
@@ -23,11 +22,14 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "^3.4.1",
     "redux": "^4.0.5",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "sass": "^1.67.0",
+    "serve": "^14.2.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "start-prod": "npx serve -s build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -53,6 +55,9 @@
   },
   "bugs": {
     "url": "https://github.com/chb/pop-cardiac-risk/issues"
+  },
+  "engines": {
+    "node": "14.x.x"
   },
   "devDependencies": {
     "@types/react-redux": "^7.1.7",

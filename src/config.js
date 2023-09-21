@@ -3,15 +3,15 @@ const BACKEND_HOST = process.env.NODE_ENV === "development" ?
     "https://smart-proxy-server.herokuapp.com"
 
 export default {
-    defaultAdapter: "mysql1", // MUST point to one of the adapters listed below!
+    defaultAdapter: "presto", // MUST point to one of the adapters listed below!
     adapters : {
-        mysql1: {
-            label   : "MySQL STU3 Database",
-            iss     : `${BACKEND_HOST}/service/mysql-gcp`,
-            clientId: "whatever",
-            scope   : "system/Patient.read system/Observation.read offline_access",
-            type    : "mysql"
-        },
+        // mysql1: {
+        //     label   : "MySQL STU3 Database",
+        //     iss     : `${BACKEND_HOST}/service/mysql-gcp`,
+        //     clientId: "whatever",
+        //     scope   : "system/Patient.read system/Observation.read offline_access",
+        //     type    : "mysql"
+        // },
         // mysql2: {
         //     label   : "MySQL STU3 Database (old)",
         //     iss     : `${BACKEND_HOST}/service/mysql-r3`,
