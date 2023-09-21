@@ -3,7 +3,7 @@ const BACKEND_HOST = process.env.NODE_ENV === "development" ?
     "https://smart-proxy-server.herokuapp.com"
 
 export default {
-    defaultAdapter: "mysql1", // MUST point to one of the adapters listed below!
+    defaultAdapter: "presto", // MUST point to one of the adapters listed below!
     adapters : {
         // mysql1: {
         //     label   : "MySQL STU3 Database",
