@@ -21,5 +21,9 @@ npm i
 ## Run
 The local development version of the app is designed to connect to local version of the Population Health App Server which is not publicly available yet. To workaround that, you need to use the production build which will connect to the online database. To do so run:
 ```sh
-npx http-server build/ -o
+# If you need to create a fresh build
+# npm run build
+npx serve -s build/
 ```
+
+If you're making local changes, rebuild manually and re-run the serve command to ensure changes are visible.
